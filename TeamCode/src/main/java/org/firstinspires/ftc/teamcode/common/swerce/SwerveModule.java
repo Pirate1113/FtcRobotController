@@ -1,20 +1,25 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
+import org.firstinspires.ftc.teamcode.common.util.AngleFunxuns;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedback.PIDController;
 
+import com.qualcomm.robotcore.
+
 @Configurable
 public class SwerveModule{
+
+    boolean MOTOR_FLIPPING = true;
 
     private DcMotorEx drive;
     private CRServo axon;
@@ -51,11 +56,26 @@ public class SwerveModule{
     }
 
     public void read(){
-
+        position = encoder.getCurrentPosition();
     }
 
     public void update(){
-        
+        double sTarget = getTargetRotation(), current = getModuleRotation();
+
+        double error = AngleFunxuns.wrapAngle0to2pi(sTarget - current);
+
+
+        if(MOTOR_FLIPPING && Math.abs(error) > Math.PI/2) {
+            sTarget = AngleFunxuns.wrapAngle0to2pi(sTarget-Math.PI);
+            wheelFlipped = true;
+        } else {
+            wheelFlipped = false;
+        }
+
+        error = AngleFunxuns.wrapAngle0to2pi(sTarget - current);
+
+        double power = Range.clip(rotController.calculate())
+
     }
 
     public void setTarget(double t){
