@@ -166,7 +166,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
             intakeIndex = mod3(intakeIndex + 1);
         }
 
-        // ===== INTERNAL — Movement =====
+        // ===== INTERNAL Movement =====
 
         private int mod3(int x) { return ((x % 3) + 3) % 3; }
 
@@ -175,7 +175,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
             return (int)Math.rint(zeroCount + accum);   // cumulative rounding to minimize drift
         }
 
-        /** Move +120° as two half-steps; never clear/eject during this motion. */
+        /** Move +120° as two half-steps */
         private void move120NoEject(Telemetry telemetry) {
             int mid = stepForward60();
             goTo(mid, telemetry);
@@ -236,8 +236,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
         // ===== UTIL =====
 
         private boolean opModeIsActive() {
-            // We don't have a reference to the OpMode; emulate a simple time guard to avoid infinite loops if misused.
-            // In practice, always call movement methods from an active OpMode loop.
+            
             return true;
         }
     }
