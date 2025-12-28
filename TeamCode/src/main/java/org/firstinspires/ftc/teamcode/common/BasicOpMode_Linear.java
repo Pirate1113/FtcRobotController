@@ -77,11 +77,12 @@ public class BasicOpMode_Linear extends LinearOpMode {
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
 
-        DcMotorEx indexerMotor = hardwareMap.get(DcMotorEx.class, "indexerMotor");
-        ColorSensor intakeColor = hardwareMap.get(ColorSensor.class, "intakeColor");
+        Servo leftServo = hardwareMap.get(Servo.class, "spindexerLeft");
+        Servo rightServo = hardwareMap.get(Servo.class, "spindexerRight");
         Servo ejectorServo = hardwareMap.get(Servo.class, "ejectorServo");
+        ColorSensor intakeColor = hardwareMap.get(ColorSensor.class, "intakeColor");
 
-        Spindexer spindexer = new Spindexer(indexerMotor, intakeColor, ejectorServo);
+        Spindexer spindexer = new Spindexer(leftServo, rightServo, ejectorServo, intakeColor);
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
