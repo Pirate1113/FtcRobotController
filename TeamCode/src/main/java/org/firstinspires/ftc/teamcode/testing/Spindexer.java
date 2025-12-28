@@ -11,10 +11,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Spindexer {
 
-    // ===== CONSTANTS =====
+    // constants
     private static final int PRESENCE_ALPHA_THRESHOLD = 5; // tune for sensor/lighting
 
-    // SERVO POSITIONS - TUNE THESE ON YOUR ROBOT
+    // SERVO POSITIONS - tune on robot idk actual
     private static final double SLOT0_POS = 0.10;  // Slot 0 at intake
     private static final double SLOT1_POS = 0.43;  // Slot 1 at intake (~120°)
     private static final double SLOT2_POS = 0.76;  // Slot 2 at intake (~240°)
@@ -52,9 +52,9 @@ public class Spindexer {
         }
     }
 
-    // ===== PUBLIC API =====
+    //
 
-    /** Read color at intake, store it, rotate to next slot (+120°) */
+    /** Read color at intake, store it, rotate to next slot (+120) */
     public void intakeOne(Telemetry telemetry) {
         Ball color = readColorAtIntake();
         slots[intakeIndex] = color;
@@ -87,7 +87,7 @@ public class Spindexer {
     public Ball[] getSlots() { return slots.clone(); }
     public int getIntakeIndex() { return intakeIndex; }
 
-    // ===== INTERNAL HELPERS =====
+    // =
 
     private Integer findFirst(Ball color) {
         for (int i = 0; i < 3; i++) {
@@ -98,7 +98,7 @@ public class Spindexer {
         return null;
     }
 
-    /** Eject specific slot: go to eject pos → flip → clear → go to next intake */
+
     private void ejectSlot(int slotIndex, Telemetry telemetry) {
         // Rotate so this slot is at its eject position (60° past intake stop)
         goToEjectForSlot(slotIndex);
@@ -122,14 +122,12 @@ public class Spindexer {
         return ((x % 3) + 3) % 3;
     }
 
-    /** Move both servos to a slot position (intake stop) */
     private void goToSlot(int slot) {
         double pos = getSlotPosition(slot);
         setServos(pos);
         intakeIndex = slot;
     }
 
-    /** Move both servos to eject position for specific slot */
     private void goToEjectForSlot(int slot) {
         double pos = getEjectPosition(slot);
         setServos(pos);
@@ -153,13 +151,12 @@ public class Spindexer {
         }
     }
 
-    /** Command both servos to same position (or mirror if needed) */
     private void setServos(double position) {
         servoLeft.setPosition(position);
         servoRight.setPosition(position);  // Change to (1.0 - position) if mirrored
     }
 
-    // ===== SENSORS / COLOR =====
+    // ===== color
     private boolean ballPresentAtIntake() {
         int alpha = intakeColor.alpha();
         return alpha > PRESENCE_ALPHA_THRESHOLD;
