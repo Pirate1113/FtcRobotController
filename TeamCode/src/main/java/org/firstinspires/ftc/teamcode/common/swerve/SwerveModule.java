@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.common.swerce;
+package org.firstinspires.ftc.teamcode.common.swerve;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.AnalogInput;
