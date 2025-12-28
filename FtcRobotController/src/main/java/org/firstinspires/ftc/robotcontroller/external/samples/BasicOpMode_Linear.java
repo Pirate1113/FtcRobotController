@@ -28,11 +28,16 @@
  */
 
 package org.firstinspires.ftc.robotcontroller.external.samples;
+import org.firstinspires.ftc.teamcode.testing.Spindexer;
+
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -54,6 +59,8 @@ import com.qualcomm.robotcore.util.Range;
 @Disabled
 public class BasicOpMode_Linear extends LinearOpMode {
 
+    private Spindexer spindexer;
+
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
@@ -69,6 +76,12 @@ public class BasicOpMode_Linear extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+
+        DcMotorEx indexerMotor = hardwareMap.get(DcMotorEx.class, "indexerMotor");
+        ColorSensor intakeColor = hardwareMap.get(ColorSensor.class, "intakeColor");
+        Servo ejectorServo = hardwareMap.get(Servo.class, "ejectorServo");
+
+        Spindexer spindexer = new Spindexer(indexerMotor, intakeColor, ejectorServo);
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
