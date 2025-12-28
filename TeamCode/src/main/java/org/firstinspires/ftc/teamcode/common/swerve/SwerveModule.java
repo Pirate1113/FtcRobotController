@@ -1,117 +1,200 @@
-package org.firstinspires.ftc.teamcode.common.swerve;
+//package org.firstinspires.ftc.teamcode.common.swerce;
+//
+//import com.bylazar.configurables.annotations.Configurable;
+//import com.qualcomm.robotcore.hardware.AnalogInput;
+//import com.qualcomm.robotcore.hardware.CRServo;
+//import com.qualcomm.robotcore.hardware.DcMotor;
+//import com.qualcomm.robotcore.hardware.DcMotorEx;
+//import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
+//
+//
+//import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
+//import static org.firstinspires.ftc.teamcode.common.util.AngleFunxuns.wrapAngle0to2pi;
+//
+//
+//import dev.nextftc.control.ControlSystem;
+//import dev.nextftc.control.KineticState;
+//import dev.nextftc.control.builder.ControlSystemBuilder;
+//import dev.nextftc.control.feedback.AngleType;
+//import dev.nextftc.control.feedback.PIDCoefficients;
+//import dev.nextftc.control.feedback.PIDController;
+//import dev.nextftc.hardware.impl.CRServoEx;
+//import dev.nextftc.hardware.impl.FeedbackCRServoEx;
+//import dev.nextftc.hardware.impl.MotorEx;
+//
+//@Configurable
+//public class SwerveModule{
+//
+//    boolean MOTOR_FLIPPING = true;
+//
+//    private DcMotorEx drive;
+//    private double lastMotorPower;
+//
+//    private FeedbackCRServoEx axon;
+//    private double uncoffset;
+//
+//    public boolean wheelFlipped = false;
+//    private double target = 0.0;
+//    private KineticState vTarget;
+//    private double position = 0.0;
+//    private double velocity = 0.0;
+//    private KineticState current;
+//    private double error;
+//    private double lastError;
+//
+//
+//    private double power;
+//
+//
+//    private PIDController rotController;
+//    private PIDCoefficients PIDCoeffs;
+//
+//    private ControlSystem pid;
+//
+//    public SwerveModule(DcMotorEx m, CRServo s, AnalogInput e, double encoderOffset, double[] PIDVals){
+//        this.drive = m;
+//        this.
+//        this.uncoffset = encoderOffset;
+//
+//        m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        pid = new ControlSystemBuilder().angular(AngleType.RADIANS, feedback -> feedback.posPid(PIDCoeffs)).build();
+//
+//        drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        vTarget = new KineticState(0,0);
+//
+//    }
+//
+//    public void read(){
+//        position = axon.getCurrentPosition();
+//    }
+//
+//    public void update(){
+//        vTarget = new KineticState(target);
+//        current = new KineticState(getModuleRotation(), velocity);
+//
+//        error = wrapAngle0to2pi(vTarget.minus(current).getPosition());
+//
+//        if(MOTOR_FLIPPING && Math.abs(error) > Math.PI/2) {
+//            vTarget = new KineticState(wrapAngle0to2pi(vTarget.getPosition() - Math.PI));
+//            wheelFlipped = true;
+//        } else {
+//            wheelFlipped = false;
+//        }
+//
+//        error = wrapAngle0to2pi(vTarget.minus(current).getPosition());
+//
+//        pid.setGoal(new KineticState(target));
+//        power = pid.calculate(new KineticState(getModuleRotation(), velocity));
+//    }
+//
+//    public void write(){
+//        axon.setPower(power);
+//    }
+//
+//    public void setMotorPower(double power) {
+//        if (wheelFlipped) power *= -1;
+//        lastMotorPower = power;
+//        drive.setPower(power);
+//    }
+//
+//    public void setTarget(double t){
+//        this.target = wrapAngle0to2pi(t);
+//    }
+//
+//    public double getTargetRotation() {
+//        return wrapAngle0to2pi(target - Math.PI);
+//    }
+//
+//    public double getModuleRotation() {
+//        return position - uncoffset;
+//    }
+//
+//
+//}
+package org.firstinspires.ftc.teamcode.common.swerce;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
+
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
-import static org.firstinspires.ftc.teamcode.common.util.AngleFunxuns.wrapAngle0to2pi;
-
-
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
-import dev.nextftc.control.builder.ControlSystemBuilder;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
-import dev.nextftc.control.feedback.PIDController;
-import dev.nextftc.hardware.controllable.RunToPosition;
+import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
+import dev.nextftc.hardware.impl.MotorEx;
 
 @Configurable
 public class SwerveModule{
 
-    boolean MOTOR_FLIPPING = true;
+    final double WHEEL_RADIUS = 1;
+    final double GEAR_RATIO = 1;
+    final double TICKS_PER_REVOLUTION = 1;
 
-    private DcMotorEx drive;
-    private double lastMotorPower;
+    double current;
+    double lastCurrent;
+    double target;
+    double period;
+    double velocity;
 
-    private FeedbackCRServoEx axon;
-    private double uncoffset;
+    double power;
 
-    public boolean wheelFlipped = false;
-    private double target = 0.0;
-    private double position = 0.0;
-    private double velocity = 0.0;
+    public static PIDCoefficients pidValues = new PIDCoefficients(0.5, 0, 0);
+    public ControlSystem pid = ControlSystem.builder()
+            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
+            .build();
 
-    private double power;
+    private MotorEx drive;
+    private CRServoEx axon;
+    private FeedbackCRServoEx ax3on;
+    private AbsoluteAnalogEncoder enc;
 
+    public double xOffset;
+    public double yOffset;
 
-    private PIDController rotController;
-    private PIDCoefficients PIDCoeffs;
-
-    private ControlSystem pid;
-
-    public SwerveModule(DcMotorEx m, CRServo s, AnalogInput e, double encoderOffset, double[] PIDKVal){
-        this.drive = m;
-        this.axon = new FeedbackCRServoEx(0.01, () -> e, () -> s);
-        this.uncoffset = encoderOffset;
-
-        MotorConfigurationType motorConfigurationType = m.getMotorType().clone();
-        this.drive.setMotorType(motorConfigurationType);
-
+    public SwerveModule(MotorEx m, CRServoEx s, AnalogInput e, double eOffset, boolean reversed){
+        drive = m;
         drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        PIDCoeffs = new PIDCoefficients(PIDKVal[0], PIDKVal[1], PIDKVal[2]);
-        rotController = new PIDController(PIDCoeffs);
+        axon = s;
+        if(reversed) ax3on.getServo().setDirection( );
 
-        pid = new ControlSystemBuilder().angular(AngleType.RADIANS, feedback -> feedback.posPid(PIDCoeffs)).build();
+        enc = new AbsoluteAnalogEncoder(e, 3.3).zero(eOffset).setInverted(reversed);
 
-        drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
+        axon.setPower(1);
+        axon.setPower(0);
     }
 
-    public void read(){
-        position = axon.getCurrentPosition();
-        velocity = axon.getVelocity();
+    public double read(){
+        current = enc.getCurrentPosition();
     }
 
-    public void update(){
-        double sTarget = getTargetRotation(), current = getModuleRotation();
+    public void rotateTo(double target){
+        pid.setGoal(new KineticState(target));
 
-        double error = wrapAngle0to2pi(sTarget - current);
-
-
-        if(MOTOR_FLIPPING && Math.abs(error) > Math.PI/2) {
-            sTarget = wrapAngle0to2pi(sTarget-Math.PI);
-            wheelFlipped = true;
+        if (Math.abs(period) > 1E-6) {
+            velocity = (current - lastCurrent) / period;
         } else {
-            wheelFlipped = false;
+            velocity = 0;
         }
 
-        error = wrapAngle0to2pi(sTarget - current);
+        KineticState sCurrent = new KineticState(current, velocity);
 
-        pid.setGoal(new KineticState(target));
-        power = pid.calculate(new KineticState(getModuleRotation(), velocity));
+        power = pid.calculate(sCurrent);
 
     }
 
-    public void write(){
+    public void write(double power){
         axon.setPower(power);
-    }
-
-    public void setMotorPower(double power) {
-        if (wheelFlipped) power *= -1;
-        lastMotorPower = power;
         drive.setPower(power);
     }
-
-    public void setTarget(double t){
-        this.target = wrapAngle0to2pi(t);
-    }
-
-    public double getTargetRotation() {
-        return wrapAngle0to2pi(target - Math.PI);
-    }
-
-    public double getModuleRotation() {
-        return position - uncoffset;
-    }
-
-
-
-
 }
