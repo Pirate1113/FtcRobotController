@@ -14,10 +14,10 @@ public class Spindexer {
     // constants
     private static final int PRESENCE_ALPHA_THRESHOLD = 5; // tune for sensor/lighting
 
-    // SERVO POSITIONS - tune on robot idk actual
+    // SERVO POSITIONS - tune on robot idk actual PUT ACTUAL
     private static final double SLOT0_POS = 0.10;  // Slot 0 at intake
-    private static final double SLOT1_POS = 0.43;  // Slot 1 at intake (~120°)
-    private static final double SLOT2_POS = 0.76;  // Slot 2 at intake (~240°)
+    private static final double SLOT1_POS = 0.43;  // Slot 1 at intake (~120)
+    private static final double SLOT2_POS = 0.76;  // Slot 2 at intake (~240)
 
     private static final double EJECT0_POS = 0.26; // 60° past slot0 (eject position)
     private static final double EJECT1_POS = 0.60; // 60° past slot1
@@ -45,7 +45,7 @@ public class Spindexer {
         this.ejectorServo = ejectorServo;
         this.intakeColor = intakeColor;
 
-        // Initialize to slot 0 at intake, ejector retracted
+        // Initialize to slot 0 at intake, ejector el finger retracted
         goToSlot(0);
         if (ejectorServo != null) {
             ejectorServo.setPosition(EJECTOR_RETRACT_POS);
@@ -148,6 +148,15 @@ public class Spindexer {
             case 1: return EJECT1_POS;
             case 2: return EJECT2_POS;
             default: return EJECT0_POS;
+        }
+    }
+
+    public void init() {
+        intakeIndex = 0;
+        goToSlot(0);
+
+        if (ejectorServo != null) {
+            ejectorServo.setPosition(EJECTOR_RETRACT_POS);
         }
     }
 

@@ -56,7 +56,6 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="Basic: Linear OpMode", group="Linear OpMode")
-@Disabled
 public class BasicOpMode_Linear extends LinearOpMode {
 
     private Spindexer spindexer;
@@ -82,7 +81,7 @@ public class BasicOpMode_Linear extends LinearOpMode {
         Servo ejectorServo = hardwareMap.get(Servo.class, "ejectorServo");
         ColorSensor intakeColor = hardwareMap.get(ColorSensor.class, "intakeColor");
 
-        Spindexer spindexer = new Spindexer(leftServo, rightServo, ejectorServo, intakeColor);
+        spindexer = new Spindexer(leftServo, rightServo, ejectorServo, intakeColor);
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -93,6 +92,8 @@ public class BasicOpMode_Linear extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
+
+        spindexer.init();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
