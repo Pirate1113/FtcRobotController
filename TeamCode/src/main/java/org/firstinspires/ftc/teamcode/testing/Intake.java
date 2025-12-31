@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp
 @Config
-public class intake extends OpMode {
+public class Intake extends OpMode {
 
     DcMotorEx intakeleft;
 
