@@ -31,12 +31,10 @@ package org.firstinspires.ftc.teamcode.common;
 import org.firstinspires.ftc.teamcode.testing.Spindexer;
 
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -68,18 +66,18 @@ public class BasicOpMode_Linear extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+//        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
+//        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
 
-        Servo leftServo = hardwareMap.get(Servo.class, "spindexerLeft");
-        Servo rightServo = hardwareMap.get(Servo.class, "spindexerRight");
+        Servo LServo = hardwareMap.get(Servo.class, "spindexerLeft");
+        Servo RServo = hardwareMap.get(Servo.class, "spindexerRight");
         Servo ejectorServo = hardwareMap.get(Servo.class, "ejectorServo");
         ColorSensor intakeColor = hardwareMap.get(ColorSensor.class, "intakeColor");
 
-        spindexer = new Spindexer(leftServo, rightServo, ejectorServo, intakeColor);
+        spindexer = new Spindexer(LServo, RServo, ejectorServo, intakeColor);
 
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+//        leftDrive.setDirection(DcMotor.Direction.REVERSE);
+//        rightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         waitForStart();
         runtime.reset();
@@ -93,8 +91,8 @@ public class BasicOpMode_Linear extends LinearOpMode {
             double rightPower = Range.clip(drive - turn, -1.0, 1.0);
 
 
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
+//            leftDrive.setPower(leftPower);
+//            rightDrive.setPower(rightPower);
 
             // spindexer controls
             if (gamepad1.a) {
