@@ -10,6 +10,7 @@ public class ANALOG {
     // ALL ANALOG
 
     public class AxonAnalog {
+
         private AnalogInput absoluteInput;
         private HardwareMap hwMap = ActiveOpMode.hardwareMap();
         private String name;
@@ -34,9 +35,9 @@ public class ANALOG {
             double rawVoltage = absoluteInput.getVoltage();
             double rawAngle;
             if (reversed){
-                rawAngle = (rawVoltage) / voltCompensation * TWO_PI;
+                rawAngle = (rawVoltage) / TWO_PI;
             } else {
-                rawAngle = rawVoltage / voltCompensation * TWO_PI;
+                rawAngle = rawVoltage / TWO_PI;
             }
             double newAngle = rawAngle - offset;
             return normalizeHeading(newAngle);

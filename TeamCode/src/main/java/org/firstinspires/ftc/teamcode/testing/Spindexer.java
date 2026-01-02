@@ -16,12 +16,25 @@ import dev.nextftc.ftc.ActiveOpMode;
 public class Spindexer {
 
     // constants
-    private static final int PRESENCE_ALPHA_THRESHOLD = 5; // tune for sensor/lighting
+    private static final int PRESENCE_ALPHA_THRESHOLD = 5; // tune?
+
+    private final AnalogInput spindexerEncoder;
+
 
     // SERVO POSITIONS - tune on robot idk actual PUT ACTUAL
+
+
     private static final double SLOT0_POS = 0.10;  // Slot 0 at intake
     private static final double SLOT1_POS = 0.43;  // Slot 1 at intake (~120)
     private static final double SLOT2_POS = 0.76;  // Slot 2 at intake (~240)
+
+
+    private static final double SLOT0_VOLT = 3.5/360*(SLOT0_POS*360);
+    private static final double SLOT1_VOLT = 3.5/360*(SLOT1_POS*360);
+    private static final double SLOT2_VOLT = 3.5/360*(SLOT2_POS*360);
+
+    //private static final double EJECT_OFFSET = 0.25;
+
 
     private static final double EJECT0_POS = 0.26; // 60° past slot0 (eject position)
     private static final double EJECT1_POS = 0.60; // 60° past slot1
@@ -29,6 +42,10 @@ public class Spindexer {
 
     private static final double EJECTOR_RETRACT_POS = 0.0;  // tune on robot
     private static final double EJECTOR_FLIP_POS = 0.6;     // tune on robot
+
+
+    private static final double MAX_VOLT = 3.5;
+
 
     // ===== TYPES =====
     public enum Ball { EMPTY, PURPLE, GREEN }
@@ -43,11 +60,12 @@ public class Spindexer {
     private int intakeIndex = 0;  // which slot (0,1,2) is at intake
     private final Ball[] slots = { Ball.EMPTY, Ball.EMPTY, Ball.EMPTY };
 
-    public Spindexer(Servo servoLeft, Servo servoRight, Servo ejectorServo, ColorSensor intakeColor) {
+    public Spindexer(Servo servoLeft, Servo servoRight, Servo ejectorServo, ColorSensor intakeColor, AnalogInput spindexerEncoder) {
         this.servoLeft = servoLeft;
         this.servoRight = servoRight;
         this.ejectorServo = ejectorServo;
         this.intakeColor = intakeColor;
+        this.spindexerEncoder = spindexerEncoder;
 
         // Initialize to slot 0 at intake, ejector el finger retracted
         goToSlot(0);
@@ -86,6 +104,12 @@ public class Spindexer {
         goToSlot(intakeIndex);
     }
 
+    private double voltageToServo(double voltage) {
+        double pos = (voltage) / (MAX_VOLT);
+        return Math.max(0.0, Math.min(1.0, pos));
+    }
+
+
     public Ball[] getSlots() { return slots.clone(); }
     public int getIntakeIndex() { return intakeIndex; }
 
@@ -100,6 +124,19 @@ public class Spindexer {
         return null;
     }
 
+    private void moveToVoltage(double targetVoltage) {
+        double currentVoltage = spindexerEncoder.getVoltage();
+        double servoPos = servoLeft.getPosition();
+
+        if (currentVoltage < targetVoltage - VOLT_TOLERANCE) {
+            servoPos += SERVO_STEP;
+        } else if (currentVoltage > targetVoltage + VOLT_TOLERANCE) {
+            servoPos -= SERVO_STEP;
+        }
+
+        servoPos = Math.max(0.0, Math.min(1.0, servoPos));
+        setServos(servoPos);
+    }
 
     private void ejectSlot(int slotIndex, Telemetry telemetry) {
         // Rotate so this slot is at its eject position (60° past intake stop)
@@ -130,6 +167,8 @@ public class Spindexer {
         intakeIndex = slot;
     }
 
+
+
     private void goToEjectForSlot(int slot) {
         double pos = getEjectPosition(slot);
         setServos(pos);
@@ -144,8 +183,8 @@ public class Spindexer {
         }
     }
 
-    private double getEjectPosition(int slot) {
-        switch (slot) {
+    private double getEjectVoltage(int slot) {
+        return getSlotVoltage(slot) + EJECT_OFFSET_VOLT;
             case 0: return EJECT0_POS;
             case 1: return EJECT1_POS;
             case 2: return EJECT2_POS;
@@ -189,4 +228,3 @@ public class Spindexer {
         if (g >= r && g >= b) return Ball.GREEN;
         return Ball.PURPLE;
     }
-}
