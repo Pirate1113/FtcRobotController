@@ -16,7 +16,8 @@ public class SpindexerVoltageTester extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        spindexerEncoder = hardwareMap.get(AnalogInput.class, "spindexerEncoder");
+        AnalogInput EncoderLeft = hardwareMap.get(AnalogInput.class, "spindexerEncoderLeft");
+        AnalogInput EncoderRight = hardwareMap.get(AnalogInput.class, "spindexerEncoderRight");
         servoLeft = hardwareMap.get(Servo.class, "servoLeft");
         servoRight = hardwareMap.get(Servo.class, "servoRight");
 
@@ -24,9 +25,11 @@ public class SpindexerVoltageTester extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            double voltage = spindexerEncoder.getVoltage();
+            double voltageLeft = EncoderLeft.getVoltage();
+            double voltageRight = EncoderRight.getVoltage();
 
-            telemetry.addData("Spindexer Voltage", "%.3f", voltage);
+            telemetry.addData("Spindexer Voltage Left", "%.3f", voltageLeft);
+            telemetry.addData("Spindexer Voltage Right", "%.3f", voltageRight);
             telemetry.addData("Servo Pos", servoLeft.getPosition());
             telemetry.update();
         }
