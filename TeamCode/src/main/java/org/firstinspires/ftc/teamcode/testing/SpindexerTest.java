@@ -11,18 +11,18 @@ public class SpindexerTest extends LinearOpMode {
     private CRServo servoRight;
 
     // Servo speed / step for manual control (0–1 scale)
-    private static final double SERVO_SPEED = 0.01;
+    private static final double SERVO_SPEED = 0.005;
 
     @Override
     public void runOpMode() {
 
         // Initialize hardware
-        servoLeft = hardwareMap.get(CRServo.class, "servoLeft");
-        servoRight = hardwareMap.get(CRServo.class, "servoRight");
+        servoLeft = hardwareMap.get(CRServo.class, "spindexerleft");
+        servoRight = hardwareMap.get(CRServo.class, "spindexerright");
 
         // Set initial positions
-        servoLeft.setPower(0.5);
-        servoRight.setPower(0.5);
+        servoLeft.setPower(0);
+        servoRight.setPower(0);
 
         waitForStart();
 
@@ -39,8 +39,8 @@ public class SpindexerTest extends LinearOpMode {
 
             // Backward control: left bumper
             if (gamepad1.left_bumper) {
-                leftPow = Math.max(0.0, leftPow - SERVO_SPEED);
-                rightPow = Math.max(0.0, rightPow - SERVO_SPEED);
+                leftPow = Math.max(-1.0, leftPow - SERVO_SPEED);
+                rightPow = Math.max(-1.0, rightPow - SERVO_SPEED);
             }
 
             // Update power
