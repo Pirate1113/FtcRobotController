@@ -29,9 +29,9 @@ public class Spindexer {
     private static final double SLOT2_POS = 0.76;  // Slot 2 at intake (~240)
 
 
-    private static final double SLOT0_VOLT = 3.5/360*(SLOT0_POS*360);
-    private static final double SLOT1_VOLT = 3.5/360*(SLOT1_POS*360);
-    private static final double SLOT2_VOLT = 3.5/360*(SLOT2_POS*360);
+    private static final double SLOT0_VOLT = 3.3/360*(SLOT0_POS*360); //1.475, 1.4775
+    private static final double SLOT1_VOLT = 3.3/360*(SLOT1_POS*360); //1.38
+    private static final double SLOT2_VOLT = 3.3/360*(SLOT2_POS*360); //2.435
 
     //private static final double EJECT_OFFSET = 0.25;
 
