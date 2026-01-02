@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode.testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 @TeleOp(name="Spindexer Forward/Backward", group="Test")
 public class SpindexerTest extends LinearOpMode {
 
-    private Servo servoLeft;
-    private Servo servoRight;
+    private CRServo servoLeft;
+    private CRServo servoRight;
 
     // Servo speed / step for manual control (0–1 scale)
     private static final double SERVO_SPEED = 0.01;
@@ -17,39 +17,39 @@ public class SpindexerTest extends LinearOpMode {
     public void runOpMode() {
 
         // Initialize hardware
-        servoLeft = hardwareMap.get(Servo.class, "servoLeft");
-        servoRight = hardwareMap.get(Servo.class, "servoRight");
+        servoLeft = hardwareMap.get(CRServo.class, "servoLeft");
+        servoRight = hardwareMap.get(CRServo.class, "servoRight");
 
         // Set initial positions
-        servoLeft.setPosition(0.5);
-        servoRight.setPosition(0.5);
+        servoLeft.setPower(0.5);
+        servoRight.setPower(0.5);
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            double leftPos = servoLeft.getPosition();
-            double rightPos = servoRight.getPosition();
+            double leftPow = servoLeft.getPower();
+            double rightPow = servoRight.getPower();
 
             // Forward control: right bumper
             if (gamepad1.right_bumper) {
-                leftPos  = Math.min(1.0, leftPos + SERVO_SPEED);
-                rightPos = Math.min(1.0, rightPos + SERVO_SPEED);
+                leftPow = Math.min(1.0, leftPow + SERVO_SPEED);
+                rightPow = Math.min(1.0, rightPow + SERVO_SPEED);
             }
 
             // Backward control: left bumper
             if (gamepad1.left_bumper) {
-                leftPos  = Math.max(0.0, leftPos - SERVO_SPEED);
-                rightPos = Math.max(0.0, rightPos - SERVO_SPEED);
+                leftPow = Math.max(0.0, leftPow - SERVO_SPEED);
+                rightPow = Math.max(0.0, rightPow - SERVO_SPEED);
             }
 
-            // Update servo positions
-            servoLeft.setPosition(leftPos);
-            servoRight.setPosition(rightPos);
+            // Update power
+            servoLeft.setPower(leftPow);
+            servoRight.setPower(rightPow);
 
             // Telemetry
-            telemetry.addData("Left Servo", "%.2f", leftPos);
-            telemetry.addData("Right Servo", "%.2f", rightPos);
+            telemetry.addData("Left Servo", "%.2f", leftPow);
+            telemetry.addData("Right Servo", "%.2f", rightPow);
             telemetry.update();
         }
     }
