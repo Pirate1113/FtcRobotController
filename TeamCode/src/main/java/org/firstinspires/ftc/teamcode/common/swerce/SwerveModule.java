@@ -197,4 +197,109 @@
 //        axon.setPower(power);
 //        drive.setPower(power);
 //    }
+<<<<<<< Updated upstream
 //}
+=======
+//
+//    public void setTarget(double t){
+//        this.target = wrapAngle0to2pi(t);
+//    }
+//
+//    public double getTargetRotation() {
+//        return wrapAngle0to2pi(target - Math.PI);
+//    }
+//
+//    public double getModuleRotation() {
+//        return position - uncoffset;
+//    }
+//
+//
+//}
+package org.firstinspires.ftc.teamcode.common.swerce;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
+
+
+import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.PIDCoefficients;
+import dev.nextftc.hardware.impl.CRServoEx;
+import dev.nextftc.hardware.impl.FeedbackCRServoEx;
+import dev.nextftc.hardware.impl.MotorEx;
+
+@Configurable
+public class SwerveModule{
+
+    final double WHEEL_RADIUS = 1;
+    final double GEAR_RATIO = 1;
+    final double TICKS_PER_REVOLUTION = 1;
+
+    double current;
+    double lastCurrent;
+    double target;
+    double period;
+    double velocity;
+
+    double power;
+
+    public static PIDCoefficients pidValues = new PIDCoefficients(0.5, 0, 0);
+    public ControlSystem pid = ControlSystem.builder()
+            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
+            .build();
+
+    private MotorEx drive;
+    private CRServoEx axon;
+    private FeedbackCRServoEx ax3on;
+    private AbsoluteAnalogEncoder enc;
+
+    public double xOffset;
+    public double yOffset;
+
+    public SwerveModule(MotorEx m, CRServoEx s, AnalogInput e, double eOffset, boolean reversed){
+        drive = m;
+        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        axon = s;
+        if(reversed) ax3on.getServo().setDirection(DcMotorSimple.Direction.REVERSE);
+
+        enc = new AbsoluteAnalogEncoder(e, 3.3).zero(eOffset).setInverted(reversed);
+
+
+
+        axon.setPower(1);
+        axon.setPower(0);
+    }
+
+    public void  read(){
+        current = enc.getCurrentPosition();
+    } // this comes out
+
+    public void rotateTo(double target){
+        pid.setGoal(new KineticState(target));
+
+        if (Math.abs(period) > 1E-6) {
+            velocity = (current - lastCurrent) / period;
+        } else {
+            velocity = 0;
+        }
+
+        KineticState sCurrent = new KineticState(current, velocity);
+
+        power = pid.calculate(sCurrent);
+
+    }
+
+    public void write(double power){
+        axon.setPower(power);
+        drive.setPower(power);
+    }
+}
+>>>>>>> Stashed changes
