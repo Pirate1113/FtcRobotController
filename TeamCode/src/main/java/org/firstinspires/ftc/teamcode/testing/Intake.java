@@ -64,6 +64,10 @@ public class Intake extends OpMode {
         // Telemetry for debugging
         telemetry.addData("Left Intake Power", powerLeft);
         telemetry.addData("Right Intake Power", powerRight);
+        telemetry.addData("previousX", previousX);
+        telemetry.addData("previousB", previousB);
+        telemetry.addData("previousDpadUp", previousDpadUp);
+        telemetry.addData("previousDpadDown", previousDpadDown);
         telemetry.update();
 
     }
