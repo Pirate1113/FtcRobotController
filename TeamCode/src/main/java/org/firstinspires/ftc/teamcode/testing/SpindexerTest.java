@@ -54,7 +54,7 @@ public class SpindexerTest extends LinearOpMode {
 
             double leftPow = servoLeft.getPower();
             double rightPow = servoRight.getPower();
-
+            //spindexer control
             // Forward control: right bumper
             if (gamepad1.right_bumper) {
                 leftPow = Math.min(1.0, leftPow + SERVO_SPEED);
@@ -66,12 +66,13 @@ public class SpindexerTest extends LinearOpMode {
                 leftPow = Math.max(-1.0, leftPow - SERVO_SPEED);
                 rightPow = Math.max(-1.0, rightPow - SERVO_SPEED);
             }
+
+            // intake control
             if (gamepad1.dpad_up && !previousDpadUp) {
                 powerLeft += 0.1;
             } else if (gamepad1.dpad_down && !previousDpadDown) {
                 powerLeft -= 0.1;
             }
-
             // Right intake control with X (square) and B (circle)
             if (gamepad1.x && !previousX) {
                 powerRight += 0.1;
@@ -105,7 +106,7 @@ public class SpindexerTest extends LinearOpMode {
             telemetry.addData("previousDpadUp", previousDpadUp);
             telemetry.addData("previousDpadDown", previousDpadDown);
             telemetry.update();
-;        }
+        }
 
     }
 }

@@ -34,8 +34,12 @@ public class AbsoluteAnalogEncoder {
     }
 
     private double pastPosition = 1;
+
+    /*
+        gets the angle from [-pi to pi)
+     */
     public double getCurrentPosition() {
-        double pos = Angle.Companion.wrapAngle0To2Pi(((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * Math.PI*2 - offset));
+        double pos = Angle.Companion.wrapAngle0To2Pi((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * Math.PI*2 - offset);
         //checks for crazy values when the encoder is close to zero
         if(!VALUE_REJECTION || Math.abs(Angle.Companion.wrapAnglePiToPi(pastPosition)) > 0.1 || Math.abs(Angle.Companion.wrapAnglePiToPi(pos)) < 1) pastPosition = pos;
         return pastPosition;
