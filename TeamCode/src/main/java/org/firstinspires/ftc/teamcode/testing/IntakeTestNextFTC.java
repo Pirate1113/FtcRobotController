@@ -8,6 +8,8 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 
 @TeleOp(name = "Intake Test NextFTC Version")
 public class IntakeTestNextFTC extends NextFTCOpMode {
@@ -29,6 +31,12 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         Gamepads.gamepad1().x()
                         .whenBecomesTrue(Intake.INSTANCE.increaseRight());
         Gamepads.gamepad1().a().whenBecomesTrue(Intake.INSTANCE.decreaseRight());
-        //TODO do telemetry later lmao
+
+    }
+    @Override
+    public void onUpdate() {
+        telemetry.addData("Left Intake Power", Intake.INSTANCE.getLeftPower());
+        telemetry.addData("Right Intake Power", Intake.INSTANCE.getRightPower());
+        telemetry.update();
     }
 }
