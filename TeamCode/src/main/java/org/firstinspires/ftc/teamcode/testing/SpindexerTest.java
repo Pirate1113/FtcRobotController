@@ -105,7 +105,7 @@ public class SpindexerTest extends LinearOpMode {
             telemetry.addData("previousDpadUp", previousDpadUp);
             telemetry.addData("previousDpadDown", previousDpadDown);
             telemetry.update();
-yk;        }
+;        }
 
     }
 }
