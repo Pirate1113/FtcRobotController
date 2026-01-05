@@ -24,7 +24,7 @@
 //    private double velocity;
 //
 //    private boolean reversed;
-//    private final boolean MOTOR_FLIPPING;
+//    private final boolean WHEEL_FLIPPING;
 //
 //    private double power;
 //
@@ -40,7 +40,7 @@
 //
 //        this.reversed = r;
 //
-//        MOTOR_FLIPPING = motorFlipping;
+//        WHEEL_FLIPPING = motorFlipping;
 //
 //        if (reversed) {
 //            axon.setDirection(DcMotorSimple.Direction.REVERSE);
