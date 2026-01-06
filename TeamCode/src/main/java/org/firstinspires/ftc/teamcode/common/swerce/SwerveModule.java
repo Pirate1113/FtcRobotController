@@ -218,6 +218,7 @@ package org.firstinspires.ftc.teamcode.common.swerce;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -231,7 +232,6 @@ import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.hardware.impl.CRServoEx;
-import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.core.units.Angle;
 
 
@@ -262,14 +262,14 @@ public class SwerveModule{
     double K_STATIC;
     public ControlSystem pid;
 
-    private Motor drive;
+    private DcMotorEx drive;
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
 
     public double xOffset;
     public double yOffset;
 
-    public SwerveModule(String n, MotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
         this.name = n;
 
         this.drive = m;
@@ -313,6 +313,7 @@ public class SwerveModule{
 
         pid.setGoal(new KineticState(target));
 
+        //calculating velocity for use in D term
         if (Math.abs(period) > 1E-6) {
             velocity = (current - lastCurrent) / period;
         } else {
@@ -328,20 +329,17 @@ public class SwerveModule{
         axon.setPower(power);
         if (wheelFlipped) wheelVel *= -1;
         drive.setVelocity(wheelVel);
-
-        drive.set
     }
 
     public void getTelemetry(Telemetry telemetry){
         telemetry.addData("", name);
-        telemetry.addData("Wheel Flipped", wheelFlipped);
         telemetry.addData("Target", target);
         telemetry.addData("Current", current);
         telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
         telemetry.addData("Rot vel", velocity);
-        telemetry.addData("Drive power", drivePower);
-
-
+        telemetry.addData("Wheel Flipped", wheelFlipped);
+        telemetry.addData("Drive power", wheelVel);
     }
 
 }

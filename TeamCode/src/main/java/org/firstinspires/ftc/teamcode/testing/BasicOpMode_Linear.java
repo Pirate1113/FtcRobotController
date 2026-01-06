@@ -27,8 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.common;
-import org.firstinspires.ftc.teamcode.testing.OdomDistance;
+package org.firstinspires.ftc.teamcode.testing;
 import org.firstinspires.ftc.teamcode.testing.Spindexer;
 
 

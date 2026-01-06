@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.common;
-
-import org.firstinspires.ftc.teamcode.testing.OdomDistance;
+package org.firstinspires.ftc.teamcode.testing;
 
 public class LimelightAngle {
         private final OdomDistance odom;
