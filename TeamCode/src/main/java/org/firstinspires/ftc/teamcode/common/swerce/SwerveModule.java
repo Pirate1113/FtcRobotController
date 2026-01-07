@@ -218,9 +218,9 @@ package org.firstinspires.ftc.teamcode.common.swerce;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
@@ -266,9 +266,16 @@ public class SwerveModule{
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
 
-    public double xOffset;
-    public double yOffset;
 
+    /** Construcotr is:
+     @param n name
+     @param m motor
+     @param s servo
+     @param e AnalogInput
+     @param eOffset  offset
+     @param reversed is it reveresed?
+     @param PIDK an array of the PIDK values
+     */
     public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
         this.name = n;
 
