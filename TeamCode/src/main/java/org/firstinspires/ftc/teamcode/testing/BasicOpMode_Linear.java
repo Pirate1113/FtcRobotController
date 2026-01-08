@@ -27,7 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.testing;
+package org.firstinspires.ftc.teamcode.common;
+import org.firstinspires.ftc.teamcode.testing.LimelightAngle;
+import org.firstinspires.ftc.teamcode.testing.OdomDistance;
 import org.firstinspires.ftc.teamcode.testing.Spindexer;
 
 
