@@ -218,8 +218,11 @@ package org.firstinspires.ftc.teamcode.common.swerce;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -229,17 +232,20 @@ import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.hardware.impl.CRServoEx;
-import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.core.units.Angle;
 
 
 @Config
 public class SwerveModule{
 
+    String name;
+
     final double WHEEL_RADIUS = 1;
     final double GEAR_RATIO = 1;
     final double TICKS_PER_REVOLUTION = 1;
     final boolean WHEEL_FLIPPING = true;
+
+    double wheelVel; //in ticks/sec
 
     double current;
     double lastCurrent;
@@ -252,25 +258,40 @@ public class SwerveModule{
     double power;
     boolean wheelFlipped;
 
-    public static PIDCoefficients pidValues = new PIDCoefficients(0.5, 0, 0);
-    public ControlSystem pid = ControlSystem.builder()
-            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
-            .build();
+    PIDCoefficients pidValues;
+    double K_STATIC;
+    public ControlSystem pid;
 
-    private MotorEx drive;
+    private DcMotorEx drive;
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
 
-    public double xOffset;
-    public double yOffset;
 
-    public SwerveModule(MotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed){
+    /** Construcotr is:
+     @param n name
+     @param m motor
+     @param s servo
+     @param e AnalogInput
+     @param eOffset  offset
+     @param reversed is it reveresed?
+     @param PIDK an array of the PIDK values
+     */
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
+        this.name = n;
+
         this.drive = m;
         drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         this.axon = new CRServoEx(s, 0.03);
 
         this.enc = new AbsoluteAnalogEncoder(e, 3.3).zero(eOffset);
+
+        this.pidValues = new PIDCoefficients(PIDK[0], PIDK[1], PIDK[2]);
+        this.K_STATIC = PIDK[3];
+
+        this.pid = ControlSystem.builder()
+                .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
+                .build();
 
         if(reversed) {
             this.axon.getServo().setDirection(DcMotorSimple.Direction.REVERSE);
@@ -299,6 +320,7 @@ public class SwerveModule{
 
         pid.setGoal(new KineticState(target));
 
+        //calculating velocity for use in D term
         if (Math.abs(period) > 1E-6) {
             velocity = (current - lastCurrent) / period;
         } else {
@@ -307,13 +329,24 @@ public class SwerveModule{
 
         KineticState sCurrent = new KineticState(current, velocity);
 
-        power = pid.calculate(sCurrent);
+        power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
     }
 
-    public void write(double drivePower){
+    public void write(){
         axon.setPower(power);
-        if (wheelFlipped) power *= -1;
-        drive.setPower(power);
+        if (wheelFlipped) wheelVel *= -1;
+        drive.setVelocity(wheelVel);
+    }
+
+    public void getTelemetry(Telemetry telemetry){
+        telemetry.addData("", name);
+        telemetry.addData("Target", target);
+        telemetry.addData("Current", current);
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Rot vel", velocity);
+        telemetry.addData("Wheel Flipped", wheelFlipped);
+        telemetry.addData("Drive power", wheelVel);
     }
 
 }

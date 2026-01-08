@@ -27,12 +27,12 @@ public class Intake implements Subsystem {
 
     // ===== SYNCHRONIZED CONTROL =====
 
-    /** Run both intake motors at full power to intake samples */
+    /** Run both intake motors at full power to intake artifacts */
     public Command intake() {
         return new SetPower(intakeMotors, 1.0).named("Intake");
     }
 
-    /** Run both intake motors in reverse to eject samples */
+    /** Run both intake motors in reverse to eject artifacts */
     public Command outtake() {
         return new SetPower(intakeMotors, -1.0).named("Outtake");
     }
