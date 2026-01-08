@@ -1,11 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import java.util.List;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 public class LimelightAngle {
 
@@ -23,29 +19,22 @@ public class LimelightAngle {
 
     public boolean hasTarget() {
         LLResult result = limelight.getLatestResult();
-        return result != null
-                && result.isValid()
-                && !result.getFiducialResults().isEmpty();
+        return result != null && result.isValid();
     }
 
     public double getYaw() {
         LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return 0.0;
-
-        return result.getFiducialResults().get(0).tx;
+        return (result != null && result.isValid()) ? result.getTx() : 0.0;
     }
 
     public double getPitch() {
         LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return 0.0;
-
-        return result.getFiducialResults().get(0).ty;
+        return (result != null && result.isValid()) ? result.getTy() : 0.0;
     }
 
     public double getDistance() {
         double pitchRad = Math.toRadians(getPitch());
-        double verticalDiff = SHOOTER_HEIGHT + TAG_OFFSET;
-        return verticalDiff / Math.tan(pitchRad);
+        return (TAG_OFFSET + SHOOTER_HEIGHT) / Math.tan(pitchRad);
     }
 }
 
