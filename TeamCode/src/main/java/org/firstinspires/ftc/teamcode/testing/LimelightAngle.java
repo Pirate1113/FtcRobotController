@@ -1,51 +1,51 @@
+package org.firstinspires.ftc.teamcode.testing;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-
-import org.firstinspires.ftc.robotcore.external.network.NetworkTable;
-import org.firstinspires.ftc.robotcore.external.network.NetworkTableEntry;
-import org.firstinspires.ftc.robotcore.external.network.NetworkTableInstance;
+import java.util.List;
 
 public class LimelightAngle {
 
-    private final NetworkTable limelight;   // Limelight NetworkTable
-    private final double SHOOTER_HEIGHT;    // shooter exit height in inches
-    private final double TAG_OFFSET;        // how far below the hoop the AprilTag is
-    private final double ROBOT_X_OFFSET;    // distance from robot center to shooter
+    private final Limelight3A limelight;
+    private final double SHOOTER_HEIGHT;
+    private final double TAG_OFFSET;
 
-    public LimelightAngle(double shooterHeight, double tagOffset, double robotXOffset) {
+    public LimelightAngle(Limelight3A limelight,
+                          double shooterHeight,
+                          double tagOffset) {
+        this.limelight = limelight;
         this.SHOOTER_HEIGHT = shooterHeight;
         this.TAG_OFFSET = tagOffset;
-        this.ROBOT_X_OFFSET = robotXOffset;
-
-        // Get Limelight NetworkTable
-        limelight = NetworkTableInstance.getDefault().getTable("limelight");
     }
 
-    /** Horizontal angle as yaw in degrees */
-    public double getYaw() {
-        return limelight.getEntry("tx").getDouble(0.0);
-    }
-
-    /** Vertical angle as pitch in degrees */
-    public double getPitch() {
-        return limelight.getEntry("ty").getDouble(0.0);
-    }
-
-    /** Returns true if Limelight sees the target */
     public boolean hasTarget() {
-        return limelight.getEntry("tv").getDouble(0.0) == 1.0;
+        LLResult result = limelight.getLatestResult();
+        return result != null
+                && result.isValid()
+                && !result.getFiducialResults().isEmpty();
     }
 
-    /** Estimate horizontal distance from shooter to target using pitch */
-    public double getDistance() {
-        double pitchDeg = getPitch();
-        double pitchRad = Math.toRadians(pitchDeg);
+    public double getYaw() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return 0.0;
 
-        double verticalDiff = TAG_OFFSET + SHOOTER_HEIGHT;
-        return verticalDiff / Math.tan(pitchRad); // horizontal distance in inches
+        return result.getFiducialResults().get(0).tx;
+    }
+
+    public double getPitch() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return 0.0;
+
+        return result.getFiducialResults().get(0).ty;
+    }
+
+    public double getDistance() {
+        double pitchRad = Math.toRadians(getPitch());
+        double verticalDiff = SHOOTER_HEIGHT + TAG_OFFSET;
+        return verticalDiff / Math.tan(pitchRad);
     }
 }
 
