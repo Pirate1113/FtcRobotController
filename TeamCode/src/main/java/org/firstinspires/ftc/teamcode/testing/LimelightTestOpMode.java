@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "Limelight Test", group = "Testing")
 public class LimelightTestOpMode extends LinearOpMode {
 
-    @Override   
+    @Override
     public void runOpMode() {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -21,12 +21,10 @@ public class LimelightTestOpMode extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
             telemetry.addData("Has Target", vision.hasTarget());
             telemetry.addData("Yaw", vision.getYaw());
             telemetry.addData("Pitch", vision.getPitch());
             telemetry.addData("Distance", vision.getDistance());
-
             telemetry.update();
         }
     }

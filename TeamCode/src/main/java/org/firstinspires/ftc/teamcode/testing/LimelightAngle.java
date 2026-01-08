@@ -17,24 +17,37 @@ public class LimelightAngle {
         this.TAG_OFFSET = tagOffset;
     }
 
+    /** Returns true if Limelight sees a target */
     public boolean hasTarget() {
         LLResult result = limelight.getLatestResult();
         return result != null && result.isValid();
     }
 
+    /** Horizontal angle as yaw in degrees */
     public double getYaw() {
         LLResult result = limelight.getLatestResult();
-        return (result != null && result.isValid()) ? result.getTx() : 0.0;
+        if(result != null && result.isValid()) {
+            return result.getTx(); // degrees
+        }
+        return 0.0;
     }
 
+    /** Vertical angle as pitch in degrees */
     public double getPitch() {
         LLResult result = limelight.getLatestResult();
-        return (result != null && result.isValid()) ? result.getTy() : 0.0;
+        if(result != null && result.isValid()) {
+            return result.getTy(); // degrees
+        }
+        return 0.0;
     }
 
+    /** Horizontal distance from shooter to hoop using pitch */
     public double getDistance() {
-        double pitchRad = Math.toRadians(getPitch());
-        return (TAG_OFFSET + SHOOTER_HEIGHT) / Math.tan(pitchRad);
+        double pitchDeg = getPitch();
+        if(pitchDeg == 0) return 0; // avoid division by zero
+        double pitchRad = Math.toRadians(pitchDeg);
+        double verticalDiff = TAG_OFFSET + SHOOTER_HEIGHT;
+        return verticalDiff / Math.tan(pitchRad);
     }
 }
 
