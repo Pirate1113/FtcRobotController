@@ -27,5 +27,7 @@ public class LimelightTestOpMode extends LinearOpMode {
             telemetry.addData("Distance", vision.getDistance());
             telemetry.update();
         }
+
+        telemetry.update();
     }
 }
