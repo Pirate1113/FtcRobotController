@@ -12,22 +12,25 @@ public class LimelightTestOpMode extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
+        limelight.start();
+
         LimelightAngle vision = new LimelightAngle(
                 limelight,
-                6.0,
-                12.5
+                6.0,    // shooter height
+                12.5    // tag offset
         );
+
+        telemetry.addLine("Limelight initialized");
+        telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
             telemetry.addData("Has Target", vision.hasTarget());
-            telemetry.addData("Yaw", vision.getYaw());
-            telemetry.addData("Pitch", vision.getPitch());
-            telemetry.addData("Distance", vision.getDistance());
+            telemetry.addData("Yaw (tx)", vision.getYaw());
+            telemetry.addData("Pitch (ty)", vision.getPitch());
+            telemetry.addData("Distance (in)", vision.getDistance());
             telemetry.update();
         }
-
-        telemetry.update();
     }
 }
