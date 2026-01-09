@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
@@ -53,25 +54,15 @@ public class Intake implements Subsystem {
 
     // ===== INDEPENDENT MOTOR CONTROL =====
 
-    public Command increaseLeft() {
-                powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-                new SetPower(intakeLeft, powerLeft).named("Increase Left Power");
-            }).requires(this);
+    public Command increaseLeft = new InstantCommand(() -> {
+       powerLeft = Math.min(1, powerRight + POWER_INCREMENT);
+       intakeLeft.getMotor().setPower(powerLeft);
+    });
+    public Command decreaseLeft = new InstantCommand(() -> {
+        powerLeft = Math.max(-1.0, powerLeft - POWER_INCREMENT);
+        intakeLeft.getMotor().setPower(powerLeft);
+    });
 
-//    /** Increase left motor power by increment */
-//    public Command increaseLeft = new LambdaCommand()
-//            .setStart(() -> {
-//                powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-//                new SetPower(intakeLeft, powerLeft).named("Increase Left Power");
-//            }).requires(this);
-
-    /** Decrease left motor power by increment */
-    public Command decreaseLeft = new LambdaCommand()
-            .setStart(() -> {
-                powerLeft = Math.max(-1.0, powerLeft - POWER_INCREMENT);
-                new SetPower(intakeLeft, powerLeft).named("Decrease Left Power");
-            })
-            .requires(this);
 
     /** Increase right motor power by increment */
     public Command increaseRight() {
