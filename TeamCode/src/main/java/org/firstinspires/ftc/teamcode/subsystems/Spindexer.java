@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.powerable.SetPower;
@@ -63,28 +64,25 @@ public class Spindexer implements Subsystem {
     // ===== INDEPENDENT SERVO CONTROL =====
 
     /** Increase left servo power by increment */
-    public Command increaseLeft() {
-        powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-        return new SetPower(servoLeft, powerLeft).named("Increase Left Power");
-    }
 
-    /** Decrease left servo power by increment */
-    public Command decreaseLeft() {
-        powerLeft = Math.max(-1.0, powerLeft - POWER_INCREMENT);
-        return new SetPower(servoLeft, powerLeft).named("Decrease Left Power");
-    }
-
-    /** Increase right servo power by increment */
-    public Command increaseRight() {
-        powerRight = Math.min(1.0, powerRight + POWER_INCREMENT);
-        return new SetPower(servoRight, powerRight).named("Increase Right Power");
-    }
-
-    /** Decrease right servo power by increment */
-    public Command decreaseRight() {
-        powerRight = Math.max(-1.0, powerRight - POWER_INCREMENT);
-        return new SetPower(servoRight, powerRight).named("Decrease Right Power");
-    }
+    public Command moveLeft = new InstantCommand(() -> {
+        powerLeft = 0.8;
+        powerRight = -0.8;
+        servoLeft.getServo().setPower(0.8);
+        servoRight.getServo().setPower(0.8);
+    });
+    public Command moveRight = new InstantCommand(() -> {
+        powerRight = 0.8;
+        servoRight.getServo().setPower(-0.8);
+    });
+    public Command stopLeft = new InstantCommand(() -> {
+        powerLeft = 0;
+        servoLeft.getServo().setPower(0);
+    });
+    public Command stopRight = new InstantCommand(() -> {
+        powerRight = 0;
+        servoRight.getServo().setPower(0);
+    });
 
     /** Set left servo to specific power */
     public Command setLeftPower(double power) {
