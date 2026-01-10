@@ -8,8 +8,8 @@ public class SwerveToShootingAngle {
     private final DcMotorEx left, right;
 
     public SwerveToShootingAngle(HardwareMap hw) {
-        left  = hw.get(DcMotorEx.class, "leftDrive");
-        right = hw.get(DcMotorEx.class, "rightDrive");
+        left  = hw.get(DcMotorEx.class, "fl_motor");
+        right = hw.get(DcMotorEx.class, "br_motor");
 
         right.setDirection(DcMotorEx.Direction.REVERSE);
     }
