@@ -10,11 +10,15 @@ public class AutoAimTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        telemetry.addLine("Initializing...");
+        telemetry.update();
+
+        // ---- Hardware ----
         Limelight3A limelight =
                 hardwareMap.get(Limelight3A.class, "limelight");
 
         LimelightAngle vision =
-                new LimelightAngle(limelight, 6.0, 12.5); // needs tuning??
+                new LimelightAngle(limelight, 6.0, 12.5);
 
         SwerveToShootingAngle turner =
                 new SwerveToShootingAngle(hardwareMap);
@@ -22,11 +26,21 @@ public class AutoAimTeleOp extends LinearOpMode {
         HoodAngle shooter =
                 new HoodAngle(hardwareMap);
 
+        // ---- START LIMELIGHT ----
+        limelight.start();
+
+        telemetry.addLine("Limelight started");
+        telemetry.update();
+
         waitForStart();
 
         while (opModeIsActive()) {
 
-            if (vision.hasTarget()) {
+            boolean hasTarget = vision.hasTarget();
+
+            telemetry.addData("Has Target", hasTarget);
+
+            if (hasTarget) {
                 double yaw = vision.getYaw();
                 double pitch = vision.getPitch();
                 double distance = vision.getDistance();
@@ -34,14 +48,20 @@ public class AutoAimTeleOp extends LinearOpMode {
                 turner.turnToTarget(yaw);
                 shooter.setHoodFromPitch(pitch);
                 shooter.setFlywheelFromDistance(distance);
+
+                telemetry.addData("Yaw (deg)", yaw);
+                telemetry.addData("Pitch (deg)", pitch);
+                telemetry.addData("Distance (in)", distance);
+                telemetry.addData("Raw Result", limelight.getLatestResult());
+
             } else {
                 turner.stop();
                 shooter.stop();
+                telemetry.addLine("No target detected");
             }
 
-            telemetry.addData("Yaw", vision.getYaw());
-            telemetry.addData("Pitch", vision.getPitch());
             telemetry.update();
+            idle();
         }
     }
 }
