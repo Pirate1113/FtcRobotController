@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.powerable.SetPower;
@@ -42,14 +43,6 @@ public class Spindexer implements Subsystem {
             .named("Outtake");
     }
 
-    /** Stop both servos */
-    public Command stop() {
-        powerLeft = 0.0;
-        powerRight = 0.0;
-        return new SetPower(servoLeft, 0.0)
-            .and(new SetPower(servoRight, 0.0))
-            .named("Stop Spindexer");
-    }
 
     /** Set both servos to a specific power */
     public Command setPower(double power) {
@@ -63,28 +56,25 @@ public class Spindexer implements Subsystem {
     // ===== INDEPENDENT SERVO CONTROL =====
 
     /** Increase left servo power by increment */
-    public Command increaseLeft() {
-        powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-        return new SetPower(servoLeft, powerLeft).named("Increase Left Power");
-    }
 
-    /** Decrease left servo power by increment */
-    public Command decreaseLeft() {
-        powerLeft = Math.max(-1.0, powerLeft - POWER_INCREMENT);
-        return new SetPower(servoLeft, powerLeft).named("Decrease Left Power");
-    }
-
-    /** Increase right servo power by increment */
-    public Command increaseRight() {
-        powerRight = Math.min(1.0, powerRight + POWER_INCREMENT);
-        return new SetPower(servoRight, powerRight).named("Increase Right Power");
-    }
-
-    /** Decrease right servo power by increment */
-    public Command decreaseRight() {
-        powerRight = Math.max(-1.0, powerRight - POWER_INCREMENT);
-        return new SetPower(servoRight, powerRight).named("Decrease Right Power");
-    }
+    public Command moveLeft = new InstantCommand(() -> {
+        powerLeft = 0.8;
+        powerRight = -0.8;
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
+    });
+    public Command moveRight = new InstantCommand(() -> {
+        powerRight = 0.8;
+        powerLeft = -0.8;
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
+    });
+    public Command stop = new InstantCommand(() -> {
+        powerLeft = 0;
+        powerRight = 0;
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
+    });
 
     /** Set left servo to specific power */
     public Command setLeftPower(double power) {

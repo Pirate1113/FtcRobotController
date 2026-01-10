@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.utility.LambdaCommand;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.powerable.SetPower;
-import kotlin.jvm.internal.Lambda;
 
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
-    private static final double POWER_INCREMENT = 0.2;
+    private static final double POWER = 0.9;
 
     private Intake() {}
 
@@ -18,31 +17,18 @@ public class Intake implements Subsystem {
     private MotorEx intakeRight;
     private MotorGroup intakeMotors;
 
-    private double powerLeft = 0.0;
+    private double powerLeft = 0;
     private double powerRight = 0.0;
 
     public void initialize() {
-        intakeLeft = new MotorEx("intakeleft").reversed().floatMode();
-        intakeRight = new MotorEx("intakeright").floatMode();
+        intakeLeft = new MotorEx("intakeLeft").floatMode();
+        intakeRight = new MotorEx("intakeRight").floatMode();
         intakeMotors = new MotorGroup(intakeRight, intakeLeft);
     }
 
     // ===== SYNCHRONIZED CONTROL =====
 
     /** Run both intake motors at full power to intake artifacts */
-    public Command intake() {
-        return new SetPower(intakeMotors, 1.0).named("Intake");
-    }
-
-    /** Run both intake motors in reverse to eject artifacts */
-    public Command outtake() {
-        return new SetPower(intakeMotors, -1.0).named("Outtake");
-    }
-
-    /** Stop both intake motors */
-    public Command stop() {
-        return new SetPower(intakeMotors, 0.0).named("Stop Intake");
-    }
 
     /** Set both motors to a specific power */
     public Command setPower(double power) {
@@ -52,38 +38,23 @@ public class Intake implements Subsystem {
     }
 
     // ===== INDEPENDENT MOTOR CONTROL =====
+    public Command moveLeft = new InstantCommand(() -> {
+        powerLeft = POWER;
+        intakeLeft.getMotor().setPower(powerLeft);
+    });
+    public Command moveRight = new InstantCommand(() -> {
+        powerRight = POWER;
+        intakeRight.getMotor().setPower(-powerRight);
+    });
+    public Command stopLeft = new InstantCommand(() -> {
+        powerLeft = 0;
+        intakeLeft.getMotor().setPower(powerLeft);
+    });
+    public Command stopRight = new InstantCommand(() -> {
+        powerRight = 0;
+        intakeRight.getMotor().setPower(-powerRight);
+    });
 
-    public Command increaseLeft() {
-                powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-                new SetPower(intakeLeft, powerLeft).named("Increase Left Power");
-            }).requires(this);
-
-//    /** Increase left motor power by increment */
-//    public Command increaseLeft = new LambdaCommand()
-//            .setStart(() -> {
-//                powerLeft = Math.min(1.0, powerLeft + POWER_INCREMENT);
-//                new SetPower(intakeLeft, powerLeft).named("Increase Left Power");
-//            }).requires(this);
-
-    /** Decrease left motor power by increment */
-    public Command decreaseLeft = new LambdaCommand()
-            .setStart(() -> {
-                powerLeft = Math.max(-1.0, powerLeft - POWER_INCREMENT);
-                new SetPower(intakeLeft, powerLeft).named("Decrease Left Power");
-            })
-            .requires(this);
-
-    /** Increase right motor power by increment */
-    public Command increaseRight() {
-        powerRight = Math.min(1.0, powerRight + POWER_INCREMENT);
-        return new SetPower(intakeRight, powerRight).named("Increase Right Power");
-    }
-
-    /** Decrease right motor power by increment */
-    public Command decreaseRight() {
-        powerRight = Math.max(-1.0, powerRight - POWER_INCREMENT);
-        return new SetPower(intakeRight, powerRight).named("Decrease Right Power");
-    }
 
     /** Set left motor to specific power */
     public Command setLeftPower(double power) {
