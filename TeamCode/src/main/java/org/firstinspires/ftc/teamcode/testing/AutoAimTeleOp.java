@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp(name="Auto Aim")
 public class AutoAimTeleOp extends LinearOpMode {
@@ -13,55 +16,54 @@ public class AutoAimTeleOp extends LinearOpMode {
         telemetry.addLine("Initializing...");
         telemetry.update();
 
-        // ---- Hardware ----
-        Limelight3A limelight =
-                hardwareMap.get(Limelight3A.class, "limelight");
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        LimelightAngle vision = new LimelightAngle(limelight, 6.0, 12.5);
 
-        LimelightAngle vision =
-                new LimelightAngle(limelight, 6.0, 12.5);
+        // Replace with your actual SwerveDrivetrain initialization
+        SwerveDrivetrain drivetrain = new SwerveDrivetrain(
+                hardwareMap.get(DcMotorEx.class,"frMotor"),
+                hardwareMap.get(CRServo.class,"frSteer"),
+                hardwareMap.get(AnalogInput.class,"frEncoder"),
 
-        SwerveToShootingAngle turner =
-                new SwerveToShootingAngle(hardwareMap);
+                hardwareMap.get(DcMotorEx.class,"brMotor"),
+                hardwareMap.get(CRServo.class,"brSteer"),
+                hardwareMap.get(AnalogInput.class,"brEncoder"),
 
-        HoodAngle shooter =
-                new HoodAngle(hardwareMap);
+                hardwareMap.get(DcMotorEx.class,"blMotor"),
+                hardwareMap.get(CRServo.class,"blSteer"),
+                hardwareMap.get(AnalogInput.class,"blEncoder"),
 
-        // ---- START LIMELIGHT ----
-        limelight.start();
+                hardwareMap.get(DcMotorEx.class,"flMotor"),
+                hardwareMap.get(CRServo.class,"flSteer"),
+                hardwareMap.get(AnalogInput.class,"flEncoder")
+        );
 
-        telemetry.addLine("Limelight started");
-        telemetry.update();
+        HoodAngle shooter = new HoodAngle(hardwareMap);
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            boolean hasTarget = vision.hasTarget();
-
-            telemetry.addData("Has Target", hasTarget);
-
-            if (hasTarget) {
+            if (vision.hasTarget()) {
                 double yaw = vision.getYaw();
                 double pitch = vision.getPitch();
                 double distance = vision.getDistance();
 
-                turner.turnToTarget(yaw);
+                drivetrain.turnToYaw(yaw);
                 shooter.setHoodFromPitch(pitch);
                 shooter.setFlywheelFromDistance(distance);
 
-                telemetry.addData("Yaw (deg)", yaw);
-                telemetry.addData("Pitch (deg)", pitch);
-                telemetry.addData("Distance (in)", distance);
-                telemetry.addData("Raw Result", limelight.getLatestResult());
-
+                telemetry.addData("Has Target", true);
+                telemetry.addData("Yaw", yaw);
+                telemetry.addData("Pitch", pitch);
+                telemetry.addData("Distance", distance);
             } else {
-                turner.stop();
+                drivetrain.stop();
                 shooter.stop();
-                telemetry.addLine("No target detected");
+                telemetry.addData("Has Target", false);
             }
 
             telemetry.update();
-            idle();
         }
     }
 }
