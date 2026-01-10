@@ -56,7 +56,7 @@ public class AutoAimTeleOp extends LinearOpMode {
 
             } else {
                 // No target detected, stop drivetrain and shooter
-                drive.turnToYaw(0);  // optional: stop turning if no target
+                drive.turnToYaw(0);
                 shooter.stop();
                 telemetry.addLine("No target detected");
             }
