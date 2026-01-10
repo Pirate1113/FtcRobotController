@@ -11,7 +11,7 @@ public class HoodAngle {
 
     public HoodAngle(HardwareMap hw) {
         hood = hw.get(Servo.class, "hoodServo");
-        flywheel = hw.get(DcMotorEx.class, "flywheel");
+        flywheel = hw.get(DcMotorEx.class, "shooter1");
 
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
