@@ -120,7 +120,7 @@ public class SwerveModule{
     public void write(double wheelVel){
         axon.setPower(power);
         if (wheelFlipped) wheelVel *= -1;
-        drive.setVelocity(wheelVel);
+        drive.setVelocity(wheelVel*Math.max(0.0, Math.cos(error)));
     }
 
     public void getTelemetry(Telemetry telemetry){

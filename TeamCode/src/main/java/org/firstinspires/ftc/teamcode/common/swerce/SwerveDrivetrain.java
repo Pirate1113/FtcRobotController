@@ -1,17 +1,18 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
+import static java.lang.Math.hypot;
+
 import androidx.annotation.NonNull;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
-import java.util.Set;
-
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
@@ -21,15 +22,25 @@ public class SwerveDrivetrain implements Subsystem {
 
     public GoBildaPinpointDriver odo;
 
+    private double heading;
+
+    Pose rawPose; //just use these as vectors
+    Pose rotPose;
+
     public SwerveModule fR, bR, bL, fL;
     public SwerveModule[] swerveModules;
 
     public double[] wheelSpeeds = new double [4];
+    public static final double MAX_SPEED = 6000; //TODO find
     public double[] angles = new double[4];
     public double[] cacheAngles = new double[4];
-    
+
+    private final double TW = 13.36;
+    private  final double WB = 13.36;
+    private final double R = hypot(TW/2, WB/2);
 
     private double startingAngle = 0;
+    private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
             {0.6, 0 ,0}, // fR
@@ -40,13 +51,6 @@ public class SwerveDrivetrain implements Subsystem {
 
     @NonNull
     @Override
-    public Command getDefaultCommand() { return Subsystem.super.getDefaultCommand(); }
-
-    @NonNull
-    @Override
-    public Set<Subsystem> getSubsystems() { return Subsystem.super.getSubsystems(); }
-
-    @Override
     public void initialize() {
         odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, "odo");
         odo.setOffsets(-2.50688543, -6.70373543, DistanceUnit.INCH);
@@ -55,27 +59,27 @@ public class SwerveDrivetrain implements Subsystem {
         odo.resetPosAndIMU();
 
         fR = new SwerveModule("frontRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontright_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "frontright_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "frontright_encoder"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "fr_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"),
                 1, false, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backright_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "backright_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "backright_encoder"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "br_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"),
                 1, true, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backleft_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "backleft_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "backleft_encoder"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
                 1, false, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontleft_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "frontleft_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "frontleft_encoder"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
                 1, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[] {fR, bR, bL, fL};
@@ -87,6 +91,60 @@ public class SwerveDrivetrain implements Subsystem {
 
     @Override
     public void periodic() {
+        for(SwerveModule m : swerveModules){
+            m.read();
+        }
+
+        double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
+                rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
+                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
+                realRightX = rawRightX / Math.sqrt(2);
+
+        heading = odo.getHeading(AngleUnit.RADIANS);
+
+        rawPose = new Pose(rawLeftX, rawLeftY, realRightX);
+        rotPose = rawPose.rotate(-heading, false);
+
+        double fwd = rotPose.getY();
+        double str = rotPose.getX();
+        double rcw = rotPose.getHeading();
+
+        double a = str - rcw * (WB / R);
+        double b = str + rcw * (WB / R);
+        double c = fwd - rcw * (TW / R);
+        double d = fwd + rcw * (TW / R);
+
+        wheelSpeeds = new double[]{
+                Math.hypot(b, c), // frontRight
+                Math.hypot(a, c), // backRight
+                Math.hypot(a, d), // backLeft
+                Math.hypot(b, d)  // frontLeft
+        };
+
+        angles = new double[]{
+                Math.atan2(b, c), // frontRight
+                Math.atan2(a, c), // backRight
+                Math.atan2(a, d), // backLeft
+                Math.atan2(b, d)  // frontLeft
+        };
+
+        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+        if (max > 1.0) {
+            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
+        }
+
+        boolean joystickIsIdle = (Math.abs(rawLeftX) <= CACHE_TOLERANCE && Math.abs(rawLeftY) <= CACHE_TOLERANCE && Math.abs(rawRightX) <= CACHE_TOLERANCE);
+
+
+        for(int i = 0; i<swerveModules.length; i++){
+            if (!joystickIsIdle){
+                cacheAngles[i] = angles[i];
+            }
+            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
+            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
+        }
+
 
 
     }
