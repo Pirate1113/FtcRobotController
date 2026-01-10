@@ -9,7 +9,7 @@ import dev.nextftc.hardware.powerable.SetPower;
 
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
-    private static final double POWER_INCREMENT = 0.2;
+    private static final double POWER = 0.9;
 
     private Intake() {}
 
@@ -17,7 +17,7 @@ public class Intake implements Subsystem {
     private MotorEx intakeRight;
     private MotorGroup intakeMotors;
 
-    private double powerLeft = 0.0;
+    private double powerLeft = 0;
     private double powerRight = 0.0;
 
     public void initialize() {
@@ -39,33 +39,22 @@ public class Intake implements Subsystem {
 
     // ===== INDEPENDENT MOTOR CONTROL =====
     public Command moveLeft = new InstantCommand(() -> {
-        powerLeft = 0.8;
-       intakeLeft.getMotor().setPower(0.8);
+        powerLeft = POWER;
+        intakeLeft.getMotor().setPower(powerLeft);
     });
     public Command moveRight = new InstantCommand(() -> {
-        powerRight = 0.8;
-        intakeRight.getMotor().setPower(-0.8);
+        powerRight = POWER;
+        intakeRight.getMotor().setPower(-powerRight);
     });
     public Command stopLeft = new InstantCommand(() -> {
         powerLeft = 0;
-        intakeLeft.getMotor().setPower(0);
+        intakeLeft.getMotor().setPower(powerLeft);
     });
     public Command stopRight = new InstantCommand(() -> {
         powerRight = 0;
-        intakeRight.getMotor().setPower(0);
+        intakeRight.getMotor().setPower(-powerRight);
     });
 
-    //    /** Increase right motor power by increment */
-    public Command increaseRight() {
-        powerRight = Math.min(1.0, powerRight + POWER_INCREMENT);
-        return new SetPower(intakeRight, powerRight).named("Increase Right Power");
-    }
-
-    /** Decrease right motor power by increment */
-    public Command decreaseRight() {
-        powerRight = Math.max(-1.0, powerRight - POWER_INCREMENT);
-        return new SetPower(intakeRight, powerRight).named("Decrease Right Power");
-    }
 
     /** Set left motor to specific power */
     public Command setLeftPower(double power) {

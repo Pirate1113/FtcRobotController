@@ -30,8 +30,8 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
 
         Gamepads.gamepad1().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
         Gamepads.gamepad1().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
-        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stopLeft);
-        Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveRight).whenBecomesFalse(Spindexer.INSTANCE.stopRight);
+        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stop);
+        Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveRight).whenBecomesFalse(Spindexer.INSTANCE.stop);
 
     }
     @Override

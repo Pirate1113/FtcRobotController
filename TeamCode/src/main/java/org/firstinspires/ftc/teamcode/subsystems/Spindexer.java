@@ -43,14 +43,6 @@ public class Spindexer implements Subsystem {
             .named("Outtake");
     }
 
-    /** Stop both servos */
-    public Command stop() {
-        powerLeft = 0.0;
-        powerRight = 0.0;
-        return new SetPower(servoLeft, 0.0)
-            .and(new SetPower(servoRight, 0.0))
-            .named("Stop Spindexer");
-    }
 
     /** Set both servos to a specific power */
     public Command setPower(double power) {
@@ -68,20 +60,20 @@ public class Spindexer implements Subsystem {
     public Command moveLeft = new InstantCommand(() -> {
         powerLeft = 0.8;
         powerRight = -0.8;
-        servoLeft.getServo().setPower(0.8);
-        servoRight.getServo().setPower(0.8);
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
     });
     public Command moveRight = new InstantCommand(() -> {
         powerRight = 0.8;
-        servoRight.getServo().setPower(-0.8);
+        powerLeft = -0.8;
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
     });
-    public Command stopLeft = new InstantCommand(() -> {
+    public Command stop = new InstantCommand(() -> {
         powerLeft = 0;
-        servoLeft.getServo().setPower(0);
-    });
-    public Command stopRight = new InstantCommand(() -> {
         powerRight = 0;
-        servoRight.getServo().setPower(0);
+        servoLeft.getServo().setPower(powerLeft);
+        servoRight.getServo().setPower(-powerRight);
     });
 
     /** Set left servo to specific power */
