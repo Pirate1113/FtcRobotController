@@ -80,27 +80,27 @@ public class SwerveDrivetrain implements Subsystem {
         odo.resetPosAndIMU();
 
         fR = new SwerveModule("frontRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontRight"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "sfrontRight"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "efrontRight"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontright_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "frontright_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "frontright_encoder"),
                 1, false, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backRight"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "sbackRight"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "ebackRight"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backright_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "backright_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "backright_encoder"),
                 1, true, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backLeft"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "sbackLeft"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "ebackLeft"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "backleft_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "backleft_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "backleft_encoder"),
                 1, false, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontLeft"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "sfrontLeft"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "efrontLeft"),
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "frontleft_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "frontleft_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "frontleft_encoder"),
                 1, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[] {fR, bR, bL, fL};
