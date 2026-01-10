@@ -55,7 +55,6 @@ public class Intake implements Subsystem {
         intakeRight.getMotor().setPower(-powerRight);
     });
 
-
     /** Set left motor to specific power */
     public Command setLeftPower(double power) {
         powerLeft = Math.max(-1.0, Math.min(1.0, power));
