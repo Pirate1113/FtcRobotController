@@ -13,6 +13,7 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.TestSpindexer;
 
 
 @TeleOp(name = "Intake Test NextFTC Version")
@@ -30,8 +31,8 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
 
         Gamepads.gamepad1().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
         Gamepads.gamepad1().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
-        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stop);
-        Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveRight).whenBecomesFalse(Spindexer.INSTANCE.stop);
+        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(TestSpindexer.INSTANCE.moveRight).whenBecomesFalse(TestSpindexer.INSTANCE.stop());
+        Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(TestSpindexer.INSTANCE.moveLeft).whenBecomesFalse(TestSpindexer.INSTANCE.stop());
 
     }
     @Override

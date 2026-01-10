@@ -23,26 +23,6 @@ public class Spindexer implements Subsystem {
         servoRight = new CRServoEx("spindexerright");
     }
 
-    // ===== SYNCHRONIZED CONTROL =====
-
-    /** Run both servos at full power to intake samples */
-    public Command intake() {
-        powerLeft = 1.0;
-        powerRight = 1.0;
-        return new SetPower(servoLeft, 1.0)
-            .and(new SetPower(servoRight, 1.0))
-            .named("Intake");
-    }
-
-    /** Run both servos. in reverse to eject samples */
-    public Command outtake() {
-        powerLeft = -1.0;
-        powerRight = -1.0;
-        return new SetPower(servoLeft, -1.0)
-            .and(new SetPower(servoRight, -1.0))
-            .named("Outtake");
-    }
-
 
     /** Set both servos to a specific power */
     public Command setPower(double power) {
