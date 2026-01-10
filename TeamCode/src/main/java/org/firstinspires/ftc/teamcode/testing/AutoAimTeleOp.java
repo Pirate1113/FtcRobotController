@@ -23,7 +23,7 @@ public class AutoAimTeleOp extends LinearOpMode {
 
         HoodAngle shooter = new HoodAngle(hardwareMap);
 
-        // Start Limelight streaming
+        // start Limelight
         limelight.start();
 
         telemetry.addLine("Limelight started");
