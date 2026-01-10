@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import static java.lang.Math.hypot;
-
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -17,9 +15,9 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
-public class SwerveDrivetrain implements Subsystem {
-    public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
-    private SwerveDrivetrain() {}
+public class SwerveDrivetrainKEVIN implements Subsystem {
+    public static final SwerveDrivetrainKEVIN INSTANCE = new SwerveDrivetrainKEVIN();
+    private SwerveDrivetrainKEVIN() {}
 
     public GoBildaPinpointDriver odo;
 

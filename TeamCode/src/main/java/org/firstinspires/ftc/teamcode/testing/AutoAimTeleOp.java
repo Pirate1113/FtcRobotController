@@ -18,7 +18,7 @@ public class AutoAimTeleOp extends LinearOpMode {
         LimelightAngle vision = new LimelightAngle(limelight, 6.0, 12.5); // Shooter height & tag offset
 
         //
-        SwerveDrivetrain drive = SwerveDrivetrain.INSTANCE;
+        SwerveDrivetrainKEVIN drive = SwerveDrivetrainKEVIN.INSTANCE;
         drive.initialize(); //
 
         HoodAngle shooter = new HoodAngle(hardwareMap);
