@@ -1,155 +1,157 @@
-package org.firstinspires.ftc.teamcode.common.swerce;
-
-import static java.lang.Math.hypot;
-
-import androidx.annotation.NonNull;
-
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.common.swerce.SwerveModule;
-
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
-
-public class SwerveDrivetrain implements Subsystem {
-    public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
-    private SwerveDrivetrain() {}
-
-    public GoBildaPinpointDriver odo;
-
-    private double heading;
-
-    Pose rawPose; //just use these as vectors
-    Pose rotPose;
-
-    public SwerveModule fR, bR, bL, fL;
-    public SwerveModule[] swerveModules;
-
-    public double[] wheelSpeeds = new double [4];
-    public static final double MAX_SPEED = 6000; //TODO find
-    public double[] angles = new double[4];
-    public double[] cacheAngles = new double[4];
-
-    private final double TW = 13.36;
-    private  final double WB = 13.36;
-    private final double R = hypot(TW/2, WB/2);
-
-    private double startingAngle = 0;
-    private static final double CACHE_TOLERANCE = 0.05;
-
-    public static double[][] PIDKVal = {
-            {0.6, 0, 0.03, 0.02}, // fR
-            {0.6, 0, 0.00, 0.02}, // bR
-            {0.6, 0, 0.05, 0.02}, // bL
-            {0.6, 0, 0.01, 0.02}  // fL
-    };
-
-    @NonNull
-    @Override
-    public void initialize() {
-        odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, "odo");
-        odo.setOffsets(-2.50688543, -6.70373543, DistanceUnit.INCH);
-        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        odo.resetPosAndIMU();
-
-        fR = new SwerveModule("frontRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
-                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fr_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fr_absolute")
-                        .zero(4.99),
-                true, PIDKVal[0]);
-
-        bR = new SwerveModule("backRight",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
-                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "br_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(),"br_absolute")
-                        .zero(6.14),
-                false, PIDKVal[1]);
-
-        bL = new SwerveModule("backLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
-                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "bl_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "bl_absolute")
-                        .zero(1.47),
-                true, PIDKVal[2]);
-
-        fL = new SwerveModule("frontLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
-                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fl_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute")
-                        .zero(6.12),
-                false, PIDKVal[3]);
-
-        swerveModules = new SwerveModule[] {fR, bR, bL, fL};
-    }
-
-    @Override
-    public void periodic() {
-        for(SwerveModule m : swerveModules){
-            m.read();
-        }
-
-        double fwd = -ActiveOpMode.gamepad1().left_stick_y;
-        double str = -ActiveOpMode.gamepad1().left_stick_x;
-        double rcw = ActiveOpMode.gamepad1().right_stick_x / Math.sqrt(2);
-
-        heading = odo.getHeading(AngleUnit.RADIANS);
-        rotPose = new Pose(fwd, str, rcw).rotate(-heading, false);
-
-        double x = rotPose.getX(); // Now truly Forward
-        double y = rotPose.getY(); // Now truly Strafe
-        double z = rotPose.getHeading();
-
-        double a = x - z * (WB / R);
-        double b = x + z * (WB / R);
-        double c = y - z * (TW / R);
-        double d = y + z * (TW / R);
-
-        wheelSpeeds = new double[]{
-            Math.hypot(b, d), // frontRight
-            Math.hypot(a, d), // backRight
-            Math.hypot(a, c), // backLeft
-            Math.hypot(b, c)  // frontLeft
-        };
-
-        angles = new double[]{
-            Math.atan2(d, b), // frontRight
-            Math.atan2(d, a), // backRight
-            Math.atan2(c, a), // backLeft
-            Math.atan2(c, b)  // frontLeft
-        };
-
-        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
-        if (max > 1.0) {
-            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
-        }
-
-        boolean joystickIsIdle = (Math.abs(str) <= CACHE_TOLERANCE && Math.abs(fwd) <= CACHE_TOLERANCE && Math.abs(rcw) <= CACHE_TOLERANCE);
-
-
-        for(int i = 0; i<swerveModules.length; i++){
-            double targetAngle = angles[i];
-            if (joystickIsIdle) {
-                targetAngle = cacheAngles[i];
-            } else {
-                cacheAngles[i] = angles[i];
-            }
-            swerveModules[i].set(targetAngle);
-            double speed = joystickIsIdle ? 0 : wheelSpeeds[i] * MAX_SPEED;
-            swerveModules[i].write(speed);
-
-            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
-        }
-
-
-
-    }
-}
+//package org.firstinspires.ftc.teamcode.common.swerce;
+//
+//import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+//import com.qualcomm.robotcore.hardware.IMU;
+//
+//import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+//
+//import dev.nextftc.core.subsystems.Subsystem;
+//import dev.nextftc.ftc.ActiveOpMode;
+//import dev.nextftc.hardware.impl.MotorEx;
+//
+//public class SwerveDrivetrain implements Subsystem {
+//    public static final org.firstinspires.ftc.teamcode.swerveDrive.SwerveDrivetrain INSTANCE = new org.firstinspires.ftc.teamcode.swerveDrive.SwerveDrivetrain();
+//    private SwerveDrivetrain() {}
+//
+//    private final double ANALOG_VOLTAGE_COMPENSATION = 3.3;
+//    public static final double cacheTolerance = 0.1;
+//
+//    public IMU imu;
+//    public RevHubOrientationOnRobot hubOrient = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
+//            RevHubOrientationOnRobot.UsbFacingDirection.UP);
+//    public SwerveModule fl_Module, bl_Module, br_Module, fr_Module;
+//    public SwerveModule[] swerveModules;
+//
+//    double[] wheelSpeeds, targetAngles, currentAngles, angleErrors, cachedAngles;
+//
+//    @Override
+//    public void initialize(){
+//        fl_Module = new SwerveModule(new MotorEx("fl_motor").reversed(), "fl_rotation", true,
+//                "fl_absolute", 3.098, true, ANALOG_VOLTAGE_COMPENSATION, -1, 1);
+//
+//        bl_Module = new SwerveModule(new MotorEx("bl_motor").reversed(), "bl_rotation", true,
+//                "bl_absolute", 1.557, true, ANALOG_VOLTAGE_COMPENSATION, -1, -1);
+//
+//        br_Module = new SwerveModule(new MotorEx("br_motor"), "br_rotation", true,
+//                "br_absolute", 0.185, true, ANALOG_VOLTAGE_COMPENSATION, 1, -1);
+//
+//        fr_Module = new SwerveModule(new MotorEx("fr_motor"), "fr_rotation", true,
+//                "fr_absolute", 2.011, true, ANALOG_VOLTAGE_COMPENSATION, 1, 1);
+//
+//        swerveModules = new SwerveModule[]{fl_Module, bl_Module, br_Module, fr_Module};
+//
+//        wheelSpeeds = new double[swerveModules.length];
+//        targetAngles = new double[swerveModules.length];
+//
+//        imu = ActiveOpMode.hardwareMap().get(IMU.class, "imu");
+//        imu.initialize(new IMU.Parameters(hubOrient));
+//        imu.resetYaw();
+//
+//        //motor flipping arrays
+//        currentAngles = new double[swerveModules.length];
+//        angleErrors = new double[swerveModules.length];
+//        cachedAngles = new double[swerveModules.length];
+//    }
+//
+//    @Override
+//    public void periodic(){
+//        double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
+//                rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
+//                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
+//                realRightX = rawRightX / Math.sqrt(2);
+////        double fwd = -ActiveOpMode.gamepad1().left_stick_y;
+////        double str =  ActiveOpMode.gamepad1().left_stick_x;
+////        double rot =  ActiveOpMode.gamepad1().right_stick_x;
+//
+////        ActiveOpMode.telemetry().addData("fwd", fwd);
+////        ActiveOpMode.telemetry().addData("str", str);
+////        ActiveOpMode.telemetry().addData("rot", rot);
+////        ActiveOpMode.telemetry().update();
+//
+//
+////        ActiveOpMode.telemetry().addData("rawLeftX", rawLeftX);
+////        ActiveOpMode.telemetry().addData("rawLeftY", rawLeftY);
+//        ActiveOpMode.telemetry().addData("rawRightX", rawRightX);
+//        ActiveOpMode.telemetry().addData("realRightX", realRightX);
+//
+//        double imuHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        double tempX = rawLeftX;
+//        double tempY = rawLeftY;
+////        rawLeftX = tempX * Math.cos(-imuHeading) - tempY * Math.sin(-imuHeading);
+////        rawLeftY = tempX * Math.sin(-imuHeading) + tempY * Math.cos(-imuHeading);
+//        rawLeftY = tempX * Math.cos(-imuHeading) - tempY * Math.sin(-imuHeading);
+//        rawLeftX = tempX * Math.sin(-imuHeading) + tempY * Math.cos(-imuHeading);
+//
+//        ActiveOpMode.telemetry().addData("imuHeading(rad)", imuHeading);
+//        ActiveOpMode.telemetry().addData("robotX", rawLeftX);
+//        ActiveOpMode.telemetry().addData("robotY", rawLeftY);
+//
+////
+////        ActiveOpMode.telemetry().addData("rawLeftX after", rawLeftX);
+////        ActiveOpMode.telemetry().addData("rawLeftY after", rawLeftY);
+////        ActiveOpMode.telemetry().update();
+//
+//
+//        for (int i = 0; i < swerveModules.length; i++) {
+//            double rotVectorY = realRightX * swerveModules[i].yOffset;
+//            double rotVectorX = -1 * realRightX * swerveModules[i].xOffset;
+//
+//            double resultX = rawLeftX + rotVectorX;
+//            double resultY = rawLeftY + rotVectorY;
+//
+//            // Compute final speed + angle
+//            wheelSpeeds[i] = Math.sqrt(resultX * resultX + resultY * resultY);
+//            targetAngles[i] = Math.atan2(resultY, resultX);
+////            targetAngles[i] = Math.atan2(resultY, resultX) - Math.PI/2;
+////            targetAngles[i] = (targetAngles[i] + 2*Math.PI) % (2*Math.PI);
+//
+//            currentAngles[i] = swerveModules[i].getPodHeading();
+//            ActiveOpMode.telemetry().addData("Module " + i + " rotVectorX", rotVectorX);
+//            ActiveOpMode.telemetry().addData("Module " + i + " rotVectorY", rotVectorY);
+//            ActiveOpMode.telemetry().addData("Module " + i + " resultX", resultX);
+//            ActiveOpMode.telemetry().addData("Module " + i + " resultY", resultY);
+//            ActiveOpMode.telemetry().addData("Module " + i + " targetAngle", targetAngles[i]);
+//            ActiveOpMode.telemetry().addData("Module " + i + " targetAngle(deg)", Math.toDegrees(targetAngles[i]));
+//            ActiveOpMode.telemetry().addData("Module " + i + " currentAngle", currentAngles[i]);
+//            ActiveOpMode.telemetry().addData("Module " + i + " currentAngle(deg)", Math.toDegrees(currentAngles[i]));
+//            ActiveOpMode.telemetry().addData("Module " + i + " angleError(deg)",
+//                    Math.toDegrees(Math.atan2(Math.sin(targetAngles[i] - currentAngles[i]),
+//                            Math.cos(targetAngles[i] - currentAngles[i]))));
+//
+//        }
+//        ActiveOpMode.telemetry().update();
+//
+//
+//        // === Normalize wheel speeds so none exceed 1.0 ===
+//        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]),
+//                Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+//        if (max > 1.0) {
+//            for (int i = 0; i < swerveModules.length; i++)
+//            {wheelSpeeds[i] /= max;}
+//        }
+//
+//        boolean joystickIsIdle = (Math.abs(rawLeftX) <= cacheTolerance && Math.abs(rawLeftY) <= cacheTolerance && Math.abs(rawRightX) <= cacheTolerance);
+//
+//        for (int i = 0; i < swerveModules.length; i++){
+//            angleErrors[i] = Math.abs(Math.atan2(Math.sin(targetAngles[i] - currentAngles[i]), Math.cos(targetAngles[i] - currentAngles[i])));
+//            if (angleErrors[i] > Math.PI/2){
+//                targetAngles[i] = (targetAngles[i] + Math.PI) % (2*Math.PI);
+//                wheelSpeeds[i] *= -1;
+//                angleErrors[i] = Math.abs(Math.atan2(Math.sin(targetAngles[i] - currentAngles[i]), Math.cos(targetAngles[i] - currentAngles[i])));
+//            }
+//            wheelSpeeds[i] *= Math.abs(Math.cos(angleErrors[i]));
+//
+//            if (!joystickIsIdle){
+//                cachedAngles[i] = targetAngles[i];
+//            }
+//        }
+//
+//        // Apply to each module
+//        for (int i = 0; i < swerveModules.length; i++) {
+//            swerveModules[i].setMotorPower(wheelSpeeds[i]);
+//            double commandedAngle = joystickIsIdle ? cachedAngles[i] : targetAngles[i];
+//            swerveModules[i].rotateTo(commandedAngle);
+//        }
+//    }
+//
+//}
