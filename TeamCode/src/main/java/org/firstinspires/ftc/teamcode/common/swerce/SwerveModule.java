@@ -105,7 +105,7 @@ public class SwerveModule {
         );
 
         // Shortest-path error in [-π, π)
-        double error = MathUtils.normalizeAngle(
+        this.error = MathUtils.normalizeAngle(
                 target - current, false, unit
         );
 
@@ -125,7 +125,7 @@ public class SwerveModule {
             wheelFlipped = false;
         }
 
-        error = MathUtils.normalizeAngle((target - current), false, unit);
+        this.error = MathUtils.normalizeAngle((target - current), false, unit);
 
         // PID drives error to 0
         double power = pidf.calculate(error, 0);

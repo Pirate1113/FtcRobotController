@@ -45,10 +45,10 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.6, 0, 0, 0.02}, // fR
-            {0.6, 0, 0, 0.02}, // bR
-            {0.6, 0, 0, 0.02}, // bL
-            {0.6, 0, 0, 0.02}  // fL
+            {0.6, 0, 0.03, 0.02}, // fR
+            {0.6, 0, 0.00, 0.02}, // bR
+            {0.6, 0, 0.05, 0.02}, // bL
+            {0.6, 0, 0.01, 0.02}  // fL
     };
 
     @NonNull
@@ -104,30 +104,31 @@ public class SwerveDrivetrain implements Subsystem {
 
         heading = odo.getHeading(AngleUnit.RADIANS);
 
-        rawPose = new Pose(rawLeftX, rawLeftY, realRightX);
+        rawPose = new Pose(rawLeftY, rawLeftX, realRightX);
         rotPose = rawPose.rotate(-heading, false);
 
-        double fwd = rotPose.getY();
-        double str = rotPose.getX();
+        double fwd = rotPose.getX();
+        double str = rotPose.getY();
         double rcw = rotPose.getHeading();
 
-        double a = str - rcw * (WB / R);
-        double b = str + rcw * (WB / R);
-        double c = fwd - rcw * (TW / R);
-        double d = fwd + rcw * (TW / R);
+        double a = fwd - rcw * (WB / R);
+        double b = fwd + rcw * (WB / R);
+        double c = str - rcw * (TW / R);
+        double d = str + rcw * (TW / R);
 
+// Update these indices to match your physical module positions
         wheelSpeeds = new double[]{
-                Math.hypot(b, c), // frontRight
-                Math.hypot(a, c), // backRight
-                Math.hypot(a, d), // backLeft
-                Math.hypot(b, d)  // frontLeft
+                Math.hypot(b, d), // frontRight (Index 0)
+                Math.hypot(a, d), // backRight (Index 1)
+                Math.hypot(a, c), // backLeft (Index 2)
+                Math.hypot(b, c)  // frontLeft (Index 3)
         };
 
         angles = new double[]{
-                Math.atan2(b, c), // frontRight
-                Math.atan2(a, c), // backRight
-                Math.atan2(a, d), // backLeft
-                Math.atan2(b, d)  // frontLeft
+                Math.atan2(d, b), // frontRight
+                Math.atan2(d, a), // backRight
+                Math.atan2(c, a), // backLeft
+                Math.atan2(c, b)  // frontLeft
         };
 
         double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
