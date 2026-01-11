@@ -35,7 +35,7 @@ public class SwerveDrivetrain implements Subsystem {
     private final double TW = 13.36;
     private  final double WB = 13.36;
     private final double R = hypot(TW/2, WB/2);
-    public static double frontLeftOffset = 2, frontRightOffset = 0, backLeftOffset = 0, backRightOffset = -0.055;
+    public static double frontLeftOffset = 4.22, frontRightOffset = 6.01, backLeftOffset = 1.47, backRightOffset = 6.12;
 
     public static boolean maintainHeading = false;
 
@@ -83,6 +83,7 @@ public class SwerveDrivetrain implements Subsystem {
             SwerveModule m = modules[i];
             m.setMotorPower(Math.abs(ws[i]) + ((USE_WHEEL_FEEDFORWARD) ? minPow * Math.signum(ws[i]) : 0));
             m.setTargetRotation(Angle.Companion.wrapAngle0To2Pi(wa[i]));
+            m.update();
         }
 
         String telemetry = frontLeftModule.getTelemetry("leftFrontModule") + "\n" +
@@ -102,7 +103,7 @@ public class SwerveDrivetrain implements Subsystem {
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
         odo.resetPosAndIMU();
-        AbsoluteAnalogEncoder flenc = new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_rotation"), 3.3).zero(frontLeftOffset).setInverted(true);
+        AbsoluteAnalogEncoder flenc = new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"), 3.3).zero(frontLeftOffset).setInverted(true);
         AbsoluteAnalogEncoder blenc = new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"), 3.3).zero(backLeftOffset).setInverted(true);
         AbsoluteAnalogEncoder frenc = new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"), 3.3).zero(frontRightOffset).setInverted(true);
         AbsoluteAnalogEncoder brenc = new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"), 3.3).zero(backRightOffset).setInverted(true);
