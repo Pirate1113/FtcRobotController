@@ -18,11 +18,11 @@ public class Intake implements Subsystem {
     private MotorGroup intakeMotors;
 
     private double powerLeft = 0;
-    private double powerRight = 0.0;
+    private double powerRight = 0;
 
     public void initialize() {
         intakeLeft = new MotorEx("intakeLeft").floatMode();
-        intakeRight = new MotorEx("intakeRight").floatMode();
+        intakeRight = new MotorEx("intakeRight").reversed().floatMode();
         intakeMotors = new MotorGroup(intakeRight, intakeLeft);
     }
 
@@ -40,7 +40,7 @@ public class Intake implements Subsystem {
     // ===== INDEPENDENT MOTOR CONTROL =====
     public Command moveLeft = new InstantCommand(() -> {
         powerLeft = POWER;
-        intakeLeft.getMotor().setPower(powerLeft);
+        intakeLeft.getMotor().setPower(-powerLeft);
     });
     public Command moveRight = new InstantCommand(() -> {
         powerRight = POWER;

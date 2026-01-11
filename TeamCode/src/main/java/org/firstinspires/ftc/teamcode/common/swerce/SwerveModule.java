@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.common.swerce;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.controller.PIDFController;
@@ -63,9 +64,11 @@ public class SwerveModule {
         this.K_STATIC = PIDK[3];
 
         if(reversed) {
+            this.drive.setDirection(DcMotorSimple.Direction.REVERSE);
             this.axon.setInverted(true);
             this.enc.setReversed(true);
         } else {
+            this.drive.setDirection(DcMotorSimple.Direction.FORWARD);
             this.axon.setInverted(false);
             this.enc.setReversed(false);
         }

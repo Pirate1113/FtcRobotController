@@ -63,24 +63,30 @@ public class SwerveDrivetrain implements Subsystem {
         fR = new SwerveModule("frontRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
                 new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fr_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fr_absolute").zero(
-                4.22), false, PIDKVal[0]);
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fr_absolute")
+                        .zero(4.99),
+                true, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
                 new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "br_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(),"br_absolute").zero(
-                6.01), false, PIDKVal[1]);
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(),"br_absolute")
+                        .zero(6.14),
+                false, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
                 new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "bl_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "bl_absolute").zero(1.47), false, PIDKVal[2]);
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "bl_absolute")
+                        .zero(1.47),
+                true, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
                 new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fl_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute").zero(6.12), false, PIDKVal[3]);
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute")
+                        .zero(6.12),
+                false, PIDKVal[3]);
 
         swerveModules = new SwerveModule[] {fR, bR, bL, fL};
     }
