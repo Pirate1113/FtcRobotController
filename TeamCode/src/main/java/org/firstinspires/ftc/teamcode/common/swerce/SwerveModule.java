@@ -25,6 +25,7 @@ public class SwerveModule {
 
     double wheelVel; //in ticks/sec
     private static final double MAX_VEL = 6000;
+    boolean powerReveresed;
 
     double current;
     double target;
@@ -63,15 +64,7 @@ public class SwerveModule {
         this.pidf = new PIDFController(PIDK[0], PIDK[1], PIDK[2], 0);
         this.K_STATIC = PIDK[3];
 
-        if(reversed) {
-            this.drive.setDirection(DcMotorSimple.Direction.REVERSE);
-            this.axon.setInverted(true);
-            this.enc.setReversed(true);
-        } else {
-            this.drive.setDirection(DcMotorSimple.Direction.FORWARD);
-            this.axon.setInverted(false);
-            this.enc.setReversed(false);
-        }
+        powerReveresed=reversed;
 
     }
 
@@ -145,6 +138,7 @@ public class SwerveModule {
 
     public void write(double wheelSpeed){
         if(wheelFlipped) wheelSpeed*=-1;
+        if(powerReveresed) wheelSpeed*=-1;
         wheelSpeed *= Math.cos(error);
         drive.setVelocity(wheelSpeed);
     }
