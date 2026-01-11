@@ -72,10 +72,10 @@ public class SwerveModule {
 
     }
 
-    public SwerveModule setPIDF(PIDFCoefficients coefficients) {
-        this.pidf = new PIDFController(coefficients);
-        return this;
-    }
+//    public SwerveModule setPIDF(PIDFCoefficients coefficients) {
+//        this.pidf = new PIDFController(coefficients);
+//        return this;
+//    }
 
     public SwerveModule setAbsoluteEncoder(AbsoluteAnalogEncoder encoder) {
         this.enc = encoder;
@@ -122,13 +122,21 @@ public class SwerveModule {
             pidf.reset();
             lastTarget = target;
         }
+        if (WHEEL_FLIPPING && Math.abs(error) > Math.PI / 2) {
+            target = MathUtils.normalizeAngle((target - Math.PI), true, AngleUnit.RADIANS);
+            wheelFlipped = true;
+        } else {
+            wheelFlipped = false;
+        }
+
+        error = MathUtils.normalizeAngle((target - current), false, unit);
 
         // PID drives error to 0
         double power = pidf.calculate(error, 0);
 
         // Direct write with calculated power
 
-//        power += Range.clip((Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power), -1,1);
+        power += Range.clip((Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power), -1,1);
         axon.set(power);
     }
 

@@ -31,7 +31,7 @@ public class JacobShi extends OpMode {
         shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
         shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
 
-        shooter1.setDirection(DcMotor.Direction.REVERSE);
+        shooter1.setDirection(DcMotor.Direction.FORWARD);
         shooter1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         shooter2.setDirection(DcMotor.Direction.REVERSE);
@@ -54,7 +54,6 @@ public class JacobShi extends OpMode {
 
         telemetry.addData("RPM", RPM);
         telemetry.update();
-
-        telemetry = dashboard.getTelemetry();
+        
     }
 }

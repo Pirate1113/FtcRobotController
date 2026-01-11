@@ -45,10 +45,10 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.1, 0, 0, 0.02}, // fR
-            {0.1, 0, 0, 0.02}, // bR
-            {0.1, 0, 0, 0.02}, // bL
-            {0.1, 0, 0, 0.02}  // fL
+            {0.6, 0, 0, 0.02}, // fR
+            {0.6, 0, 0, 0.02}, // bR
+            {0.6, 0, 0, 0.02}, // bL
+            {0.6, 0, 0, 0.02}  // fL
     };
 
     @NonNull
@@ -80,7 +80,7 @@ public class SwerveDrivetrain implements Subsystem {
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
                 new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fl_rotation"),
-                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute").zero(16.12), false, PIDKVal[3]);
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute").zero(6.12), false, PIDKVal[3]);
 
         swerveModules = new SwerveModule[] {fR, bR, bL, fL};
     }
@@ -134,14 +134,14 @@ public class SwerveDrivetrain implements Subsystem {
 
         for(int i = 0; i<swerveModules.length; i++){
             double targetAngle = angles[i];
-//            if (joystickIsIdle) {
-//                targetAngle = cacheAngles[i];
-//            } else {
-//                cacheAngles[i] = angles[i];
-//            }
+            if (joystickIsIdle) {
+                targetAngle = cacheAngles[i];
+            } else {
+                cacheAngles[i] = angles[i];
+            }
             swerveModules[i].set(targetAngle);
-//            double speed = joystickIsIdle ? 0 : wheelSpeeds[i] * MAX_SPEED;
-            swerveModules[i].write(0);
+            double speed = joystickIsIdle ? 0 : wheelSpeeds[i] * MAX_SPEED;
+            swerveModules[i].write(speed);
 
             swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
         }
