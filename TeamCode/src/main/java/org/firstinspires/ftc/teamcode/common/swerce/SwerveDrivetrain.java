@@ -129,7 +129,7 @@ public class SwerveDrivetrain implements Subsystem {
                 hypot(a, d),
                 hypot(a, c)
         };
-    
+
         double[] wa = {
                 atan2(c, b),
                 atan2(d, b),
