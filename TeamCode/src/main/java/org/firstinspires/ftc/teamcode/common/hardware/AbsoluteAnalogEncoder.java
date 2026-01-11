@@ -2,7 +2,12 @@ package org.firstinspires.ftc.teamcode.common.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 import dev.nextftc.core.units.Angle;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.seattlesolvers.solverslib.util.MathUtils;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Config
 public class AbsoluteAnalogEncoder {
@@ -39,7 +44,7 @@ public class AbsoluteAnalogEncoder {
         gets the angle from [-pi to pi)
      */
     public double getCurrentPosition() {
-        double pos = Angle.Companion.wrapAngle0To2Pi((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * Math.PI*2 - offset);
+        double pos = MathUtils.normalizeAngle(((!inverted ? 1 - getVoltage() / analogRange : getVoltage() / analogRange) * Math.PI*2 - offset), true, AngleUnit.RADIANS);
         //checks for crazy values when the encoder is close to zero
         if(!VALUE_REJECTION || Math.abs(Angle.Companion.wrapAnglePiToPi(pastPosition)) > 0.1 || Math.abs(Angle.Companion.wrapAnglePiToPi(pos)) < 1) pastPosition = pos;
         return pastPosition;

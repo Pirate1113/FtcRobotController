@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.common.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 
+
+@TeleOp (name = "OffsetsTesting")
 public class SpindexerVoltageTester extends LinearOpMode {
 
     private AnalogInput spindexerEncoder;

@@ -8,10 +8,12 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.common.swerce.SwerveModule;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
@@ -43,10 +45,10 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.6, 0 ,0}, // fR
-            {0.6, 0 ,0}, // bR
-            {0.6, 0 ,0}, // bL
-            {0.6, 0 ,0}  // fL
+            {0.1, 0, 0, 0.02}, // fR
+            {0.1, 0, 0, 0.02}, // bR
+            {0.1, 0, 0, 0.02}, // bL
+            {0.1, 0, 0, 0.02}  // fL
     };
 
     @NonNull
@@ -60,33 +62,27 @@ public class SwerveDrivetrain implements Subsystem {
 
         fR = new SwerveModule("frontRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "fr_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"),
-                1, false, PIDKVal[0]);
+                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fr_rotation"),
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fr_absolute").zero(
+                4.22), false, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "br_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"),
-                1, true, PIDKVal[1]);
+                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "br_rotation"),
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(),"br_absolute").zero(
+                6.01), false, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
-                1, false, PIDKVal[2]);
+                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "bl_rotation"),
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "bl_absolute").zero(1.47), false, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
-                1, true, PIDKVal[3]);
+                new com.seattlesolvers.solverslib.hardware.motors.CRServo(ActiveOpMode.hardwareMap(), "fl_rotation"),
+                new AbsoluteAnalogEncoder(ActiveOpMode.hardwareMap(), "fl_absolute").zero(16.12), false, PIDKVal[3]);
 
         swerveModules = new SwerveModule[] {fR, bR, bL, fL};
-
-        for (SwerveModule m : swerveModules) {
-            m.rotateTo(startingAngle);
-        }
     }
 
     @Override
@@ -137,11 +133,16 @@ public class SwerveDrivetrain implements Subsystem {
 
 
         for(int i = 0; i<swerveModules.length; i++){
-            if (!joystickIsIdle){
-                cacheAngles[i] = angles[i];
-            }
-            swerveModules[i].rotateTo(angles[i]);
-            swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
+            double targetAngle = angles[i];
+//            if (joystickIsIdle) {
+//                targetAngle = cacheAngles[i];
+//            } else {
+//                cacheAngles[i] = angles[i];
+//            }
+            swerveModules[i].set(targetAngle);
+//            double speed = joystickIsIdle ? 0 : wheelSpeeds[i] * MAX_SPEED;
+            swerveModules[i].write(0);
+
             swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
         }
 

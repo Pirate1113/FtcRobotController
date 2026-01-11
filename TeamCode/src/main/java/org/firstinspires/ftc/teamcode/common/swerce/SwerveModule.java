@@ -2,27 +2,19 @@ package org.firstinspires.ftc.teamcode.common.swerce;
 
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.controller.PIDFController;
+import com.seattlesolvers.solverslib.hardware.motors.CRServo;
+import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
+import com.seattlesolvers.solverslib.util.MathUtils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-import com.acmerobotics.dashboard.config.Config;
-
-import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
-import dev.nextftc.control.feedback.AngleType;
-import dev.nextftc.control.feedback.PIDCoefficients;
-import dev.nextftc.hardware.impl.CRServoEx;
-import dev.nextftc.core.units.Angle;
-
-
-@Config
-public class SwerveModule{
-
+public class SwerveModule {
     String name;
 
     final double WHEEL_RADIUS = 1;
@@ -31,96 +23,119 @@ public class SwerveModule{
     final boolean WHEEL_FLIPPING = true;
 
     double wheelVel; //in ticks/sec
+    private static final double MAX_VEL = 6000;
 
     double current;
-    double lastCurrent;
     double target;
-    double lastTarget;
+    Double lastTarget;
     double error;
-    double period;
-    double velocity;
-
     double power;
+
     boolean wheelFlipped;
 
-    PIDCoefficients pidValues;
+    PIDFController pidf;
+
     double K_STATIC;
-    public ControlSystem pid;
 
     private DcMotorEx drive;
-    private CRServoEx axon;
+    private CRServo axon;
     private AbsoluteAnalogEncoder enc;
-
 
     /** Construcotr is:
      @param n name
      @param m motor
      @param s servo
      @param e AnalogInput
-     @param eOffset  offset
      @param reversed is it reveresed?
      @param PIDK an array of the PIDK values
      */
-    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AbsoluteAnalogEncoder e, boolean reversed, double[] PIDK){
         this.name = n;
 
         this.drive = m;
         drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        this.axon = new CRServoEx(s, 0.03);
+        this.axon = s;
 
-        this.enc = new AbsoluteAnalogEncoder(e, 3.3).zero(eOffset);
+        this.enc = e;
 
-        this.pidValues = new PIDCoefficients(PIDK[0], PIDK[1], PIDK[2]);
+        this.pidf = new PIDFController(PIDK[0], PIDK[1], PIDK[2], 0);
         this.K_STATIC = PIDK[3];
 
-        this.pid = ControlSystem.builder()
-                .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
-                .build();
-
         if(reversed) {
-            this.axon.getServo().setDirection(DcMotorSimple.Direction.REVERSE);
-            this.enc.setInverted(true);
+            this.axon.setInverted(true);
+            this.enc.setReversed(true);
+        } else {
+            this.axon.setInverted(false);
+            this.enc.setReversed(false);
         }
 
-        axon.setPower(1);
-        axon.setPower(0);
     }
 
-    public void read(){
-        Angle.Companion.wrapAnglePiToPi(current = enc.getCurrentPosition());
-    } // this comes out [-pi, pi)
-
-    public void rotateTo(double tar){
-        this.target = Angle.Companion.wrapAnglePiToPi(tar);
-
-        this.error = Angle.Companion.wrapAnglePiToPi(target-current);
-
-        if (WHEEL_FLIPPING && Math.abs(error) > Math.PI / 2) {
-            target = Angle.Companion.wrapAnglePiToPi(target - Math.PI);
-            wheelFlipped = true;
-        } else {
-            wheelFlipped = false;
-        }
-
-        pid.setGoal(new KineticState(target));
-
-        //calculating velocity for use in D term
-        if (Math.abs(period) > 1E-6) {
-            velocity = (current - lastCurrent) / period;
-        } else {
-            velocity = 0;
-        }
-
-        KineticState sCurrent = new KineticState(current, velocity);
-
-        power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
+    public SwerveModule setPIDF(PIDFCoefficients coefficients) {
+        this.pidf = new PIDFController(coefficients);
+        return this;
     }
 
-    public void write(double wheelVel){
-        axon.setPower(power);
-        if (wheelFlipped) wheelVel *= -1;
-        drive.setVelocity(wheelVel*Math.max(0.0, Math.cos(error)));
+    public SwerveModule setAbsoluteEncoder(AbsoluteAnalogEncoder encoder) {
+        this.enc = encoder;
+        return this;
+    }
+
+    public AbsoluteAnalogEncoder getAbsoluteEncoder() {
+        return this.enc;
+    }
+
+    public void read() {
+        current = enc.getCurrentPosition();
+    }
+
+    public void set(double tar) {
+        // Safety check
+        if (pidf == null) {
+            throw new IllegalStateException(
+                    "OptimizedPositionalControl requires a PIDF"
+            );
+        }
+
+        AngleUnit unit = enc.getAngleUnit();
+
+        // Normalize target to [0, 2π)
+        double target = MathUtils.normalizeAngle(tar, true, unit);
+
+        // Current position (already absolute, but normalize defensively)
+        double current = MathUtils.normalizeAngle(
+                enc.getCurrentPosition(), true, unit
+        );
+
+        // Shortest-path error in [-π, π)
+        double error = MathUtils.normalizeAngle(
+                target - current, false, unit
+        );
+
+        // Reset PID if target changed
+        if (lastTarget == null ||
+                Math.abs(MathUtils.normalizeAngle(
+                        target - lastTarget, false, unit
+                )) > 1e-6) {
+
+            pidf.reset();
+            lastTarget = target;
+        }
+
+        // PID drives error to 0
+        double power = pidf.calculate(error, 0);
+
+        // Direct write with calculated power
+
+//        power += Range.clip((Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power), -1,1);
+        axon.set(power);
+    }
+
+    public void write(double wheelSpeed){
+        if(wheelFlipped) wheelSpeed*=-1;
+        wheelSpeed *= Math.cos(error);
+        drive.setVelocity(wheelSpeed);
     }
 
     public void getTelemetry(Telemetry telemetry){
@@ -129,7 +144,6 @@ public class SwerveModule{
         telemetry.addData("Current", current);
         telemetry.addData("Error", error);
         telemetry.addData("Power", power);
-        telemetry.addData("Rot vel", velocity);
         telemetry.addData("Wheel Flipped", wheelFlipped);
         telemetry.addData("Drive power", wheelVel);
     }
