@@ -138,6 +138,7 @@ public class TestSpindexer implements Subsystem {
         return new RunToPosition(controllerLeft, totalAngleLeft - indexAngle)
                 .and(new RunToPosition(controllerRight, totalAngleRight - indexAngle))
                 .named("Index Backward");
+
     }
 
     // ===== MANUAL POWER CONTROL (if you need it) =====

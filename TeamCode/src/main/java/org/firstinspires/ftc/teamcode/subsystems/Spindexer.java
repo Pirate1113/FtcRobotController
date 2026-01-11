@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.CRServoEx;
+import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.positionable.SetPosition;
 import dev.nextftc.hardware.powerable.SetPower;
 
 public class Spindexer implements Subsystem {
@@ -14,28 +18,15 @@ public class Spindexer implements Subsystem {
 
     private CRServoEx servoLeft;
     private CRServoEx servoRight;
-
+    private ServoEx ejector;
     private double powerLeft = 0.0;
     private double powerRight = 0.0;
 
     public void initialize() {
         servoLeft = new CRServoEx("spindexerleft");
         servoRight = new CRServoEx("spindexerright");
+        ejector = new ServoEx("ejectorServe");
     }
-
-
-    /** Set both servos to a specific power */
-    public Command setPower(double power) {
-        powerLeft = power;
-        powerRight = power;
-        return new SetPower(servoLeft, power)
-            .and(new SetPower(servoRight, power))
-            .named("Set Spindexer Power");
-    }
-
-    // ===== INDEPENDENT SERVO CONTROL =====
-
-    /** Increase left servo power by increment */
 
     public Command moveLeft = new InstantCommand(() -> {
         powerLeft = 0.8;
@@ -56,20 +47,8 @@ public class Spindexer implements Subsystem {
         servoRight.getServo().setPower(-powerRight);
     });
 
-    /** Set left servo to specific power */
-    public Command setLeftPower(double power) {
-        powerLeft = Math.max(-1.0, Math.min(1.0, power));
-        return new SetPower(servoLeft, powerLeft).named("Set Left Power");
-    }
-
-    /** Set right servo to specific power */
-    public Command setRightPower(double power) {
-        powerRight = Math.max(-1.0, Math.min(1.0, power));
-        return new SetPower(servoRight, powerRight).named("Set Right Power");
-    }
-
-    // ===== GETTERS FOR TELEMETRY =====
-
+    public Command eject = new SetPosition(ejector, 1);
+    public Command uneject = new SetPosition(ejector, 0);
     public double getLeftPower() {
         return powerLeft;
     }
