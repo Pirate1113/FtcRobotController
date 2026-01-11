@@ -23,15 +23,20 @@ public class TestSpindexer implements Subsystem {
 
     // Control Systems (one for each servo)
     private final ControlSystem controllerLeft = ControlSystem.builder()
+            .posPid(0.1, 0.0, 0.0)
             .build();
 
     // Position tracking for left servo
     private double totalAngleLeft = 0.0;
     private double previousAngleLeft = 0.0;
 
+    private double startLeftPos;
     // Position tracking for right servo
     private double totalAngleRight = 0.0;
     private double previousAngleRight = 0.0;
+
+    private double powerLeft;
+
     @Override
     public void initialize() {
         servoLeft = new FeedbackCRServoEx(
@@ -42,6 +47,8 @@ public class TestSpindexer implements Subsystem {
                 0.01,
                 () -> { return ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogRight"); },
                 () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright"); });
+
+        startLeftPos = servoLeft.getCurrentPosition();
     }
 
     @Override
@@ -49,14 +56,21 @@ public class TestSpindexer implements Subsystem {
         // Update position tracking for both servos
         updateLeftPosition();
 
-        // Calculate and apply control outputs
+//        updateRightPosition();
 
+
+        powerLeft = controllerLeft.calculate(new KineticState(totalAngleLeft));
+
+//       double powerRight = controllerRight.calculate(servoRight.getState());
 
         servoLeft.setPower(powerLeft);
+        servoRight.setPower(powerLeft);
     }
 
     // ===== POSITION TRACKING =====
     void updateLeftPosition() {
+
+        double currentAngle = servoLeft.getCurrentPosition() - startLeftPos;
         double deltaAngle = currentAngle - previousAngleLeft;
 
         // Handle wrapping at 2π
@@ -70,6 +84,18 @@ public class TestSpindexer implements Subsystem {
         previousAngleLeft = currentAngle;
     }
 
+    public Command b1 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(0, 0.0));
+//        controllerRight.setGoal(new KineticState(0, 0.0));
+    }).named("Stop");
+    public Command b2 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(Math.PI/1.5, 0.0));
+//        controllerRight.setGoal(new KineticState(Math.PI/1.5, 0.0));
+    });
+    public Command b3 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(2*Math.PI/1.5, 0.0));
+//        controllerRight.setGoal(new KineticState(2*Math.PI/1.5, 0.0));
+    });
     private void updateRightPosition() {
         double currentAngle = servoRight.getCurrentPosition();
         double deltaAngle = currentAngle - previousAngleRight;
@@ -86,8 +112,6 @@ public class TestSpindexer implements Subsystem {
 
     }
 
-    }).named("Stop");
-
     public double getLeftPosition() {
         return totalAngleLeft;
     }
@@ -103,4 +127,14 @@ public class TestSpindexer implements Subsystem {
     public double getRightRawPosition() {
         return servoRight.getCurrentPosition();
     }
+
+    public String getLeftGoal() {
+        return controllerLeft.getGoal().toString();
+    }
+    public double getLeftPower() {
+        return powerLeft;
+    }
+//    public String getRightGoal() {
+//        return controllerRight.getGoal().toString();
+//    }
 }

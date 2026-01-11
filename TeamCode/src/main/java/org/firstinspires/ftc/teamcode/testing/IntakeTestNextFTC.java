@@ -14,13 +14,13 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Palm;
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
-
+import org.firstinspires.ftc.teamcode.subsystems.TestSpindexer;
 
 @TeleOp(name = "Intake Test NextFTC Version")
 public class IntakeTestNextFTC extends NextFTCOpMode {
     public IntakeTestNextFTC() {
         addComponents(
-                new SubsystemComponent(Intake.INSTANCE, Spindexer.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Spindexer.INSTANCE,TestSpindexer.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -35,7 +35,7 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stop);
         Gamepads.gamepad1().a().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.eject).whenBecomesFalse(Spindexer.INSTANCE.uneject);
         Gamepads.gamepad1().y().toggleOnBecomesTrue().whenBecomesTrue(TestSpindexer.INSTANCE.b1).whenBecomesFalse(TestSpindexer.INSTANCE.b2);
-        Gamepads.gamepad1().dpadLeft().toggleOnBecomesTrue().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
+//        Gamepads.gamepad1().dpadLeft().toggleOnBecomesTrue().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
 
     }
     @Override
@@ -43,8 +43,12 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         BindingManager.update();
         telemetry.addData("Left Intake Power", Intake.INSTANCE.getLeftPower());
         telemetry.addData("Right Intake Power", Intake.INSTANCE.getRightPower());
-        telemetry.addData("Left Servo", "%.2f", Spindexer.INSTANCE.getLeftPower());
-        telemetry.addData("Right Servo", "%.2f", Spindexer.INSTANCE.getRightPower());
+        telemetry.addData("Left Servo Pow", "%.2f", Spindexer.INSTANCE.getLeftPower());
+        telemetry.addData("Right Servo Pow", "%.2f", Spindexer.INSTANCE.getRightPower());
+        telemetry.addData("Left Servo Pos", "%.2f", TestSpindexer.INSTANCE.getLeftRawPosition());
+        telemetry.addData("Right Servo Pos", "%.2f", TestSpindexer.INSTANCE.getRightRawPosition());
+        telemetry.addData("Left Servo Goal", TestSpindexer.INSTANCE.getLeftGoal());
+        telemetry.addData("Power TestSpin", TestSpindexer.INSTANCE.getLeftPower());
         telemetry.update();
 
     }
