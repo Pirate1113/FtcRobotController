@@ -39,8 +39,8 @@ public class Flywheel implements Subsystem {
         distance = set;
     }
 
-    public final Command off = new RunToVelocity(controller, 0.0).requires(this).named("FlywheelOff");
-    public final Command setFlywheel = new RunToVelocity(controller, 2200 + distance * 67).requires(this).named("FlywheelOn");
+    public final Command off = new RunToVelocity(controller, 0.0,0).requires(this).named("FlywheelOff");
+    public final Command setFlywheel = new RunToVelocity(controller, 2200 + distance * 67,50).requires(this).named("FlywheelOn");
 
 }
 //        flywheel.setVelocity(rpm);
