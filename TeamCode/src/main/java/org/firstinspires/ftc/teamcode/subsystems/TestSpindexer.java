@@ -100,58 +100,21 @@ public class TestSpindexer implements Subsystem {
     // ===== POSITION-BASED COMMANDS =====
 
     /** Move left by rotating servos in opposite directions */
-    public Command moveLeft = new RunToPosition(controllerLeft, totalAngleLeft + Math.PI)
-                .and(new RunToPosition(controllerRight, totalAngleRight - Math.PI))
-                .named("Move Left");
 
     /** Move right by rotating servos in opposite directions */
-    public Command moveRight = new RunToPosition(controllerLeft, totalAngleLeft - Math.PI)
-                .and(new RunToPosition(controllerRight, totalAngleRight + Math.PI))
-                .named("Move Right");
-
-    /** Rotate both servos to specific positions */
-    public Command goToPosition(double leftTarget, double rightTarget) {
-        return new RunToPosition(controllerLeft, leftTarget)
-                .and(new RunToPosition(controllerRight, rightTarget))
-                .named("Go To Position");
-    }
-
-    /** Stop at current positions */
-    public Command stop() {
-        return new InstantCommand(() -> {
-            controllerLeft.setGoal(new KineticState(totalAngleLeft, 0.0));
-            controllerRight.setGoal(new KineticState(totalAngleRight, 0.0));
-        }).named("Stop");
-    }
-
-    /** Index forward (rotate one slot) - adjust angle as needed for your mechanism */
-    public Command indexForward() {
-        double indexAngle = Math.PI / 1.5; // 60 degrees, adjust for your spindexer
-        return new RunToPosition(controllerLeft, totalAngleLeft + indexAngle)
-                .and(new RunToPosition(controllerRight, totalAngleRight + indexAngle))
-                .named("Index Forward");
-    }
-
-    /** Index backward (rotate one slot back) */
-    public Command indexBackward() {
-        double indexAngle = Math.PI / 1.5; // 60 degrees, adjust for your spindexer
-        return new RunToPosition(controllerLeft, totalAngleLeft - indexAngle)
-                .and(new RunToPosition(controllerRight, totalAngleRight - indexAngle))
-                .named("Index Backward");
-
-    }
-
-    // ===== MANUAL POWER CONTROL (if you need it) =====
-
-    /** Manually set power (bypasses PID control) */
-    public Command setManualPower(double leftPower, double rightPower) {
-        return new InstantCommand(() -> {
-            servoLeft.setPower(leftPower);
-            servoRight.setPower(rightPower);
-        }).named("Manual Power");
-    }
-
-    // ===== GETTERS FOR TELEMETRY =====
+     */
+    public Command b1 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(0, 0.0));
+        controllerRight.setGoal(new KineticState(0, 0.0));
+    }).named("Stop");
+    public Command b2 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(Math.PI/1.5, 0.0));
+        controllerRight.setGoal(new KineticState(Math.PI/1.5, 0.0));
+    });
+    public Command b3 = new InstantCommand(() -> {
+        controllerLeft.setGoal(new KineticState(2*Math.PI/1.5, 0.0));
+        controllerRight.setGoal(new KineticState(2*Math.PI/1.5, 0.0));
+    });
 
     public double getLeftPosition() {
         return totalAngleLeft;
