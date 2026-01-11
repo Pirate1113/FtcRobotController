@@ -44,10 +44,11 @@ public class Intake implements Subsystem {
     });
     public Command moveRight = new InstantCommand(() -> {
         powerRight = POWER;
-        intakeRight.getMotor().setPower(-powerRight);
+        intakeRight.getMotor().setPower(powerRight);
     });
     public Command stopLeft = new InstantCommand(() -> {
         powerLeft = 0;
+        powerRight = 0;
         intakeLeft.getMotor().setPower(powerLeft);
     });
     public Command stopRight = new InstantCommand(() -> {
