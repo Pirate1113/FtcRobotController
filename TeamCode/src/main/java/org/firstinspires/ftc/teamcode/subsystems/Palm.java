@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -25,7 +26,10 @@ public class Palm implements Subsystem {
     public void periodic() {
     }
 
-    public final Command off = new SetPosition(palm, 0).requires(this).named("PalmOff");
-    public final Command on = new SetPosition(palm, 0.1).requires(this).named("PalmOn");
-
+    public final Command off = new InstantCommand(() -> {
+        palm.getServo().setPosition(0);
+    }).requires(this);
+    public final Command on = new InstantCommand(() -> {
+        palm.getServo().setPosition(0.3);
+    }).requires(this);
 }

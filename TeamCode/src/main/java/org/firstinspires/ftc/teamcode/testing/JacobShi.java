@@ -47,8 +47,8 @@ public class JacobShi extends OpMode {
 //            power -= 0.1;
 //        }
 
-        shooter1.setPower(1.0);
-        shooter2.setPower(1.0);
+        shooter1.setPower(-1.0);
+        shooter2.setPower(-1.0);
 
         RPM = shooter1.getVelocity()*60/28;
 
