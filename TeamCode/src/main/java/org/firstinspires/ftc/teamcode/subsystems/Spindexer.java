@@ -18,14 +18,14 @@ public class Spindexer implements Subsystem {
 
     private CRServoEx servoLeft;
     private CRServoEx servoRight;
-    private ServoEx ejector;
+//    private ServoEx ejector;
     private double powerLeft = 0.0;
     private double powerRight = 0.0;
 
     public void initialize() {
         servoLeft = new CRServoEx("spindexerleft");
         servoRight = new CRServoEx("spindexerright");
-        ejector = new ServoEx("ejectorServe");
+//        ejector = new ServoEx("ejectorServe");
     }
 
     public Command moveLeft = new InstantCommand(() -> {
@@ -46,9 +46,9 @@ public class Spindexer implements Subsystem {
         servoLeft.getServo().setPower(powerLeft);
         servoRight.getServo().setPower(-powerRight);
     });
-
-    public Command eject = new SetPosition(ejector, 1);
-    public Command uneject = new SetPosition(ejector, 0);
+//
+//    public Command eject = new SetPosition(ejector, 1);
+//    public Command uneject = new SetPosition(ejector, 0);
     public double getLeftPower() {
         return powerLeft;
     }
