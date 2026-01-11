@@ -97,38 +97,34 @@ public class SwerveDrivetrain implements Subsystem {
             m.read();
         }
 
-        double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
-                rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
-                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
-                realRightX = rawRightX / Math.sqrt(2);
+        double fwd = -ActiveOpMode.gamepad1().left_stick_y;
+        double str = -ActiveOpMode.gamepad1().left_stick_x;
+        double rcw = ActiveOpMode.gamepad1().right_stick_x / Math.sqrt(2);
 
         heading = odo.getHeading(AngleUnit.RADIANS);
+        rotPose = new Pose(fwd, str, rcw).rotate(-heading, false);
 
-        rawPose = new Pose(rawLeftY, rawLeftX, realRightX);
-        rotPose = rawPose.rotate(-heading, false);
+        double x = rotPose.getX(); // Now truly Forward
+        double y = rotPose.getY(); // Now truly Strafe
+        double z = rotPose.getHeading();
 
-        double fwd = rotPose.getX();
-        double str = rotPose.getY();
-        double rcw = rotPose.getHeading();
+        double a = x - z * (WB / R);
+        double b = x + z * (WB / R);
+        double c = y - z * (TW / R);
+        double d = y + z * (TW / R);
 
-        double a = fwd - rcw * (WB / R);
-        double b = fwd + rcw * (WB / R);
-        double c = str - rcw * (TW / R);
-        double d = str + rcw * (TW / R);
-
-// Update these indices to match your physical module positions
         wheelSpeeds = new double[]{
-                Math.hypot(b, d), // frontRight (Index 0)
-                Math.hypot(a, d), // backRight (Index 1)
-                Math.hypot(a, c), // backLeft (Index 2)
-                Math.hypot(b, c)  // frontLeft (Index 3)
+            Math.hypot(b, d), // frontRight
+            Math.hypot(a, d), // backRight
+            Math.hypot(a, c), // backLeft
+            Math.hypot(b, c)  // frontLeft
         };
 
         angles = new double[]{
-                Math.atan2(d, b), // frontRight
-                Math.atan2(d, a), // backRight
-                Math.atan2(c, a), // backLeft
-                Math.atan2(c, b)  // frontLeft
+            Math.atan2(d, b), // frontRight
+            Math.atan2(d, a), // backRight
+            Math.atan2(c, a), // backLeft
+            Math.atan2(c, b)  // frontLeft
         };
 
         double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
@@ -136,7 +132,7 @@ public class SwerveDrivetrain implements Subsystem {
             for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
         }
 
-        boolean joystickIsIdle = (Math.abs(rawLeftX) <= CACHE_TOLERANCE && Math.abs(rawLeftY) <= CACHE_TOLERANCE && Math.abs(rawRightX) <= CACHE_TOLERANCE);
+        boolean joystickIsIdle = (Math.abs(str) <= CACHE_TOLERANCE && Math.abs(fwd) <= CACHE_TOLERANCE && Math.abs(rcw) <= CACHE_TOLERANCE);
 
 
         for(int i = 0; i<swerveModules.length; i++){
