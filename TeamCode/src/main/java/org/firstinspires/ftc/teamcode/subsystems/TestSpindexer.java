@@ -23,12 +23,13 @@ public class TestSpindexer implements Subsystem {
 
     // Control Systems (one for each servo)
     private final ControlSystem controllerLeft = ControlSystem.builder()
-            .posPid(0.1, 0.0, 0.0)
+            .posPid(0.1, 0.0, 0.01)
             .build();
 
     // Position tracking for left servo
     private double totalAngleLeft = 0.0;
     private double previousAngleLeft = 0.0;
+    private double velocityLeft = 0.0;
 
     private double startLeftPos;
     // Position tracking for right servo
@@ -56,12 +57,9 @@ public class TestSpindexer implements Subsystem {
         // Update position tracking for both servos
         updateLeftPosition();
 
-//        updateRightPosition();
-
-
-        powerLeft = controllerLeft.calculate(new KineticState(totalAngleLeft));
-
-//       double powerRight = controllerRight.calculate(servoRight.getState());
+        // Get actual velocity from servo, combine with unwrapped position
+        velocityLeft = servoLeft.getVelocity();
+        powerLeft = controllerLeft.calculate(servoLeft.getState());
 
         servoLeft.setPower(powerLeft);
         servoRight.setPower(powerLeft);
@@ -84,10 +82,15 @@ public class TestSpindexer implements Subsystem {
         previousAngleLeft = currentAngle;
     }
 
-    public Command b1 = new InstantCommand(() -> {
-        controllerLeft.setGoal(new KineticState(0, 0.0));
-//        controllerRight.setGoal(new KineticState(0, 0.0));
-    }).named("Stop");
+    public Command b1 = new RunToPosition(
+            controllerLeft,
+            0,
+            0.1   // absolute tolerance in units
+    );
+//            InstantCommand(() -> {
+//        controllerLeft.setGoal(new KineticState(0,0));
+////        controllerRight.setGoal(new KineticState(0, 0.0));
+//    }).named("Stop");
     public Command b2 = new InstantCommand(() -> {
         controllerLeft.setGoal(new KineticState(Math.PI/1.5, 0.0));
 //        controllerRight.setGoal(new KineticState(Math.PI/1.5, 0.0));
