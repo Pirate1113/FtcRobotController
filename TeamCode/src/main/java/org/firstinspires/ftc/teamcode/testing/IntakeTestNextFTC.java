@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
 import dev.nextftc.bindings.BindingManager;
+import dev.nextftc.bindings.Button;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -19,7 +22,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 public class IntakeTestNextFTC extends NextFTCOpMode {
     public IntakeTestNextFTC() {
         addComponents(
-                new SubsystemComponent(Intake.INSTANCE, Spindexer.INSTANCE,Palm.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Spindexer.INSTANCE,Palm.INSTANCE,Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -28,12 +31,16 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
     public void onStartButtonPressed() {
         //left intake control
 
-        Gamepads.gamepad1().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
-        Gamepads.gamepad1().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
-        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveRight).whenBecomesFalse(Spindexer.INSTANCE.stop);
-        Gamepads.gamepad1().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stop);
-        Gamepads.gamepad1().a().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.eject).whenBecomesFalse(Spindexer.INSTANCE.uneject);
-        Gamepads.gamepad1().dpadLeft().toggleOnBecomesTrue().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
+        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
+        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
+        Gamepads.gamepad2().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveRight).whenBecomesFalse(Spindexer.INSTANCE.stop);
+        Gamepads.gamepad2().dpadDown().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.moveLeft).whenBecomesFalse(Spindexer.INSTANCE.stop);
+        Gamepads.gamepad2().a().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.eject).whenBecomesFalse(Spindexer.INSTANCE.uneject);
+//        Button dpadLeft = button(() -> someBooleanCondition);
+
+// for example:
+//        Gamepads.gamepad1().dpadLeft().toggleOnBecomesTrue().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
+        Gamepads.gamepad2().y().toggleOnBecomesFalse().whenBecomesTrue(Flywheel.INSTANCE.setFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);
 
     }
     @Override
@@ -43,7 +50,7 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         telemetry.addData("Right Intake Power", Intake.INSTANCE.getRightPower());
         telemetry.addData("Left Servo Pow", "%.2f", Spindexer.INSTANCE.getLeftPower());
         telemetry.addData("Right Servo Pow", "%.2f", Spindexer.INSTANCE.getRightPower());
-
+        telemetry.addData("EjectorPos", "%.2f", Spindexer.INSTANCE.getEjectorPos());
         telemetry.update();
 
     }

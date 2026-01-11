@@ -14,7 +14,7 @@ import kotlin.time.Instant;
 public class Spindexer implements Subsystem {
     public static final Spindexer INSTANCE = new Spindexer();
     private static final double POWER_INCREMENT = 0.2;
-
+    private static double ejectorPos = 0;
     private Spindexer() {
     }
 
@@ -27,8 +27,7 @@ public class Spindexer implements Subsystem {
     public void initialize() {
         servoLeft = new CRServoEx("spindexerleft");
         servoRight = new CRServoEx("spindexerright");
-        ejector = new ServoEx("ejectorServo");
-        ejector.setPosition(0.3);
+        ejector = new ServoEx("finger");
     }
 
     public Command moveLeft = new InstantCommand(() -> {
@@ -51,10 +50,12 @@ public class Spindexer implements Subsystem {
     });
 
     public Command eject = new InstantCommand(() -> {
-            ejector.getServo().setPosition(0.6);
+        ejectorPos = 0.6;
+        ejector.getServo().setPosition(ejectorPos);
     });
     public Command uneject = new InstantCommand(() -> {
-            ejector.getServo().setPosition(0.3);
+        ejectorPos = 0.1;
+        ejector.getServo().setPosition(ejectorPos);
     });
     public double getLeftPower() {
         return powerLeft;
@@ -62,5 +63,8 @@ public class Spindexer implements Subsystem {
 
     public double getRightPower() {
         return powerRight;
+    }
+    public double getEjectorPos() {
+        return ejectorPos;
     }
 }
