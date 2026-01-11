@@ -97,12 +97,6 @@ public class TestSpindexer implements Subsystem {
         previousAngleRight = currentAngle;
     }
 
-    // ===== POSITION-BASED COMMANDS =====
-
-    /** Move left by rotating servos in opposite directions */
-
-    /** Move right by rotating servos in opposite directions */
-     */
     public Command b1 = new InstantCommand(() -> {
         controllerLeft.setGoal(new KineticState(0, 0.0));
         controllerRight.setGoal(new KineticState(0, 0.0));
