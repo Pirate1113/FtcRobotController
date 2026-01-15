@@ -10,12 +10,12 @@ public class HoodAngle {
     private final DcMotorEx flywheel;
 
     // needs measuring/tuning
-    private static final double TARGET_HEIGHT  = 57.0; // inches (AprilTag)
-    private static final double SHOOTER_HEIGHT = 12.0; // inches
+    public static final double TARGET_HEIGHT  = 57.0; // inches (AprilTag)
+    public static final double SHOOTER_HEIGHT = 12.0; // inches
 
     // tuning
-    private static final double SERVO_INTERCEPT = 0.32;  // hood pos at 0°
-    private static final double SERVO_SLOPE     = (double) 1 /360; // servo units per degree
+    public static final double SERVO_INTERCEPT = 0.32;  // hood pos at 0°
+    public static final double SERVO_SLOPE     = (double) 1 /360; // servo units per degree
 
     // flywheel
     private static final double BASE_RPM = 2200;
