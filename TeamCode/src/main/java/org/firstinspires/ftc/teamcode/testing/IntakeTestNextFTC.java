@@ -27,7 +27,7 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         );
     }
-    
+
     @Override
     public void onStartButtonPressed() {
         //left intake control
