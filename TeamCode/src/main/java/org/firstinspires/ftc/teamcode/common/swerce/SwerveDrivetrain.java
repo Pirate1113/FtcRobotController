@@ -57,7 +57,7 @@ public class SwerveDrivetrain implements Subsystem {
 
         double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
                 rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
-                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
+                rawRightX = -ActiveOpMode.gamepad1().right_stick_x,
                 realRightX = rawRightX / Math.sqrt(2);
 
         double heading = odo.getHeading(AngleUnit.RADIANS);
@@ -110,7 +110,7 @@ public class SwerveDrivetrain implements Subsystem {
         frontLeftModule = new SwerveModule(ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"), ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"), flenc);
         backLeftModule = new SwerveModule(ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"), ActiveOpMode.hardwareMap().get(CRServo.class, " bl_rotation"), blenc);
         frontRightModule = new SwerveModule(ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"), ActiveOpMode.hardwareMap().get(CRServo.class, " fr_rotation"), frenc);
-        backRightModule = new SwerveModule(ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"), ActiveOpMode.hardwareMap().get(CRServo.class, " br_rotation"), frenc);
+        backRightModule = new SwerveModule(ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"), ActiveOpMode.hardwareMap().get(CRServo.class, " br_rotation"), brenc);
 
         modules = new SwerveModule[]{frontLeftModule, frontRightModule, backRightModule, backLeftModule};
         for (SwerveModule m : modules) m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

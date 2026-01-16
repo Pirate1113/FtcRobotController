@@ -12,7 +12,7 @@ import dev.nextftc.hardware.powerable.SetPower;
 
 public class Palm implements Subsystem {
     public static final Palm INSTANCE = new Palm();
-
+    private double pos = 0;
     private Palm() {
     }
 
@@ -27,9 +27,14 @@ public class Palm implements Subsystem {
     }
 
     public final Command off = new InstantCommand(() -> {
-        palm.getServo().setPosition(0);
+        pos = 0;
+        palm.setPosition(0);
     }).requires(this);
     public final Command on = new InstantCommand(() -> {
-        palm.getServo().setPosition(0.3);
+        pos = 0.3;
+        palm.setPosition(0.3);
     }).requires(this);
+    public double getPos() {
+        return pos;
+    }
 }
