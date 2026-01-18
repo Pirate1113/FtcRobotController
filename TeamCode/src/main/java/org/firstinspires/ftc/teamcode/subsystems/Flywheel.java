@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -18,7 +19,7 @@ public class Flywheel implements Subsystem {
     private MotorEx shooter2;
 
     public double distance;
-
+    public double power = 0, power1 =0, power2 =0;
 
     private final ControlSystem controller = ControlSystem.builder()
             .velPid(0.005, 0, 0)
@@ -31,17 +32,53 @@ public class Flywheel implements Subsystem {
     }
 
     public void periodic() {
-        shooter1.setPower(controller.calculate(shooter1.getState()));
-        shooter2.setPower(controller.calculate(shooter2.getState()));
+//        power1 = controller.calculate(shooter1.getState());
+//        power2 = controller.calculate(shooter2.getState());
+//        shooter1.setPower(power1);
+//        shooter2.setPower(power2);
     }
 
     public void setDistance(double set) {
         distance = set;
     }
 
-    public final Command off = new RunToVelocity(controller, 0.0,0).requires(this).named("FlywheelOff");
-    public final Command setFlywheel = new RunToVelocity(controller, 2200 + distance * 67,50).requires(this).named("FlywheelOn");
+    public final Command off = new InstantCommand(() -> {
+        power = 0;
+        shooter1.setPower(power);
+        shooter2.setPower(power);
 
+    });
+
+//    controller, 0.0,0).requires(this).named("FlywheelOff");
+    public final Command runPID = new RunToVelocity(controller, 2200 + distance * 67,50).requires(this).named("FlywheelOn");
+    public final Command stopPID = new RunToVelocity(controller, 0,0).requires(this).named("FlywheelOn");
+    public final Command stopPID1 = new InstantCommand(() -> {
+      new RunToVelocity(controller, 0, 0).schedule();
+    });
+    public final Command RunPID1 = new InstantCommand(() -> {
+        new RunToVelocity(controller, 2200+distance*67, 50).schedule();
+    });
+//    RunToVelocity(controller, 0,0).requires(this).named("FlywheelOn");
+    public final Command setFlywheel = new InstantCommand(() -> {
+        power = 1;
+        shooter1.setPower(-power);
+        shooter2.setPower(power);
+
+    });
+    public double getRPM() {
+        return -shooter1.getVelocity()*60/28;
+    }
+    public final Command backFlywheel = new InstantCommand(() -> {
+        power =-0.2;
+        shooter1.setPower(-power);
+        shooter2.setPower(power);
+    });
+    public double getPower() {
+        return power;
+    }
+    public double getGoal() {
+        return power1;
+    }
 }
 //        flywheel.setVelocity(rpm);
 //    }

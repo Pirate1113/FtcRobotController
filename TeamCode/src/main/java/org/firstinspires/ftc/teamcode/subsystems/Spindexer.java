@@ -50,11 +50,11 @@ public class Spindexer implements Subsystem {
     });
 
     public Command eject = new InstantCommand(() -> {
-        ejectorPos = 0.6;
+        ejectorPos = 0.3;
         ejector.getServo().setPosition(ejectorPos);
     });
     public Command uneject = new InstantCommand(() -> {
-        ejectorPos = 0.1;
+        ejectorPos = -1;
         ejector.getServo().setPosition(ejectorPos);
     });
     public double getLeftPower() {
@@ -65,6 +65,6 @@ public class Spindexer implements Subsystem {
         return powerRight;
     }
     public double getEjectorPos() {
-        return ejectorPos;
+        return ejector.getServo().getPosition();
     }
 }
