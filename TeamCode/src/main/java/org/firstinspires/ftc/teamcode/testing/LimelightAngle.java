@@ -2,62 +2,73 @@ package org.firstinspires.ftc.teamcode.testing;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class LimelightAngle {
 
     private final Limelight3A limelight;
-    private final double SHOOTER_HEIGHT;
-    private final double TAG_OFFSET;
 
-    public LimelightAngle(Limelight3A limelight,
+    // Heights in inches
+    private final double shooterHeight;
+    private final double tagHeight;
+
+    /**
+     * @param hw HardwareMap from OpMode
+     * @param limelightName // sure
+     * @param shooterHeight // height of shooter from floor
+     * @param tagHeight height of AprilTag from floor INCHES
+     */
+    public LimelightAngle(HardwareMap hw,
+                          String limelightName,
                           double shooterHeight,
-                          double tagOffset) {
-        this.limelight = limelight;
-        this.SHOOTER_HEIGHT = shooterHeight;
-        this.TAG_OFFSET = tagOffset;
+                          double tagHeight) {
+
+        this.limelight = hw.get(Limelight3A.class, limelightName);
+        this.shooterHeight = shooterHeight;
+        this.tagHeight = tagHeight;
+
+        limelight.start();
     }
 
-    /** Returns true if Limelight sees a target */
+    /** @return true if Limelight currently sees a valid target */
     public boolean hasTarget() {
         LLResult result = limelight.getLatestResult();
         return result != null && result.isValid();
     }
 
-    /** Horizontal angle as yaw in degrees */
+    /** @return horizontal yaw offset in degrees */
     public double getYaw() {
         LLResult result = limelight.getLatestResult();
-        if(result != null && result.isValid()) {
-            return result.getTx(); // degrees
-        }
-        return 0.0;
+        return (result != null && result.isValid()) ? result.getTx() : 0.0;
     }
 
-    /** Vertical angle as pitch in degrees */
+    /** @return vertical pitch offset in degrees */
     public double getPitch() {
         LLResult result = limelight.getLatestResult();
-        if(result != null && result.isValid()) {
-            return result.getTy(); // degrees
-        }
-        return 0.0;
+        return (result != null && result.isValid()) ? result.getTy() : 0.0;
     }
 
-    /** Horizontal distance from shooter to hoop using pitch */
-    public double getDistance() {
-        double pitchDeg = getPitch();
-        if(pitchDeg == 0) return 0; // avoid division by zero
+    /**
+     *
+     * tan(theta) = (tagHeight - shooterHeight) / distance
+     *
+     * @return distance in inches
+     */
+    public double getDistanceInches() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return 0.0;
+
+        double pitchDeg = result.getTy();
+        if (Math.abs(pitchDeg) < 0.01) return 0.0;
+
         double pitchRad = Math.toRadians(pitchDeg);
-        double verticalDiff = TAG_OFFSET + SHOOTER_HEIGHT;
+        double verticalDiff = tagHeight - shooterHeight;
+
         return verticalDiff / Math.tan(pitchRad);
     }
+
+
+    public void stop() {
+        limelight.stop();
+    }
 }
-
-
-/**
-     * field-centric distance using odometry got rid
-     */
-//    public double getFieldDistance(double hoopX, double hoopY) {
-//        double dx = hoopX - (odom.getX() + ROBOT_X_OFFSET);
-//        double dy = hoopY - odom.getY();
-//        return Math.hypot(dx, dy);
-//    }
-//}

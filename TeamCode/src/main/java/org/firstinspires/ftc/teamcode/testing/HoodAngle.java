@@ -9,29 +9,44 @@ public class HoodAngle {
     private final Servo hood;
     private final DcMotorEx flywheel;
 
-    // needs measuring/tuning
-    public static final double TARGET_HEIGHT  = 57.0; // inches (AprilTag)
-    public static final double SHOOTER_HEIGHT = 12.0; // inches
+    //constants
 
-    // tuning
-    public static final double SERVO_INTERCEPT = 0.32;  // hood pos at 0°
-    public static final double SERVO_SLOPE     = (double) 1 /360; // servo units per degree
+    // heights in inches
+    public static final double SHOOTER_HEIGHT;
+    public static final double TAG_HEIGHT;
 
-    // flywheel
+    //hood tuning
+
+    // servo position at 0 degrees idk how to figure
+    public static final double SERVO_INTERCEPT = 0.32;
+
+    // should work but kinda ignoring gear ratio
+    public static final double SERVO_SLOPE = 1.0 / 360.0;
+
+
+
+    //
     private static final double BASE_RPM = 2200;
-    private static final double RPM_PER_INCH = 67;
+    private static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
 
-    public HoodAngle(HardwareMap hw) {
+
+    public HoodAngle(HardwareMap hw,
+                     double shooterHeight,
+                     double tagHeight) {
+
         hood = hw.get(Servo.class, "hoodServo");
         flywheel = hw.get(DcMotorEx.class, "shooter1");
+
+        this.SHOOTER_HEIGHT = shooterHeight;
+        this.TAG_HEIGHT = tagHeight;
 
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
 
+    /** Aim hood + flywheel directly from Limelight distance */
     public void aimFromDistance(double distanceInches) {
-
-        if (distanceInches < 1) return;
+        if (distanceInches < 1.0) return;
 
         double hoodPos = hoodPositionFromDistance(distanceInches);
         hood.setPosition(hoodPos);
@@ -40,15 +55,29 @@ public class HoodAngle {
         flywheel.setVelocity(rpm);
     }
 
-    /**
-     * projectile motion
-     */
+    /** Convenience method: use LimelightAngle directly */
+    public void aimFromLimelight(LimelightAngle limelight) {
+        if (!limelight.hasTarget()) return;
+
+        double distance = limelight.getDistanceInches();
+        aimFromDistance(distance);
+    }
+
+    /** Stop flywheel (hood stays where it is) */
+    public void stop() {
+        flywheel.setPower(0);
+    }
+
+
+    // projectile math
     private double hoodPositionFromDistance(double distance) {
 
-        double h = TARGET_HEIGHT - SHOOTER_HEIGHT;
+        double verticalDiff = TAG_HEIGHT - SHOOTER_HEIGHT;
 
         double angleRad =
-                Math.atan((h + Math.sqrt(h * h + distance * distance)) / distance);
+                Math.atan((verticalDiff + Math.sqrt(
+                        verticalDiff * verticalDiff + distance * distance))
+                        / distance);
 
         double angleDeg = Math.toDegrees(angleRad);
 
@@ -56,10 +85,6 @@ public class HoodAngle {
                 SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
 
         return clamp(servoPos);
-    }
-
-    public void stop() {
-        flywheel.setPower(0);
     }
 
     private double clamp(double v) {
