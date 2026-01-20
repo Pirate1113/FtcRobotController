@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class LimelightAngle {
 
-    private final Limelight3A limelight;
+    public final Limelight3A limelight;
 
     // Heights in inches
-    private final double shooterHeight;
-    private final double tagHeight;
+    public final double shooterHeight;
+    public final double tagHeight;
 
     /**
      * @param hw HardwareMap from OpMode
