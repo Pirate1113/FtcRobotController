@@ -12,8 +12,8 @@ public class HoodAngle {
     //constants
 
     // heights in inches
-    public static final double SHOOTER_HEIGHT;
-    public static final double TAG_HEIGHT;
+    public static double SHOOTER_HEIGHT = 12.0;
+    public static double TAG_HEIGHT = 37.0;
 
     //hood tuning
 
@@ -37,8 +37,8 @@ public class HoodAngle {
         hood = hw.get(Servo.class, "hoodServo");
         flywheel = hw.get(DcMotorEx.class, "shooter1");
 
-        this.SHOOTER_HEIGHT = shooterHeight;
-        this.TAG_HEIGHT = tagHeight;
+        SHOOTER_HEIGHT = shooterHeight;
+        TAG_HEIGHT = tagHeight;
 
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
