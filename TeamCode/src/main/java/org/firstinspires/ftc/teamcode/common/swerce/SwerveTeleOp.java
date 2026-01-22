@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.testing.SwerveDrivetrain;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;

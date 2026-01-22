@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
-import org.firstinspires.ftc.teamcode.testing.SwerveDrivetrain;
 
 public class SwerveToShootingAngle implements Subsystem {
 
