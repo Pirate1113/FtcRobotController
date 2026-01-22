@@ -1,175 +1,138 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PwmControl;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
-import java.util.Locale;
+import com.acmerobotics.dashboard.config.Config;
 
-public class SwerveModule {
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.PIDCoefficients;
+import dev.nextftc.hardware.impl.CRServoEx;
+import dev.nextftc.core.units.Angle;
 
-    /* ===================== TUNING ===================== */
-    public static double P = 0.6;
-    public static double I = 0.0;
-    public static double D = 0.1;
-    public static double K_STATIC = 0.03;
 
-    public static double MAX_SERVO = 1.0;
-    public static double MAX_MOTOR = 1.0;
-    public static boolean MOTOR_FLIPPING = true;
+@Config
+public class SwerveModule{
 
-    public static double WHEEL_RADIUS = 1.4; // inches
-    public static double GEAR_RATIO = 1 / (3.5 * 1.5 * 2);
-    public static final double TICKS_PER_REV = 28;
+    String name;
 
-    /* ===================== HARDWARE ===================== */
-    private final DcMotorEx motor;
-    private final CRServo servo;
-    private final AbsoluteAnalogEncoder encoder;
+    final double WHEEL_RADIUS = 1;
+    final double GEAR_RATIO = 1;
+    final double TICKS_PER_REVOLUTION = 1;
+    final boolean WHEEL_FLIPPING = true;
 
-    /* ===================== CONTROL ===================== */
-    private final SimplePID rotationPID;
+    double wheelVel; //in ticks/sec
 
-    /* ===================== STATE ===================== */
-    private double target = 0.0;
-    private double position = 0.0;
-    public boolean wheelFlipped = false;
-    public double lastMotorPower = 0.0;
+    double current;
+    double lastCurrent;
+    double target;
+    double lastTarget;
+    double error;
+    double period;
+    double velocity;
 
-    /* ===================== CONSTRUCTOR ===================== */
-    public SwerveModule(DcMotorEx motor, CRServo servo, AbsoluteAnalogEncoder encoder) {
-        this.motor = motor;
-        this.servo = servo;
-        this.encoder = encoder;
+    double power;
+    boolean wheelFlipped;
 
-        MotorConfigurationType cfg = motor.getMotorType().clone();
-        cfg.setAchieveableMaxRPMFraction(MAX_MOTOR);
-        motor.setMotorType(cfg);
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    PIDCoefficients pidValues;
+    double K_STATIC;
+    public ControlSystem pid;
 
-        ((CRServoImplEx) servo).setPwmRange(new PwmControl.PwmRange(500, 2500));
+    private DcMotorEx drive;
+    private CRServoEx axon;
+    private AbsoluteAnalogEncoder enc;
 
-        rotationPID = new SimplePID(P, I, D);
+
+    /** Construcotr is:
+     @param n name
+     @param m motor
+     @param s servo
+     @param e AnalogInput
+     @param eOffset  offset
+     @param reversed is it reveresed?
+     @param PIDK an array of the PIDK values
+     */
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
+        this.name = n;
+
+        this.drive = m;
+        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        this.axon = new CRServoEx(s, 0.03);
+
+        this.enc = new AbsoluteAnalogEncoder(e, 3.3).zero(eOffset);
+
+        this.pidValues = new PIDCoefficients(PIDK[0], PIDK[1], PIDK[2]);
+        this.K_STATIC = PIDK[3];
+
+        this.pid = ControlSystem.builder()
+                .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
+                .build();
+
+        if(reversed) {
+            this.axon.getServo().setDirection(DcMotorSimple.Direction.REVERSE);
+            this.enc.setInverted(true);
+        }
+
+        axon.setPower(1);
+        axon.setPower(0);
     }
 
-    /* ===================== LOOP ===================== */
-    public void read() {
-        position = encoder.getCurrentPosition(); // radians 0–2π
-    }
+    public void read(){
+        Angle.Companion.wrapAnglePiToPi(current = enc.getCurrentPosition());
+    } // this comes out [-pi, pi)
 
-    public void update() {
-        rotationPID.setPID(P, I, D);
+    public void rotateTo(double tar){
+        this.target = Angle.Companion.wrapAnglePiToPi(tar);
 
-        double current = getModuleRotation();
-        double desired = target;
+        this.error = Angle.Companion.wrapAnglePiToPi(target-current);
 
-        double error = normalizeRadians(desired - current);
-
-        // Shortest-path flipping
-        if (MOTOR_FLIPPING && Math.abs(error) > Math.PI / 2) {
-            desired = normalizeRadians(desired + Math.PI);
+        if (WHEEL_FLIPPING && Math.abs(error) > Math.PI / 2) {
+            target = Angle.Companion.wrapAnglePiToPi(target - Math.PI);
             wheelFlipped = true;
         } else {
             wheelFlipped = false;
         }
 
-        error = normalizeRadians(desired - current);
+        pid.setGoal(new KineticState(target));
 
-        double power = rotationPID.calculate(error);
-        power = Range.clip(power, -MAX_SERVO, MAX_SERVO);
-
-        // Static friction compensation
-        if (Math.abs(error) > 0.02) {
-            power += K_STATIC * Math.signum(error);
+        //calculating velocity for use in D term
+        if (Math.abs(period) > 1E-6) {
+            velocity = (current - lastCurrent) / period;
+        } else {
+            velocity = 0;
         }
 
-        if (Double.isNaN(power)) power = 0;
-        servo.setPower(power);
+        KineticState sCurrent = new KineticState(current, velocity);
+
+        power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
     }
 
-    /* ===================== CONTROL ===================== */
-    public void setTargetRotation(double radians) {
-        target = normalizeRadians(radians);
+    public void write(double wheelVel){
+        axon.setPower(power);
+        if (wheelFlipped) wheelVel *= -1;
+        drive.setVelocity( Math.cos(error) * wheelVel);
+        //cosine comp to not move when wheel still tunring
     }
 
-    public void setMotorPower(double power) {
-        if (wheelFlipped) power *= -1;
-        lastMotorPower = power;
-        motor.setPower(power);
+    public void getTelemetry(Telemetry telemetry){
+        telemetry.addData("", name);
+        telemetry.addData("Target", target);
+        telemetry.addData("Current", current);
+        telemetry.addData("Error", error);
+        telemetry.addData("Power", power);
+        telemetry.addData("Rot vel", velocity);
+        telemetry.addData("Wheel Flipped", wheelFlipped);
+        telemetry.addData("Drive power", wheelVel);
     }
 
-    /* ===================== GETTERS ===================== */
-    public double getModuleRotation() {
-        // Adjust this offset ONLY if your encoder mounting requires it
-        return normalizeRadians(position - Math.PI);
-    }
-
-    public double getTargetRotation() {
-        return target;
-    }
-
-    public double getWheelPosition() {
-        return encoderTicksToInches(motor.getCurrentPosition());
-    }
-
-    public double getWheelVelocity() {
-        return encoderTicksToInches(motor.getVelocity());
-    }
-
-    public void setMode(DcMotor.RunMode mode) {
-        motor.setMode(mode);
-    }
-
-    public String getTelemetry(String name) {
-        return String.format(
-                Locale.ENGLISH,
-                "%s | rot=%.2f tgt=%.2f flip=%b pwr=%.2f",
-                name, getModuleRotation(), target, wheelFlipped, lastMotorPower
-        );
-    }
-
-    /* ===================== UTIL ===================== */
-    private double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
-    }
-
-    /* ===================== SIMPLE PID ===================== */
-    private static class SimplePID {
-        private double kP, kI, kD;
-        private double integral = 0.0;
-        private double lastError = 0.0;
-
-        SimplePID(double p, double i, double d) {
-            kP = p;
-            kI = i;
-            kD = d;
-        }
-
-        void setPID(double p, double i, double d) {
-            kP = p;
-            kI = i;
-            kD = d;
-        }
-
-        double calculate(double error) {
-            integral += error;
-            double derivative = error - lastError;
-            lastError = error;
-            return kP * error + kI * integral + kD * derivative;
-        }
-
-        void reset() {
-            integral = 0.0;
-            lastError = 0.0;
-        }
-    }
 }
