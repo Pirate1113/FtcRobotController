@@ -1,13 +1,23 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import androidx.core.math.MathUtils;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class HoodAngle {
 
     private final Servo hood;
-    private final DcMotorEx flywheel;
+    DcMotorEx shooter1;
+    DcMotorEx shooter2;
+
+
+    public double RPM;
 
     //constants
 
@@ -35,12 +45,18 @@ public class HoodAngle {
                      double tagHeight) {
 
         hood = hw.get(Servo.class, "hoodServo");
-        flywheel = hw.get(DcMotorEx.class, "shooter1");
+        shooter1 = hw.get(DcMotorEx.class, "shooter1");
+        shooter2 = hw.get(DcMotorEx.class, "shooter2");
+
+        shooter1.setDirection(DcMotor.Direction.REVERSE);
+
+        shooter2.setDirection(DcMotor.Direction.FORWARD);
 
         SHOOTER_HEIGHT = shooterHeight;
         TAG_HEIGHT = tagHeight;
 
-        flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
 
@@ -52,20 +68,32 @@ public class HoodAngle {
         hood.setPosition(hoodPos);
 
         double rpm = BASE_RPM + distanceInches * RPM_PER_INCH;
-        flywheel.setVelocity(rpm);
+        shooter1.setVelocity(rpm);
+        shooter2.setVelocity(rpm);
+    }
+
+    public void setHoodPos (double pos) {
+        hood.setPosition(pos);
+
     }
 
     /** Convenience method: use LimelightAngle directly */
-    public void aimFromLimelight(LimelightAngle limelight) {
+    public void aimFromLimelight(LimelightAngle limelight, Telemetry telemetry) {
         if (!limelight.hasTarget()) return;
 
-        double distance = limelight.getDistanceInches();
+        double distance = limelight.getDistanceInches(telemetry);
         aimFromDistance(distance);
+    }
+
+    public void getTelemetry (Telemetry telemetry) {
+        telemetry.addData("shooter1: ", shooter1.getVelocity()*60/28);
+        telemetry.addData("shooter2: ", shooter2.getVelocity()*60/28);
     }
 
     /** Stop flywheel (hood stays where it is) */
     public void stop() {
-        flywheel.setPower(0);
+        shooter1.setPower(0);
+        shooter2.setPower(0);
     }
 
 
@@ -84,10 +112,7 @@ public class HoodAngle {
         double servoPos =
                 SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
 
-        return clamp(servoPos);
+        return MathUtils.clamp(servoPos, 0.0, 1.0);
     }
 
-    private double clamp(double v) {
-        return Math.max(0.0, Math.min(1.0, v));
-    }
 }
