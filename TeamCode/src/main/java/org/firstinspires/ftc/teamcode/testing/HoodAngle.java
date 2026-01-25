@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class HoodAngle {
 
@@ -37,9 +38,6 @@ public class HoodAngle {
         hood = hw.get(Servo.class, "hoodServo");
         flywheel = hw.get(DcMotorEx.class, "shooter1");
 
-        SHOOTER_HEIGHT = shooterHeight;
-        TAG_HEIGHT = tagHeight;
-
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
@@ -72,7 +70,7 @@ public class HoodAngle {
     // projectile math
     private double hoodPositionFromDistance(double distance) {
 
-        double verticalDiff = TAG_HEIGHT - SHOOTER_HEIGHT;
+        double verticalDiff = tagHeight - shooterHeight;
 
         double angleRad =
                 Math.atan((verticalDiff + Math.sqrt(
@@ -86,6 +84,9 @@ public class HoodAngle {
 
         return clamp(servoPos);
     }
+
+
+
 
     private double clamp(double v) {
         return Math.max(0.0, Math.min(1.0, v));
