@@ -31,7 +31,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
         limelight = new LimelightAngle(
                 hardwareMap,
-                "limelight",           // device name in configuration
+                "limelight",
                 CAMERA_HEIGHT_INCHES,
                 CAMERA_PITCH_DEG,
                 TAG_HEIGHT_INCHES

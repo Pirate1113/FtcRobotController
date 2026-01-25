@@ -37,6 +37,8 @@ public class HoodAngle {
         hood = hw.get(Servo.class, "hoodServo");
         flywheel = hw.get(DcMotorEx.class, "shooter1");
 
+        flywheel.setDirection(DcMotorEx.Direction.REVERSE);
+
         this.shooterHeightInches = shooterHeightInches;
         this.tagHeightInches = tagHeightInches;
 
