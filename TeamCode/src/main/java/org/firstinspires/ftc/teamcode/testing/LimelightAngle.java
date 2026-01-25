@@ -67,10 +67,6 @@ public class LimelightAngle {
         double totalAngleRad = Math.toRadians(totalAngleDeg);
         double verticalDiff = tagHeightInches - cameraHeightInches;
 
-        if (Math.abs(Math.tan(totalAngleRad)) < 1e-6) {
-            return 0.0;
-        }
-
         double distance = verticalDiff / Math.tan(totalAngleRad);
 
 
