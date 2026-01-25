@@ -1,39 +1,36 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
+import  com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 public class LimelightAngle {
 
     public final Limelight3A limelight;
 
-    // Camera geometry (INCHES, DEGREES)
-    // TODO: MEASURE AND TUNE THESE on your robot.
-    private final double cameraHeightInches;   // height of Limelight lens from floor
-    private final double cameraPitchDeg;       // upward tilt of Limelight relative to horizontal
-
-    private final double tagHeightInches;      // AprilTag height from floor
+    // Heights in inches
+    public final double llHeight;
+    public final double tagHeight;
 
     /**
      * @param hw HardwareMap from OpMode
-     * @param limelightName device name in Robot Configuration
-     * @param cameraHeightInches Limelight lens height from floor
-     * @param cameraPitchDeg Limelight mounting angle (deg, positive looking up)
-     * @param tagHeightInches Tag height from floor
+     * @param limelightName // sure
+     * @param shooterHeight // height of shooter from floor
+     * @param tagHeight height of AprilTag from floor INCHES
      */
     public LimelightAngle(HardwareMap hw,
                           String limelightName,
-                          double cameraHeightInches,
-                          double cameraPitchDeg,
-                          double tagHeightInches) {
+                          double shooterHeight,
+                          double tagHeight) {
 
         this.limelight = hw.get(Limelight3A.class, limelightName);
-
-        this.cameraHeightInches = cameraHeightInches;
-        this.cameraPitchDeg = cameraPitchDeg;
-        this.tagHeightInches = tagHeightInches;
+        this.limelight.pipelineSwitch(0);
+        this.llHeight = shooterHeight;
+        this.tagHeight = tagHeight;
 
         limelight.start();
     }
@@ -50,29 +47,35 @@ public class LimelightAngle {
         return (result != null && result.isValid()) ? result.getTx() : 0.0;
     }
 
-    /** @return vertical pitch offset in degrees (target relative to camera crosshair) */
+    /** @return vertical pitch offset in degrees */
     public double getPitch() {
         LLResult result = limelight.getLatestResult();
         return (result != null && result.isValid()) ? result.getTy() : 0.0;
     }
 
-
-    public double getDistanceInches() {
+    /**
+     *
+     * tan(theta) = (tagHeight - shooterHeight) / distance
+     *
+     * @return distance in inches
+     */
+    public double getDistanceInches(Telemetry telemetry) {
         LLResult result = limelight.getLatestResult();
+
+        Pose3D pose = result.getBotpose();
+
         if (result == null || !result.isValid()) return 0.0;
 
-        double tyDeg = result.getTy();
-        double totalAngleDeg = cameraPitchDeg + tyDeg;
+        telemetry.addData("Botpos: ", pose.toString());
 
-        double totalAngleRad = Math.toRadians(totalAngleDeg);
-        double verticalDiff = tagHeightInches - cameraHeightInches;
+        double pitch = Math.toRadians(result.getTy());
+        if (Math.abs(pitch) < 0.00872665) return 0.0;
 
-        double distance = verticalDiff / Math.tan(totalAngleRad);
+        double verticalDiff = tagHeight - llHeight;
 
-
-        if (distance < 0.0) distance = 0.0;
-        return distance;
+        return verticalDiff / Math.tan(pitch);
     }
+
 
     public void stop() {
         limelight.stop();

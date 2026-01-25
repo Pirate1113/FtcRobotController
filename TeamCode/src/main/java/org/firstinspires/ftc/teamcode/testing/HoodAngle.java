@@ -1,109 +1,118 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import androidx.core.math.MathUtils;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-/**
- * Controls hood servo and flywheel speed for auto-aim shooting.
- */
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class HoodAngle {
 
     private final Servo hood;
-    private final DcMotorEx flywheel;
-
-    // Shooter & target geometry (INCHES)
-    private final double shooterHeightInches;
-    private final double tagHeightInches;
+    DcMotorEx shooter1;
+    DcMotorEx shooter2;
 
 
-    // servo position that corresponds to 0 degrees
+    public double RPM;
+
+    //constants
+
+    // heights in inches
+    public static double SHOOTER_HEIGHT = 12.0;
+    public static double TAG_HEIGHT = 37.0;
+
+    //hood tuning
+
+    // servo position at 0 degrees idk how to figure
     public static final double SERVO_INTERCEPT = 0.32;
-    // servo position change per degree of hood angle we might need to tune for gear ratio
+
+    // should work but kinda ignoring gear ratio
     public static final double SERVO_SLOPE = 1.0 / 360.0;
 
-    // Flywheel speed (constant 6000 RPM as requested)
-    private static final double FLYWHEEL_RPM = 6000.0;
 
-    // motor parameters (for velocity in ticks/sec)
-    private static final int TICKS_PER_REV = 28; // GoBILDA 5202/5203 base encoder
-    private static final double GEAR_RATIO = 1.0; // tune if necessary?!?
+
+    //
+    private static final double BASE_RPM = 2200;
+    private static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
+
 
     public HoodAngle(HardwareMap hw,
-                     double shooterHeightInches,
-                     double tagHeightInches) {
+                     double shooterHeight,
+                     double tagHeight) {
 
         hood = hw.get(Servo.class, "hoodServo");
-        flywheel = hw.get(DcMotorEx.class, "shooter1");
+        shooter1 = hw.get(DcMotorEx.class, "shooter1");
+        shooter2 = hw.get(DcMotorEx.class, "shooter2");
 
-        flywheel.setDirection(DcMotorEx.Direction.REVERSE);
+        shooter1.setDirection(DcMotor.Direction.REVERSE);
 
-        this.shooterHeightInches = shooterHeightInches;
-        this.tagHeightInches = tagHeightInches;
+        shooter2.setDirection(DcMotor.Direction.FORWARD);
 
-        flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        SHOOTER_HEIGHT = shooterHeight;
+        TAG_HEIGHT = tagHeight;
+
+        shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    /**
-     * aim hood based on distance and run flywheel at constant 6000 RPM
-     *
-     */
+
+    /** Aim hood + flywheel directly from Limelight distance */
     public void aimFromDistance(double distanceInches) {
-        if (distanceInches < 1.0) return; // ignore bad/zero readings
+        if (distanceInches < 1.0) return;
 
         double hoodPos = hoodPositionFromDistance(distanceInches);
         hood.setPosition(hoodPos);
 
-        setFlywheelRpm(FLYWHEEL_RPM);
+        double rpm = BASE_RPM + distanceInches * RPM_PER_INCH;
+        shooter1.setVelocity(rpm);
+        shooter2.setVelocity(rpm);
     }
 
-    /** aim using LimelightAngle directly */
-    public void aimFromLimelight(LimelightAngle limelight,
-                                 double shooterToCameraOffsetInches) {
+    public void setHoodPos (double pos) {
+        hood.setPosition(pos);
+
+    }
+
+    /** Convenience method: use LimelightAngle directly */
+    public void aimFromLimelight(LimelightAngle limelight, Telemetry telemetry) {
         if (!limelight.hasTarget()) return;
 
-        double distCamera = limelight.getDistanceInches();
-        if (distCamera <= 0.0) return;
-
-        double distShooter = distCamera + shooterToCameraOffsetInches;
-        aimFromDistance(distShooter);
+        double distance = limelight.getDistanceInches(telemetry);
+        aimFromDistance(distance);
     }
 
+    public void getTelemetry (Telemetry telemetry) {
+        telemetry.addData("shooter1: ", shooter1.getVelocity()*60/28);
+        telemetry.addData("shooter2: ", shooter2.getVelocity()*60/28);
+    }
+
+    /** Stop flywheel (hood stays where it is) */
     public void stop() {
-        flywheel.setPower(0);
+        shooter1.setPower(0);
+        shooter2.setPower(0);
     }
 
 
-    private double hoodPositionFromDistance(double distanceInches) {
+    // projectile math
+    private double hoodPositionFromDistance(double distance) {
 
-        double verticalDiff = tagHeightInches - shooterHeightInches;
+        double verticalDiff = TAG_HEIGHT - SHOOTER_HEIGHT;
 
-        // atan( (h + sqrt(h^2 + d^2)) / d )
         double angleRad =
                 Math.atan((verticalDiff + Math.sqrt(
-                        verticalDiff * verticalDiff + distanceInches * distanceInches))
-                        / distanceInches);
+                        verticalDiff * verticalDiff + distance * distance))
+                        / distance);
 
         double angleDeg = Math.toDegrees(angleRad);
 
         double servoPos =
                 SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
 
-        return clamp(servoPos);
+        return MathUtils.clamp(servoPos, 0.0, 1.0);
     }
 
-    private double clamp(double v) {
-        if (v < 0.0) return 0.0;
-        if (v > 1.0) return 1.0;
-        return v;
-    }
-
-    /** convert desired RPM to encoder ticks/sec and send to motor */
-    private void setFlywheelRpm(double rpm) {
-        // ticks/sec = rpm * TICKS_PER_REV * gearRatio / 60
-        double ticksPerSec = rpm * TICKS_PER_REV * GEAR_RATIO / 60.0;
-
-        flywheel.setVelocity(ticksPerSec);
-    }
 }

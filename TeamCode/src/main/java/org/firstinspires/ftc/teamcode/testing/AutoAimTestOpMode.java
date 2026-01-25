@@ -1,41 +1,33 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import androidx.core.math.MathUtils;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
-
-@TeleOp(name = "Auto Aim Hood Test", group = "Testing")
+@TeleOp(name="Auto Aim Hood Test", group="Testing")
 public class AutoAimTestOpMode extends LinearOpMode {
 
     private HoodAngle hood;
     private LimelightAngle limelight;
 
-    // tuning needed?!
-    private static final double SHOOTER_HEIGHT_INCHES = 6.0;
+    // needs tuning of course
+    private static final double LIMELIGHT_HEIGHT = 14.0;
+    private static final double TAG_HEIGHT = 29.5;
 
-    // basket tag
-    private static final double TAG_HEIGHT_INCHES = 39.0;
+    double hoodPos = 0.0;
+    private static final double HOOD_STEP = 0.01;
 
-    // things that need tuning
-    private static final double CAMERA_HEIGHT_INCHES = 8.0;  // height of LL from ground
-    private static final double CAMERA_PITCH_DEG = 0.0;      // LL tilt up from horizontal
-
-    private static final double SHOOTER_TO_CAMERA_OFFSET_INCHES = -2.0; // idk if needed
 
     @Override
     public void runOpMode() {
 
-        // hood + flywheel subsystem
-        hood = new HoodAngle(hardwareMap, SHOOTER_HEIGHT_INCHES, TAG_HEIGHT_INCHES);
+        // hoodangle
+        hood = new HoodAngle(hardwareMap, LIMELIGHT_HEIGHT, TAG_HEIGHT);
 
-
-        limelight = new LimelightAngle(
-                hardwareMap,
-                "limelight",
-                CAMERA_HEIGHT_INCHES,
-                CAMERA_PITCH_DEG,
-                TAG_HEIGHT_INCHES
-        );
+        // yes LIMELIGHT yes yez
+        limelight = new LimelightAngle(hardwareMap, "limelight", LIMELIGHT_HEIGHT, TAG_HEIGHT);
 
         telemetry.addLine("Hood and Limelight initialized");
         telemetry.update();
@@ -45,22 +37,24 @@ public class AutoAimTestOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (limelight.hasTarget()) {
-                // distance from camera to tag
-                double distanceCamera = limelight.getDistanceInches();
+                // get distance
+                double distance = limelight.getDistanceInches(telemetry);
 
-                // convert to shooter-to-tag distance accounting for offset, I don't really know if we need this but sure ig
-                double distanceShooter = distanceCamera + SHOOTER_TO_CAMERA_OFFSET_INCHES;
+                // autoaim
+                hood.aimFromDistance(distance);
 
-                // auto-aim
-                hood.aimFromDistance(distanceShooter);
+                double stick = -gamepad1.right_stick_y; // up = positive
+
+                hoodPos += stick * HOOD_STEP;
+                hoodPos = Range.clip(hoodPos, 0.0, 1.0);
+                hood.setHoodPos(hoodPos);
 
                 // telemetry
                 telemetry.addData("Target Detected", true);
-                telemetry.addData("Distance (cam)", "%.2f in", distanceCamera);
-                telemetry.addData("Distance (shooter)", "%.2f in", distanceShooter);
-                telemetry.addData("Flywheel RPM", "%.0f", 6000.0);
-                telemetry.addData("Limelight ty", "%.2f deg", limelight.getPitch());
-                telemetry.addData("Limelight tx", "%.2f deg", limelight.getYaw());
+                telemetry.addData("Distance (inches)", "%.2f", distance);
+                telemetry.addData("Hood Servo Pos", "%.3f", hoodPositionForTelemetry(distance));
+                telemetry.addData("ServoPos: ", hoodPos);
+                hood.getTelemetry(telemetry);
             } else {
                 telemetry.addData("Target Detected", false);
             }
@@ -70,5 +64,12 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
         hood.stop();
         limelight.stop();
+    }
+
+    private double hoodPositionForTelemetry(double distance) {
+        double h = TAG_HEIGHT - LIMELIGHT_HEIGHT;
+        double angleRad = Math.atan((h + Math.sqrt(h * h + distance * distance)) / distance);
+        double angleDeg = Math.toDegrees(angleRad);
+        return HoodAngle.SERVO_INTERCEPT + HoodAngle.SERVO_SLOPE * angleDeg;
     }
 }
