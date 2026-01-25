@@ -3,10 +3,11 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class HoodAngle {
-
     private final Servo hood;
     private final DcMotorEx flywheel;
 
@@ -18,13 +19,7 @@ public class HoodAngle {
 
     //hood tuning
 
-    // servo position at 0 degrees idk how to figure
-    public static final double SERVO_INTERCEPT = 0.32;
-
-    // should work but kinda ignoring gear ratio
-    public static final double SERVO_SLOPE = 0.013;
-
-
+    private static final double SERVO_DEG_PER_HOOD = 13;
 
     //
     private static final double BASE_RPM = 2200;
@@ -32,7 +27,7 @@ public class HoodAngle {
 
 
     public HoodAngle(HardwareMap hw,
-                     double shooterHeight,
+                     double LLHeight,
                      double tagHeight) {
 
         hood = hw.get(Servo.class, "hoodServo");
@@ -79,19 +74,13 @@ public class HoodAngle {
 
         double angleDeg = Math.toDegrees(angleRad);
 
-        double servoPos =
-                SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
+        double servoPos = angleDeg * SERVO_DEG_PER_HOOD/255;
 
-        return clamp(servoPos);
+        return Range.clip(servoPos, 0, 1.0);
     }
 
     public double getFlywheelRpm() {
         double ticksPerSec = flywheel.getVelocity();
         return ticksPerSec * 60.0 / 28;
-    }
-
-
-    private double clamp(double v) {
-        return Math.max(0.0, Math.min(1.0, v));
     }
 }
