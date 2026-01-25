@@ -28,13 +28,13 @@ public class JacobShi extends OpMode {
 
     @Override
     public void init() {
-        shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
         shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
+        shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
 
-        shooter1.setDirection(DcMotor.Direction.FORWARD);
+        shooter1.setDirection(DcMotor.Direction.REVERSE);
         shooter1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        shooter2.setDirection(DcMotor.Direction.REVERSE);
+        shooter2.setDirection(DcMotor.Direction.FORWARD);
         shooter2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         dashboard = FtcDashboard.getInstance();

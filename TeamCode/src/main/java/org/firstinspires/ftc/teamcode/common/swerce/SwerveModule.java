@@ -58,10 +58,11 @@ public class SwerveModule{
      @param s servo
      @param e AnalogInput
      @param eOffset  offset
-     @param reversed is it reveresed?
+     @param servoReverse is servo reveresed?
+     @param analogReverse is the enc reversed>
      @param PIDK an array of the PIDK values
      */
-    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean reversed, double[] PIDK){
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean servoReverse, boolean analogReverse, double[] PIDK){
         this.name = n;
 
         this.drive = m;
@@ -78,10 +79,8 @@ public class SwerveModule{
                 .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
                 .build();
 
-        if(reversed) {
-            this.axon.getServo().setDirection(DcMotorSimple.Direction.REVERSE);
-            this.enc.setInverted(true);
-        }
+        if(servoReverse) this.axon.getServo().setDirection(CRServo.Direction.REVERSE);
+        if(analogReverse) this.enc.setInverted(true);
 
         axon.setPower(1);
         axon.setPower(0);
