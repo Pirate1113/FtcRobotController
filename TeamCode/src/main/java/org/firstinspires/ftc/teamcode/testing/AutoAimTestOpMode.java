@@ -11,13 +11,13 @@ public class AutoAimTestOpMode extends LinearOpMode {
     private LimelightAngle limelight;
 
     // tuning needed?!
-    private static final double SHOOTER_HEIGHT_INCHES = 6.0;
+    private static final double SHOOTER_HEIGHT_INCHES = 8.0;
 
     // basket tag
     private static final double TAG_HEIGHT_INCHES = 39.0;
 
     // things that need tuning
-    private static final double CAMERA_HEIGHT_INCHES = 8.0;  // height of LL from ground
+    private static final double CAMERA_HEIGHT_INCHES = 14.0;  // height of LL from ground
     private static final double CAMERA_PITCH_DEG = 0.0;      // LL tilt up from horizontal
 
     private static final double SHOOTER_TO_CAMERA_OFFSET_INCHES = -2.0; // idk if needed
