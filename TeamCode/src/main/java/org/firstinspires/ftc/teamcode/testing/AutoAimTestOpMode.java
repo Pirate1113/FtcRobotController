@@ -44,24 +44,19 @@ public class AutoAimTestOpMode extends LinearOpMode {
                                 verticalDiff * verticalDiff + distance * distance))
                                 / distance);
                 double angleDeg = Math.toDegrees(angleRad);
-                double servoPos = angleDeg * 11.25/255;
+                double servoPos = angleDeg * 8.125/255;
 
                 // telemetry
                 telemetry.addData("Hood angle: ", angleDeg);
                 telemetry.addData("ServoPos: ", servoPos);
                 telemetry.addData("Distance (inches)", "%.2f", distance);
-                telemetry.addData("Fake RPM idk if we need", "%.0f", 2200 + distance * 67);
-                telemetry.addData("Flywheel REAL RPM", "%.0f", hood.getFlywheelRpm());
-
             } else {
                 telemetry.addData("Target Detected", false);
-                hood.stop();
             }
 
             telemetry.update();
         }
 
-        hood.stop();
         limelight.stop();
     }
 

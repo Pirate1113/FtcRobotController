@@ -1,66 +1,39 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import dev.nextftc.hardware.impl.ServoEx;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 public class HoodAngle {
-    private final Servo hood;
-    private final DcMotorEx flywheel;
-
-    //constants
+    private final ServoEx hood;
 
     // heights in inches
     public static double shooterHeight = 12.0;
     public static double tagHeight = 37.0;
 
-    //hood tuning
-
-    private static final double SERVO_DEG_PER_HOOD = 13;
-
-    //
-    private static final double BASE_RPM = 2200;
-    private static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
-
+    private static final double SERVO_DEG_PER_HOOD = 8.125;
 
     public HoodAngle(HardwareMap hw,
                      double LLHeight,
                      double tagHeight) {
 
-        hood = hw.get(Servo.class, "hoodServo");
-        flywheel = hw.get(DcMotorEx.class, "shooter1");
-
-        flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hood = new ServoEx("hoodServo", 0.04);
     }
 
-
-    /** Aim hood + flywheel directly from Limelight distance */
     public void aimFromDistance(double distanceInches) {
         if (distanceInches < 1.0) return;
 
         double hoodPos = hoodPositionFromDistance(distanceInches);
         hood.setPosition(hoodPos);
 
-        double rpm = BASE_RPM + distanceInches * RPM_PER_INCH;
-        flywheel.setVelocity(rpm);
     }
 
-    /** Convenience method: use LimelightAngle directly */
     public void aimFromLimelight(LimelightAngle limelight) {
         if (!limelight.hasTarget()) return;
 
         double distance = limelight.getDistanceInches();
         aimFromDistance(distance);
     }
-
-    /** Stop flywheel (hood stays where it is) */
-    public void stop() {
-        flywheel.setPower(0);
-    }
-
 
     // projectile math
     private double hoodPositionFromDistance(double distance) {
@@ -79,8 +52,4 @@ public class HoodAngle {
         return Range.clip(servoPos, 0, 1.0);
     }
 
-    public double getFlywheelRpm() {
-        double ticksPerSec = flywheel.getVelocity();
-        return ticksPerSec * 60.0 / 28;
-    }
 }
