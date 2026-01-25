@@ -44,9 +44,8 @@ public class HoodAngle {
     }
 
     /**
-     * aim hood based on distance and run flywheel at constant 6000 RPM.
+     * aim hood based on distance and run flywheel at constant 6000 RPM
      *
-     * @param distanceInches horizontal distance from SHOOTER to tag (inches)
      */
     public void aimFromDistance(double distanceInches) {
         if (distanceInches < 1.0) return; // ignore bad/zero readings
@@ -62,7 +61,6 @@ public class HoodAngle {
                                  double shooterToCameraOffsetInches) {
         if (!limelight.hasTarget()) return;
 
-        // Limelight distance is camera-to-tag. Convert to shooter-to-tag if needed.
         double distCamera = limelight.getDistanceInches();
         if (distCamera <= 0.0) return;
 
@@ -99,7 +97,7 @@ public class HoodAngle {
         return v;
     }
 
-    /** Convert desired RPM to encoder ticks/sec and send to motor */
+    /** convert desired RPM to encoder ticks/sec and send to motor */
     private void setFlywheelRpm(double rpm) {
         // ticks/sec = rpm * TICKS_PER_REV * gearRatio / 60
         double ticksPerSec = rpm * TICKS_PER_REV * GEAR_RATIO / 60.0;
