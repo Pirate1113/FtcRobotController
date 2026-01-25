@@ -10,10 +10,10 @@ import dev.nextftc.hardware.impl.ServoEx;
 import dev.nextftc.hardware.positionable.SetPosition;
 import dev.nextftc.hardware.powerable.SetPower;
 
-public class Palm implements Subsystem {
-    public static final Palm INSTANCE = new Palm();
+public class nextftctestsubsystem implements Subsystem {
+    public static final nextftctestsubsystem INSTANCE = new nextftctestsubsystem();
     private double pos = 0;
-    private Palm() {
+    private nextftctestsubsystem() {
     }
 
     private ServoEx palm;

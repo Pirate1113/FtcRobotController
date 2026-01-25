@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import static java.lang.Math.*;
-import com.qualcomm.robotcore.hardware.*;
-import com.qualcomm.robotcore.util.Range;
-
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,15 +9,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class HoodAngle {
     private final Servo hood;
-    public DcMotorEx flywheel;
+    private final DcMotorEx flywheel;
 
     //constants
 
     // heights in inches
     public static double shooterHeight = 12.0;
     public static double tagHeight = 37.0;
-
-    public static double initialVelocity = 0.0;
 
     //hood tuning
 
@@ -43,7 +36,8 @@ public class HoodAngle {
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    
+
+    /** Aim hood + flywheel directly from Limelight distance */
     public void aimFromDistance(double distanceInches) {
         if (distanceInches < 1.0) return;
 
@@ -54,6 +48,7 @@ public class HoodAngle {
         flywheel.setVelocity(rpm);
     }
 
+    /** Convenience method: use LimelightAngle directly */
     public void aimFromLimelight(LimelightAngle limelight) {
         if (!limelight.hasTarget()) return;
 
@@ -61,31 +56,21 @@ public class HoodAngle {
         aimFromDistance(distance);
     }
 
-
+    /** Stop flywheel (hood stays where it is) */
     public void stop() {
         flywheel.setPower(0);
     }
 
-    public double getFlywheelRpm() {
-        double ticksPerSec = flywheel.getVelocity();
-        return ticksPerSec * 60.0 / 28.0;
-    }
-    public double radiusMeters = 0.0376565;
-
-    public double getInitialVelocity(double radiusMeters) {
-        double rpm = getFlywheelRpm();
-        double v =  rpm * 2.0 * Math.PI * radiusMeters / 60.0; // m/s
-        return v;
-    }
 
     // projectile math
-    public double hoodPositionFromDistance(double distance) {
+    private double hoodPositionFromDistance(double distance) {
 
         double verticalDiff = tagHeight - shooterHeight;
 
-        double angleRad = Math.atan(verticalDiff / distance);
-
-        double projectileAngle = (double) 1 /2*asin((distance*9.81)/getInitialVelocity(0.0376565));
+        double angleRad =
+                Math.atan((verticalDiff + Math.sqrt(
+                        verticalDiff * verticalDiff + distance * distance))
+                        / distance);
 
         double angleDeg = Math.toDegrees(angleRad);
 
@@ -94,5 +79,8 @@ public class HoodAngle {
         return Range.clip(servoPos, 0, 1.0);
     }
 
-
+    public double getFlywheelRpm() {
+        double ticksPerSec = flywheel.getVelocity();
+        return ticksPerSec * 60.0 / 28;
+    }
 }

@@ -66,7 +66,7 @@ public class Flywheel implements Subsystem {
 
     });
     public double getRPM() {
-        return -shooter1.getVelocity()*60/28;
+        return shooter1.getVelocity()*60/28;
     }
     public final Command backFlywheel = new InstantCommand(() -> {
         power =-0.2;
