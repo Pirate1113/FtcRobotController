@@ -1,8 +1,4 @@
 package org.firstinspires.ftc.teamcode.testing;
-
-import static org.firstinspires.ftc.teamcode.testing.HoodAngle.SERVO_INTERCEPT;
-import static org.firstinspires.ftc.teamcode.testing.HoodAngle.SERVO_SLOPE;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
