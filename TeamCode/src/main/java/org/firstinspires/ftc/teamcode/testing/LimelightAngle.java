@@ -1,32 +1,20 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import  com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-<<<<<<< HEAD
-=======
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
->>>>>>> 58e1ccaacf0918166dce8467964b78cd2725b165
 
 public class LimelightAngle {
 
     public final Limelight3A limelight;
 
-<<<<<<< HEAD
     // Camera geometry (INCHES, DEGREES)
     // TODO: MEASURE AND TUNE THESE on your robot.
     private final double cameraHeightInches;   // height of Limelight lens from floor
     private final double cameraPitchDeg;       // upward tilt of Limelight relative to horizontal
 
     private final double tagHeightInches;      // AprilTag height from floor
-=======
-    // Heights in inches
-    public final double llHeight;
-    public final double tagHeight;
->>>>>>> 58e1ccaacf0918166dce8467964b78cd2725b165
 
     /**
      * @param hw HardwareMap from OpMode
@@ -42,16 +30,10 @@ public class LimelightAngle {
                           double tagHeightInches) {
 
         this.limelight = hw.get(Limelight3A.class, limelightName);
-<<<<<<< HEAD
 
         this.cameraHeightInches = cameraHeightInches;
         this.cameraPitchDeg = cameraPitchDeg;
         this.tagHeightInches = tagHeightInches;
-=======
-        this.limelight.pipelineSwitch(0);
-        this.llHeight = shooterHeight;
-        this.tagHeight = tagHeight;
->>>>>>> 58e1ccaacf0918166dce8467964b78cd2725b165
 
         limelight.start();
     }
@@ -74,25 +56,11 @@ public class LimelightAngle {
         return (result != null && result.isValid()) ? result.getTy() : 0.0;
     }
 
-<<<<<<< HEAD
 
     public double getDistanceInches() {
-=======
-    /**
-     *
-     * tan(theta) = (tagHeight - shooterHeight) / distance
-     *
-     * @return distance in inches
-     */
-    public double getDistanceInches(Telemetry telemetry) {
->>>>>>> 58e1ccaacf0918166dce8467964b78cd2725b165
         LLResult result = limelight.getLatestResult();
-
-        Pose3D pose = result.getBotpose();
-
         if (result == null || !result.isValid()) return 0.0;
 
-<<<<<<< HEAD
         double tyDeg = result.getTy();
         double totalAngleDeg = cameraPitchDeg + tyDeg;
 
@@ -113,16 +81,6 @@ public class LimelightAngle {
 
         if (distance < 0.0) distance = 0.0;
         return distance;
-=======
-        telemetry.addData("Botpos: ", pose.toString());
-
-        double pitch = Math.toRadians(result.getTy());
-        if (Math.abs(pitch) < 0.00872665) return 0.0;
-
-        double verticalDiff = tagHeight - llHeight;
-
-        return verticalDiff / Math.tan(pitch);
->>>>>>> 58e1ccaacf0918166dce8467964b78cd2725b165
     }
 
     public void stop() {
