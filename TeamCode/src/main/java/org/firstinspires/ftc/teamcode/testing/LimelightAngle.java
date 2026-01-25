@@ -64,11 +64,6 @@ public class LimelightAngle {
         double tyDeg = result.getTy();
         double totalAngleDeg = cameraPitchDeg + tyDeg;
 
-        // avoid division by very small angles
-        if (Math.abs(totalAngleDeg) < 0.5) { // 0.5 degree threshold we might need to tune
-            return 0.0;
-        }
-
         double totalAngleRad = Math.toRadians(totalAngleDeg);
         double verticalDiff = tagHeightInches - cameraHeightInches;
 
