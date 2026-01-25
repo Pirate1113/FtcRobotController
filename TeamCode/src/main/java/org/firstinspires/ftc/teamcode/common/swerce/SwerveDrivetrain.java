@@ -64,25 +64,25 @@ public class SwerveDrivetrain implements Subsystem {
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fr_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"),
-                4.22, false, false, PIDKVal[0]);
+                4.22, false, true, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "br_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"),
-                6.01, false, false, PIDKVal[1]);
+                6.01, false, true, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
-                1.47, false, false, PIDKVal[2]);
+                4.5, true, false, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
-                6.12, false, false, PIDKVal[3]);
+                3.04, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
