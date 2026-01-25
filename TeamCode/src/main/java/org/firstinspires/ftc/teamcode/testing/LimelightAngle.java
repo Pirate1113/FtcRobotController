@@ -1,19 +1,15 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import  com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 public class LimelightAngle {
 
     public final Limelight3A limelight;
 
     // Heights in inches
-    public final double llHeight;
+    public final double shooterHeight;
     public final double tagHeight;
 
     /**
@@ -28,8 +24,7 @@ public class LimelightAngle {
                           double tagHeight) {
 
         this.limelight = hw.get(Limelight3A.class, limelightName);
-        this.limelight.pipelineSwitch(0);
-        this.llHeight = shooterHeight;
+        this.shooterHeight = shooterHeight;
         this.tagHeight = tagHeight;
 
         limelight.start();
@@ -59,21 +54,17 @@ public class LimelightAngle {
      *
      * @return distance in inches
      */
-    public double getDistanceInches(Telemetry telemetry) {
+    public double getDistanceInches() {
         LLResult result = limelight.getLatestResult();
-
-        Pose3D pose = result.getBotpose();
-
         if (result == null || !result.isValid()) return 0.0;
 
-        telemetry.addData("Botpos: ", pose.toString());
+        double pitchDeg = result.getTy();
+        if (Math.abs(pitchDeg) < 0.01) return 0.0;
 
-        double pitch = Math.toRadians(result.getTy());
-        if (Math.abs(pitch) < 0.00872665) return 0.0;
+        double pitchRad = Math.toRadians(pitchDeg);
+        double verticalDiff = tagHeight - shooterHeight;
 
-        double verticalDiff = tagHeight - llHeight;
-
-        return verticalDiff / Math.tan(pitch);
+        return verticalDiff / Math.tan(pitchRad);
     }
 
 
