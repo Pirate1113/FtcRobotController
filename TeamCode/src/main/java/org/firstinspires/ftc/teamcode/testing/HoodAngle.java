@@ -12,8 +12,8 @@ public class HoodAngle {
     //constants
 
     // heights in inches
-    public static double SHOOTER_HEIGHT = 12.0;
-    public static double TAG_HEIGHT = 37.0;
+    public static double shooterHeight = 12.0;
+    public static double tagHeight = 37.0;
 
     //hood tuning
 

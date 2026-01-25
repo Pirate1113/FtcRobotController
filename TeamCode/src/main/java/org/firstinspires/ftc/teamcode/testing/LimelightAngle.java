@@ -59,7 +59,6 @@ public class LimelightAngle {
         if (result == null || !result.isValid()) return 0.0;
 
         double pitchDeg = result.getTy();
-        if (Math.abs(pitchDeg) < 0.01) return 0.0;
 
         double pitchRad = Math.toRadians(pitchDeg);
         double verticalDiff = tagHeight - shooterHeight;
