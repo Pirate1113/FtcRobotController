@@ -44,7 +44,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
                                 verticalDiff * verticalDiff + distance * distance))
                                 / distance);
                 double angleDeg = Math.toDegrees(angleRad);
-                double servoPos = angleDeg * 13/255;
+                double servoPos = angleDeg * 11.25/255;
 
                 // telemetry
                 telemetry.addData("Hood angle: ", angleDeg);

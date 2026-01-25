@@ -31,30 +31,30 @@ public class Spindexer implements Subsystem {
     }
 
     public Command moveLeft = new InstantCommand(() -> {
-        powerLeft = 0.8;
+//        powerLeft = 0.8;
         powerRight = -0.8;
-        servoLeft.getServo().setPower(powerLeft);
-        servoRight.getServo().setPower(-powerRight);
+//        new SetPower(servoLeft, powerLeft).schedule();
+        new SetPower(servoRight, -powerRight).schedule();
     });
     public Command moveRight = new InstantCommand(() -> {
         powerRight = 0.8;
-        powerLeft = -0.8;
-        servoLeft.getServo().setPower(powerLeft);
+//        powerLeft = -0.8;
+//        servoLeft.getServo().setPower(powerLeft);
         servoRight.getServo().setPower(-powerRight);
     });
     public Command stop = new InstantCommand(() -> {
         powerLeft = 0;
-        powerRight = 0;
+//        powerRight = 0;
         servoLeft.getServo().setPower(powerLeft);
-        servoRight.getServo().setPower(-powerRight);
+//        servoRight.getServo().setPower(-powerRight);
     });
 
-    public Command eject = new InstantCommand(() -> {
-        ejectorPos = 0.3;
+    public Command uneject = new InstantCommand(() -> {
+        ejectorPos = 0.85;
         ejector.getServo().setPosition(ejectorPos);
     });
-    public Command uneject = new InstantCommand(() -> {
-        ejectorPos = -1;
+    public Command eject = new InstantCommand(() -> {
+        ejectorPos = 0.45;
         ejector.getServo().setPosition(ejectorPos);
     });
     public double getLeftPower() {
