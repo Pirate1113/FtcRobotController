@@ -21,7 +21,7 @@ public class HoodAngle {
     public static final double SERVO_INTERCEPT = 0.32;
 
     // should work but kinda ignoring gear ratio
-    public static final double SERVO_SLOPE = 1.0 / 360.0;
+    public static final double SERVO_SLOPE = 0.013;
 
 
 

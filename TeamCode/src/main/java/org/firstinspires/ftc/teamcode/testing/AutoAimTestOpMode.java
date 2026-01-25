@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import static org.firstinspires.ftc.teamcode.testing.HoodAngle.SERVO_INTERCEPT;
+import static org.firstinspires.ftc.teamcode.testing.HoodAngle.SERVO_SLOPE;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -36,6 +39,16 @@ public class AutoAimTestOpMode extends LinearOpMode {
                 // autoaim
                 hood.aimFromDistance(distance);
 
+                double verticalDiff = TAG_HEIGHT - SHOOTER_HEIGHT;
+                double angleRad =
+                        Math.atan((verticalDiff + Math.sqrt(
+                                verticalDiff * verticalDiff + distance * distance))
+                                / distance);
+                double angleDeg = Math.toDegrees(angleRad);
+
+                telemetry.addData("Angle (deg)", angleDeg);
+                telemetry.addData("ServoPos", SERVO_INTERCEPT + SERVO_SLOPE * angleDeg);
+
                 // telemetry
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (inches)", "%.2f", distance);
@@ -56,6 +69,8 @@ public class AutoAimTestOpMode extends LinearOpMode {
         double h = TAG_HEIGHT - SHOOTER_HEIGHT;
         double angleRad = Math.atan((h + Math.sqrt(h * h + distance * distance)) / distance);
         double angleDeg = Math.toDegrees(angleRad);
-        return HoodAngle.SERVO_INTERCEPT + HoodAngle.SERVO_SLOPE * angleDeg;
+        return SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
     }
+
+
 }
