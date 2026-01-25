@@ -54,8 +54,9 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
                 telemetry.addData("Distance (inches)", "%.2f", distance);
                 telemetry.addData("Hood Servo Pos", "%.3f", hoodPositionForTelemetry(distance));
-                telemetry.addData("Flywheel RPM", "%.0f", 2200 + distance * 67);
-                telemetry.addData("Flywheel RPM", "%.0f", 2200 + distance * 67);
+                telemetry.addData("Fake RPM idk if we need", "%.0f", 2200 + distance * 67);
+                telemetry.addData("Flywheel REAL RPM", "%.0f", hood.getFlywheelRpm());
+
             } else {
                 telemetry.addData("Target Detected", false);
             }

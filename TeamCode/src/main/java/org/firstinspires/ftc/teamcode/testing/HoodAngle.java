@@ -85,7 +85,10 @@ public class HoodAngle {
         return clamp(servoPos);
     }
 
-
+    public double getFlywheelRpm() {
+        double ticksPerSec = flywheel.getVelocity();
+        return ticksPerSec * 60.0 / 28;
+    }
 
 
     private double clamp(double v) {
