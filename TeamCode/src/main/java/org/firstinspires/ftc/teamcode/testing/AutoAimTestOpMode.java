@@ -13,17 +13,18 @@ public class AutoAimTestOpMode extends LinearOpMode {
     private LimelightAngle limelight;
 
     // needs tuning of course
-    public static final double shooterHeight = 12.0;
-    public static final double tagHeight = 37.0;
+    public static final double LLHeight = 14;
+    public static final double shooterHeight = 12;
+    public static final double tagHeight = 29.5;
 
     @Override
     public void runOpMode() {
 
         // hoodangle
-        hood = new HoodAngle(hardwareMap, shooterHeight, tagHeight);
+        hood = new HoodAngle(hardwareMap, LLHeight, tagHeight);
 
         // yes LIMELIGHT yes yez
-        limelight = new LimelightAngle(hardwareMap, "limelight", shooterHeight, tagHeight);
+        limelight = new LimelightAngle(hardwareMap, "limelight", LLHeight, tagHeight);
 
         telemetry.addLine("Hood and Limelight initialized");
         telemetry.update();
@@ -33,6 +34,8 @@ public class AutoAimTestOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (limelight.hasTarget()) {
+                telemetry.addData("Target Detected", true);
+
                 // get distance
                 double distance = limelight.getDistanceInches();
 
@@ -45,20 +48,18 @@ public class AutoAimTestOpMode extends LinearOpMode {
                                 verticalDiff * verticalDiff + distance * distance))
                                 / distance);
                 double angleDeg = Math.toDegrees(angleRad);
-
-                telemetry.addData("Angle (deg)", angleDeg);
-                telemetry.addData("ServoPos", SERVO_INTERCEPT + SERVO_SLOPE * angleDeg);
+                double servoPos = angleDeg * 13/255;
 
                 // telemetry
-                telemetry.addData("Target Detected", true);
-
+                telemetry.addData("Hood angle: ", angleDeg);
+                telemetry.addData("ServoPos: ", servoPos);
                 telemetry.addData("Distance (inches)", "%.2f", distance);
-                telemetry.addData("Hood Servo Pos", "%.3f", hoodPositionForTelemetry(distance));
                 telemetry.addData("Fake RPM idk if we need", "%.0f", 2200 + distance * 67);
                 telemetry.addData("Flywheel REAL RPM", "%.0f", hood.getFlywheelRpm());
 
             } else {
                 telemetry.addData("Target Detected", false);
+                hood.stop();
             }
 
             telemetry.update();
@@ -68,12 +69,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
         limelight.stop();
     }
 
-    private double hoodPositionForTelemetry(double distance) {
-        double h = tagHeight - shooterHeight;
-        double angleRad = Math.atan((h + Math.sqrt(h * h + distance * distance)) / distance);
-        double angleDeg = Math.toDegrees(angleRad);
-        return SERVO_INTERCEPT + SERVO_SLOPE * angleDeg;
-    }
+
 
 
 }

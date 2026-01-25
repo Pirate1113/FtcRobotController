@@ -9,22 +9,22 @@ public class LimelightAngle {
     public final Limelight3A limelight;
 
     // Heights in inches
-    public final double shooterHeight;
-    public final double tagHeight;
+    public static double LLHeight;
+    public static double tagHeight;
 
     /**
      * @param hw HardwareMap from OpMode
      * @param limelightName // sure
-     * @param shooterHeight // height of shooter from floor
+     * @param LLHeight // height of shooter from floor
      * @param tagHeight height of AprilTag from floor INCHES
      */
     public LimelightAngle(HardwareMap hw,
                           String limelightName,
-                          double shooterHeight,
+                          double LLHeight,
                           double tagHeight) {
 
         this.limelight = hw.get(Limelight3A.class, limelightName);
-        this.shooterHeight = shooterHeight;
+        this.LLHeight = LLHeight;
         this.tagHeight = tagHeight;
 
         limelight.start();
@@ -61,7 +61,7 @@ public class LimelightAngle {
         double pitchDeg = result.getTy();
 
         double pitchRad = Math.toRadians(pitchDeg);
-        double verticalDiff = tagHeight - shooterHeight;
+        double verticalDiff = tagHeight - LLHeight;
 
         return verticalDiff / Math.tan(pitchRad);
     }
