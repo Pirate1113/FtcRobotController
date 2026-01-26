@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.testing;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,18 +9,13 @@ public class AutoAimTestOpMode extends LinearOpMode {
     private HoodAngle hood;
     private LimelightAngle limelight;
 
-    // needs tuning of course
-    public static final double LLHeight = 14;
-    public static final double shooterHeight = 12;
+    public static final double LLHeight = 14.0;
+    public static final double shooterHeight = 12.0;
     public static final double tagHeight = 29.5;
 
     @Override
     public void runOpMode() {
-
-        // hoodangle
         hood = new HoodAngle(hardwareMap, LLHeight, tagHeight);
-
-        // yes LIMELIGHT yes yez
         limelight = new LimelightAngle(hardwareMap, "limelight", LLHeight, tagHeight);
 
         telemetry.addLine("Hood and Limelight initialized");
@@ -28,39 +24,29 @@ public class AutoAimTestOpMode extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
             if (limelight.hasTarget()) {
-                telemetry.addData("Target Detected", true);
-
-                // get distance
                 double distance = limelight.getDistanceInches();
-
-                // autoaim
                 hood.aimFromDistance(distance);
 
-                double verticalDiff = tagHeight - shooterHeight;
-                double angleRad =
-                        Math.atan((verticalDiff + Math.sqrt(
-                                verticalDiff * verticalDiff + distance * distance))
-                                / distance);
-                double angleDeg = Math.toDegrees(angleRad);
-                double servoPos = angleDeg * 8.125/255;
+                double hoodServoPos = hood.hoodPositionFromDistance(distance);
+                double actualRpm = hood.getFlywheelRpm();
+                double targetRpm = HoodAngle.BASE_RPM + distance * HoodAngle.RPM_PER_INCH;
+                double velocity = hood.getInitialVelocity(0.0376565);
 
-                // telemetry
-                telemetry.addData("Hood angle: ", angleDeg);
-                telemetry.addData("ServoPos: ", servoPos);
-                telemetry.addData("Distance (inches)", "%.2f", distance);
+                telemetry.addData("Target Detected", true);
+                telemetry.addData("Distance (in)", "%.1f", distance);
+                telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
+                telemetry.addData("Hood Servo Pos", "%.3f", hoodServoPos);
+                telemetry.addData("Target RPM", "%.0f", targetRpm);
+                telemetry.addData("Actual RPM", "%.0f", actualRpm);
+                telemetry.addData("Velocity (in/s)", "%.0f", velocity * 39.37);
             } else {
                 telemetry.addData("Target Detected", false);
             }
-
             telemetry.update();
         }
 
+        hood.stop();
         limelight.stop();
     }
-
-
-
-
 }
