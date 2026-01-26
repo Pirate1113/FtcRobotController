@@ -9,7 +9,6 @@ public class AutoAimTestOpMode extends LinearOpMode {
     private HoodAngle hood;
     private LimelightAngle limelight;
 
-    // Heights in inches
     public static final double LLHeight = 14.0;
     public static final double shooterHeight = 12.0;
     public static final double tagHeight = 29.5;
@@ -27,11 +26,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
         while (opModeIsActive()) {
             if (limelight.hasTarget()) {
                 double distance = limelight.getDistanceInches();
-
-
                 hood.aimFromDistance(distance);
-
-                //telemetry
 
                 double hoodServoPos = hood.hoodPositionFromDistance(distance);
                 double actualRpm = hood.getFlywheelRpm();
@@ -40,11 +35,11 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (in)", "%.1f", distance);
+                telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
                 telemetry.addData("Hood Servo Pos", "%.3f", hoodServoPos);
-                telemetry.addData("Target FAKE RPM", "%.0f", targetRpm);
-                telemetry.addData("Actual REAL RPM", "%.0f", actualRpm);
-                telemetry.addData("Velocity (m/s)", "%.1f", velocity);
-
+                telemetry.addData("Target RPM", "%.0f", targetRpm);
+                telemetry.addData("Actual RPM", "%.0f", actualRpm);
+                telemetry.addData("Velocity (in/s)", "%.0f", velocity * 39.37);
             } else {
                 telemetry.addData("Target Detected", false);
             }

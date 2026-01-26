@@ -69,28 +69,31 @@ public class HoodAngle {
         double ticksPerSec = flywheel.getVelocity();
         return ticksPerSec * 60.0 / 28.0;
     }
-    public double radiusMeters = 0.0376565;
+    public double radiusInches = 1.5;
 
-    public double getInitialVelocity(double radiusMeters) {
+    public double getInitialVelocity(double radiusInches) {
         double rpm = getFlywheelRpm();
-        double v =  rpm * 2.0 * Math.PI * radiusMeters / 60.0; // m/s
+        double v =  rpm * 2.0 * Math.PI * radiusInches / 60.0; // in/s
         return v;
     }
 
     // projectile math
     public double hoodPositionFromDistance(double distance) {
-
         double verticalDiff = tagHeight - shooterHeight;
 
-        double angleRad = Math.atan(verticalDiff / distance);
-
-        double projectileAngle = (double) 1 /2*asin((distance*9.81)/getInitialVelocity(0.0376565));
-
-        double angleDeg = Math.toDegrees(angleRad);
+        double g = 386.4;  // inches/s^2
+        double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(getInitialVelocity(1.5), 2));
+        double angleDeg = Math.toDegrees(projectileAngleRad);
 
         double servoPos = angleDeg * SERVO_DEG_PER_HOOD/255;
 
         return Range.clip(servoPos, 0, 1.0);
+    }
+
+    public double getProjectileAngle(double distance) {
+        double g = 386.4;
+        double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(getInitialVelocity(1.5), 2));
+        return Math.toDegrees(projectileAngleRad);
     }
 
 
