@@ -20,17 +20,16 @@ public class HoodAngle {
 
     // heights in inches
     public static double shooterHeight = 12.0;
-    public static double tagHeight = 37.0;
+    public static double tagHeight = 29.5;
 
-    public static double initialVelocity = 0.0;
 
     //hood tuning
 
     private static final double SERVO_DEG_PER_HOOD = 13;
 
     //
-    private static final double BASE_RPM = 2200;
-    private static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
+    public static final double BASE_RPM = 2200;
+    public static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
 
 
     public HoodAngle(HardwareMap hw,
