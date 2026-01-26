@@ -62,7 +62,7 @@ public class HoodAngle {
     }
 
     public double getInitialVelocity(double radiusInches) {
-        return getFlywheelRpm() * 2.0 * Math.PI * radiusInches * 60.0; // in/s;
+        return getFlywheelRpm() * 2.0 * Math.PI * radiusInches / 60.0; // in/s;
     }
 
     // projectile math
