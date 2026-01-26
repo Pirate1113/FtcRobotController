@@ -30,14 +30,14 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
                 double hoodServoPos = hood.hoodPositionFromDistance(distance);
                 double actualRpm = hood.getFlywheelRpm();
-                double targetRpm = HoodAngle.BASE_RPM + distance * HoodAngle.RPM_PER_INCH;
+
                 double velocity = hood.getInitialVelocity(0.0376565);
 
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (in)", "%.1f", distance);
                 telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
                 telemetry.addData("Hood Servo Pos", "%.3f", hoodServoPos);
-                telemetry.addData("Target RPM", "%.0f", targetRpm);
+
                 telemetry.addData("Actual RPM", "%.0f", actualRpm);
                 telemetry.addData("Velocity (in/s)", "%.0f", velocity * 39.37);
             } else {

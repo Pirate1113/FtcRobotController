@@ -28,9 +28,6 @@ public class HoodAngle {
     private static final double SERVO_DEG_PER_HOOD = 13;
 
     //
-    public static final double BASE_RPM = 2200;
-    public static final double RPM_PER_INCH = 67; //this is basically fake idk if we need this but tune 67
-
 
     public HoodAngle(HardwareMap hw,
                      double LLHeight,
@@ -49,8 +46,7 @@ public class HoodAngle {
         double hoodPos = hoodPositionFromDistance(distanceInches);
         hood.setPosition(hoodPos);
 
-        double rpm = BASE_RPM + distanceInches * RPM_PER_INCH;
-        flywheel.setVelocity(rpm);
+        flywheel.setVelocity(3500);
     }
 
     public void aimFromLimelight(LimelightAngle limelight) {
@@ -91,8 +87,20 @@ public class HoodAngle {
     }
 
     public double getProjectileAngle(double distance) {
-        double g = 386.4;
-        double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(getInitialVelocity(1.5), 2));
+        double g = 386.4; // in/s^2
+        double y = tagHeight - shooterHeight; // y val
+        double x = distance;
+
+        double v0 = getInitialVelocity(1.5);
+
+        double a = (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
+        double b = -x;
+        double c = y + (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
+
+        double discriminant = b*b - 4*a*c;
+        double tanTheta = (-b - Math.sqrt(discriminant)) / (2*a);
+        // make the sign in front of the discriminant a positive for the high angle just went with low angle
+        double projectileAngleRad = Math.atan(tanTheta);
         return Math.toDegrees(projectileAngleRad);
     }
 
