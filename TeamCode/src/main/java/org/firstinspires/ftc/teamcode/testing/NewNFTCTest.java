@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 //import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.TestSpindexer;
 
 import dev.nextftc.bindings.BindingManager;
 import dev.nextftc.bindings.Button;
@@ -23,7 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 public class NewNFTCTest extends NextFTCOpMode {
     public NewNFTCTest() {
         addComponents(
-                new SubsystemComponent(Intake.INSTANCE),
+                new SubsystemComponent(TestSpindexer.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -33,14 +34,16 @@ public class NewNFTCTest extends NextFTCOpMode {
     public void onStartButtonPressed() {
         //left intake control
 
-        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
-        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
+        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(TestSpindexer.INSTANCE.b1).whenBecomesFalse(TestSpindexer.INSTANCE.b2);
+        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(TestSpindexer.INSTANCE.b3);
     }
     @Override
     public void onUpdate() {
         BindingManager.update();
-        telemetry.addData("Left Intake Power", Intake.INSTANCE.getLeftPower());
-        telemetry.addData("Right Intake Power", Intake.INSTANCE.getRightPower());
+        telemetry.addData("Left Power", TestSpindexer.INSTANCE.getLeftPower());
+        telemetry.addData("Left Goal", TestSpindexer.INSTANCE.getLeftGoal());
+        telemetry.addData("Left Pos", TestSpindexer.INSTANCE.getLeftPosition());
+        telemetry.addData("Left Raw Pos", TestSpindexer.INSTANCE.getLeftRawPosition());
 //        telemetry.addData("Left Servo Pow", "%.2f", Spindexer.INSTANCE.getLeftPower());
 //        telemetry.addData("Right Servo Pow", "%.2f", Spindexer.INSTANCE.getRightPower());
 //        telemetry.addData("EjectorPos", "%.2f", Spindexer.INSTANCE.getEjectorPos());

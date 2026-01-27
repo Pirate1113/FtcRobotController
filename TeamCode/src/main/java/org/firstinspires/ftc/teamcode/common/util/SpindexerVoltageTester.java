@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.common.util;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -10,16 +11,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class SpindexerVoltageTester extends LinearOpMode {
 
     private AnalogInput spindexerEncoder;
-    private Servo servoLeft;
-    private Servo servoRight;
+    private CRServo servoLeft;
+    private CRServo servoRight;
 
     @Override
     public void runOpMode() {
 
-        AnalogInput EncoderLeft = hardwareMap.get(AnalogInput.class, "spindexerEncoderLeft");
-        AnalogInput EncoderRight = hardwareMap.get(AnalogInput.class, "spindexerEncoderRight");
-        servoLeft = hardwareMap.get(Servo.class, "servoLeft");
-        servoRight = hardwareMap.get(Servo.class, "servoRight");
+        AnalogInput EncoderLeft = hardwareMap.get(AnalogInput.class, "analogLeft");
+        AnalogInput EncoderRight = hardwareMap.get(AnalogInput.class, "analogRight");
+        servoLeft = hardwareMap.get(CRServo.class, "spindexerleft");
+        servoRight = hardwareMap.get(CRServo.class, "spindexerright");
 
         waitForStart();
 
@@ -28,9 +29,8 @@ public class SpindexerVoltageTester extends LinearOpMode {
             double voltageLeft = EncoderLeft.getVoltage();
             double voltageRight = EncoderRight.getVoltage();
 
-            telemetry.addData("Spindexer Voltage Left", "%.3f", voltageLeft);
-            telemetry.addData("Spindexer Voltage Right", "%.3f", voltageRight);
-            telemetry.addData("Servo Pos", servoLeft.getPosition());
+            telemetry.addData("Spindexer Voltage Left", "%.3f", voltageLeft/3.3);
+            telemetry.addData("Spindexer Voltage Right", "%.3f", voltageRight/3.3);
             telemetry.update();
         }
     }

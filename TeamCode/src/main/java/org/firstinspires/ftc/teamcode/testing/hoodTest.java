@@ -42,11 +42,11 @@ public class hoodTest extends NextFTCOpMode {
         Gamepads.gamepad2().y().toggleOnBecomesFalse().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
         Gamepads.gamepad2().rightTrigger().greaterThan(0.2).whenBecomesTrue(Flywheel.INSTANCE.setFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);
         Gamepads.gamepad2().rightBumper().toggleOnBecomesFalse().whenBecomesTrue(Flywheel.INSTANCE.backFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);
-        Gamepads.gamepad2().leftStickY().greaterThan(0.5).toggleOnBecomesFalse().whenBecomesTrue(new InstantCommand(() -> {
-                pos = Math.min(pos+0.05, 1.00);
+        Gamepads.gamepad2().leftStickY().greaterThan(0.5).whenBecomesTrue(new InstantCommand(() -> {
+                Hood.INSTANCE.incPos();
                 Hood.INSTANCE.SetPos(pos);
             }).then(Hood.INSTANCE.moveHood)).whenBecomesFalse(new InstantCommand(() -> {
-                pos = Math.max(pos - 0.05, -1.00);
+                Hood.INSTANCE.decPos();
                 Hood.INSTANCE.SetPos(pos);
                 }).then(Hood.INSTANCE.moveHood));
     }

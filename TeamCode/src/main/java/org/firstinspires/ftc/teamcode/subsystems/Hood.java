@@ -35,6 +35,12 @@ public class Hood implements Subsystem {
     public void SetPos(double sk) {
         pos = sk;
     }
+    public void incPos() {
+        pos = Math.min(pos+0.05, 1.00);
+    }
+    public void decPos() {
+        pos = Math.max(pos - 0.05, -1.00);
+    }
 }
 //
 //    public Command moveLeft = new InstantCommand(() -> {
