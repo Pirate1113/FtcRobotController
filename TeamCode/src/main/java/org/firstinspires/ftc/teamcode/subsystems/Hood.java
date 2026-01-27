@@ -5,6 +5,7 @@ import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.positionable.SetPosition;
 
 public class Hood implements Subsystem {
     public static final Hood INSTANCE = new Hood();
@@ -14,21 +15,28 @@ public class Hood implements Subsystem {
 
     private ServoEx hood;
     public double pitchDeg;
+    private double pos;
 
 
     public void initialize() {
-        hood = new ServoEx("feedServo");
+        hood = new ServoEx("hoodServo");
     }
 
     public void setPitchDeg(double set) {
         pitchDeg = set;
     }
 
-    public Command setHood = new InstantCommand(() -> {
-        double pos = 0.45 + pitchDeg * 1 / 360;  // need to tune 0.45 (initial hood angle), and the 0.002 prob should be tuned too
-        pos = Math.max(0.0, Math.min(1.0, pos));
-        hood.setPosition(pos);
+    public Command incHood = new InstantCommand(() -> {
+        pos = Math.min(pos+0.05, 1.00);
+        new SetPosition(hood, pos).schedule();
     });
+    public Command decHood = new InstantCommand(() -> {
+        pos = Math.max(pos-0.05, -1);
+        new SetPosition(hood, pos).schedule();
+    });
+    public double getPos() {
+        return pos;
+    }
 }
 //
 //    public Command moveLeft = new InstantCommand(() -> {
