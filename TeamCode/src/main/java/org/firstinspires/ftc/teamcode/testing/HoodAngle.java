@@ -84,6 +84,7 @@ public class HoodAngle {
         double c = y + (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
 
         double discriminant = b*b - 4*a*c;
+        telemetry.addData("discrimination: ", discriminant);
         double tanTheta = (-b + Math.sqrt(discriminant)) / (2*a);
         // make the sign in front of the discriminant a positive for the high angle
         double projectileAngleRad = Math.atan(tanTheta);
