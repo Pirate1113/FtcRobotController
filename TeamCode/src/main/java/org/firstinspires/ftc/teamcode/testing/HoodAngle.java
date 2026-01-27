@@ -42,7 +42,7 @@ public class HoodAngle {
         if (distanceInches < 1.0) return;
 
         //hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
-
+        hoodPositionFromDistance(distanceInches, telemetry);
         flywheel.setVelocity(3500);
     }
 
@@ -83,7 +83,7 @@ public class HoodAngle {
 
     public double hoodPositionFromDistance(double distance, Telemetry telemetry) {
         double angleDeg = getProjectileAngle(distance);
-        double servoPos = Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0);
+        double servoPos = Math.abs(Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0));
 
         telemetry.addData("Servoting: ", servoPos);
 
