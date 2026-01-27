@@ -31,7 +31,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
                 hood.aimFromDistance(distance);
                 double actualRpm = hood.getFlywheelRpm();
 
-                double g = 386.4;  // inches/s^2
+                double g = -386.4;  // inches/s^2
                 double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(hood.getInitialVelocity(1.5), 2));
                 double angleDeg = Math.toDegrees(projectileAngleRad);
 
