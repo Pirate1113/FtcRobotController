@@ -41,8 +41,7 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
 
-        //hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
-        hoodPositionFromDistance(distanceInches, telemetry);
+        hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
         flywheel.setVelocity(3500);
     }
 
@@ -74,7 +73,7 @@ public class HoodAngle {
         double c = y + (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
 
         double discriminant = b*b - 4*a*c;
-        double tanTheta = (-b - Math.sqrt(discriminant)) / (2*a);
+        double tanTheta = (-b + Math.sqrt(discriminant)) / (2*a);
         // make the sign in front of the discriminant a positive for the high angle
         double projectileAngleRad = Math.atan(tanTheta);
         double angleDeg = Math.toDegrees(projectileAngleRad);
@@ -89,7 +88,6 @@ public class HoodAngle {
 
         return servoPos;
     }
-
 
 
 }
