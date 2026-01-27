@@ -28,7 +28,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
         while (opModeIsActive()) {
             if (limelight.hasTarget()) {
                 double distance = limelight.getDistanceInches();
-                hood.aimFromDistance(distance);
+                hood.aimFromDistance(distance, telemetry);
                 double actualRpm = hood.getFlywheelRpm();
 
                 double g = -386.4;  // inches/s^2
