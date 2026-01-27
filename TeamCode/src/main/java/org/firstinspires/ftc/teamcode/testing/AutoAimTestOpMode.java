@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import static java.lang.Math.asin;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -27,22 +29,25 @@ public class AutoAimTestOpMode extends LinearOpMode {
             if (limelight.hasTarget()) {
                 double distance = limelight.getDistanceInches();
                 hood.aimFromDistance(distance);
-
-                double hoodServoPos = hood.hoodPositionFromDistance(distance);
                 double actualRpm = hood.getFlywheelRpm();
 
-                double velocity = hood.getInitialVelocity(0.0376565);
+                double g = 386.4;  // inches/s^2
+                double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(hood.getInitialVelocity(1.5), 2));
+                double angleDeg = Math.toDegrees(projectileAngleRad);
+
+                double servoPos = angleDeg * 8.125/255;
+
+                double velocity = hood.getInitialVelocity(1.5);
 
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (in)", "%.1f", distance);
                 telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
-                telemetry.addData("Hood Servo Pos", "%.3f", hoodServoPos);
+                telemetry.addData("Hood Servo Pos", "%.3f", servoPos);
 
                 telemetry.addData("Actual RPM", "%.0f", actualRpm);
-                telemetry.addData("Velocity (in/s)", "%.0f", velocity * 39.37);
-            } else {
-                telemetry.addData("Target Detected", false);
-            }
+                telemetry.addData("Velocity (in/s)", "%.0f", velocity);
+            } else telemetry.addData("Target Detected", false);
+
             telemetry.update();
         }
 
