@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import dev.nextftc.bindings.BindingManager;
 import dev.nextftc.bindings.Button;
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Hood;
 
 @TeleOp(name = "HoodTest")
 public class hoodTest extends NextFTCOpMode {
+    public double pos = 0;
     public hoodTest() {
         addComponents(
                 new SubsystemComponent(Spindexer.INSTANCE,Palm.INSTANCE,Flywheel.INSTANCE, Hood.INSTANCE),
@@ -40,8 +42,15 @@ public class hoodTest extends NextFTCOpMode {
         Gamepads.gamepad2().y().toggleOnBecomesFalse().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
         Gamepads.gamepad2().rightTrigger().greaterThan(0.2).whenBecomesTrue(Flywheel.INSTANCE.setFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);
         Gamepads.gamepad2().rightBumper().toggleOnBecomesFalse().whenBecomesTrue(Flywheel.INSTANCE.backFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);
-        Gamepads.gamepad2().leftStickY().greaterThan(0.5).whenBecomesTrue(Hood.INSTANCE.incHood).whenBecomesFalse(Hood.INSTANCE.decHood);
+        Gamepads.gamepad2().leftStickY().greaterThan(0.5).toggleOnBecomesFalse().whenBecomesTrue(new InstantCommand(() -> {
+                pos = Math.min(pos+0.05, 1.00);
+                Hood.INSTANCE.SetPos(pos);
+            }).then(Hood.INSTANCE.moveHood)).whenBecomesFalse(new InstantCommand(() -> {
+                pos = Math.max(pos - 0.05, -1.00);
+                Hood.INSTANCE.SetPos(pos);
+                }).then(Hood.INSTANCE.moveHood));
     }
+
     @Override
     public void onUpdate() {
         BindingManager.update();

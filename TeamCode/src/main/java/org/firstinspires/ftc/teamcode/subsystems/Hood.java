@@ -26,16 +26,14 @@ public class Hood implements Subsystem {
         pitchDeg = set;
     }
 
-    public Command incHood = new InstantCommand(() -> {
-        pos = Math.min(pos+0.05, 1.00);
-        new SetPosition(hood, pos).schedule();
-    });
-    public Command decHood = new InstantCommand(() -> {
-        pos = Math.max(pos-0.05, -1);
-        new SetPosition(hood, pos).schedule();
+    public Command moveHood = new InstantCommand(() -> {
+        hood.setPosition(pos);
     });
     public double getPos() {
         return pos;
+    }
+    public void SetPos(double sk) {
+        pos = sk;
     }
 }
 //
