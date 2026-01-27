@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import static java.lang.Math.asin;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -19,6 +17,8 @@ public class AutoAimTestOpMode extends LinearOpMode {
     public void runOpMode() {
         hood = new HoodAngle(hardwareMap, LLHeight, tagHeight);
         limelight = new LimelightAngle(hardwareMap, "limelight", LLHeight, tagHeight);
+
+        limelight.pipelineSwitch(0);
 
         telemetry.addLine("Hood and Limelight initialized");
         telemetry.update();
