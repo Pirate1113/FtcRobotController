@@ -8,32 +8,30 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import dev.nextftc.hardware.impl.ServoEx;
+
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+
 public class HoodAngle {
 
-    private final Servo hood;
+    private final ServoEx hood;
     public DcMotorEx flywheel;
 
-    //constants
-
-    // heights in inches
-    public static double shooterHeight = 12.0;
-    public static double tagHeight = 29.5;
-
+    //constants heights in inches
+    public static double SHOOTER_HEIGHT = 12.0;
+    public static double GOAL_HEIGHT = 39;
+    private static final double HEIGHT_DIFF = GOAL_HEIGHT - SHOOTER_HEIGHT;
 
     //hood tuning
-
     private static final double SERVO_DEG_PER_HOOD = 8.125;
-
-    //
 
     public HoodAngle(HardwareMap hw,
                      double LLHeight,
                      double tagHeight) {
 
-        hood = hw.get(Servo.class, "hoodServo");
+        hood = new ServoEx("hoodServo", 0.05);
         flywheel = hw.get(DcMotorEx.class, "shooter1");
 
         flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -71,29 +69,32 @@ public class HoodAngle {
 
     // projectile math fixed
 
-    public double getProjectileAngle(double distance, Telemetry telemetry) {
-        double g = 386.4; // in/s^2
-        double y = tagHeight - shooterHeight; // y val
-        double x = distance;
+    public static double getProjectileAngle(double v0, double R, Telemetry telemetry) {
+        double g = 386.09; // in/s^2
 
-        double v0 = getInitialVelocity(1.5);
-        telemetry.addData("velocity: ", v0);
+        if (v0 <= 0 || R <= 0) return Double.NaN;
 
-        double a = (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
-        double b = -x;
-        double c = y + (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
+        double A = (g * R * R) / (2.0 * v0 * v0);
+        double B = -R;
+        double C = A + HEIGHT_DIFF;
 
-        double discriminant = b*b - 4*a*c;
-        telemetry.addData("discrimination: ", discriminant);
-        double tanTheta = (-b + Math.sqrt(discriminant)) / (2*a);
-        // make the sign in front of the discriminant a positive for the high angle
-        double projectileAngleRad = Math.atan(tanTheta);
+        double D = B*B - 4*A*C;
+        telemetry.addData("discrmination: ", D);
+//        if (D < 0) return Double.NaN; // unreachable
 
-        return Math.toDegrees(projectileAngleRad);
+        double sqrtD = Math.sqrt(D);
+
+        // choose low-angle solution (usually better for FTC)
+        double T = (-B - sqrtD) / (2*A);
+
+        // for high arc instead:
+        // double T = (-B + sqrtD) / (2*A);
+
+        return Math.atan(T); // radians
     }
 
     public double hoodPositionFromDistance(double distance, Telemetry telemetry) {
-        double angleDeg = getProjectileAngle(distance, telemetry);
+        double angleDeg = getProjectileAngle(getInitialVelocity(1.5), distance, telemetry);
         double servoPos = Math.abs(Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0));
 
         telemetry.addData("what the hood is supposed to be at: ", angleDeg);
