@@ -30,6 +30,10 @@ public class LimelightAngle {
         limelight.start();
     }
 
+    public void pipelineSwitch (int index) {
+        limelight.pipelineSwitch(index);
+    }
+
     /** @return true if Limelight currently sees a valid target */
     public boolean hasTarget() {
         LLResult result = limelight.getLatestResult();
