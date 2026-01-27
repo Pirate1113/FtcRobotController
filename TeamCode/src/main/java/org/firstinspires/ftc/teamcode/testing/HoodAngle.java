@@ -47,6 +47,7 @@ public class HoodAngle {
 
 
         hood.setPosition(0);
+        telemetry.addData("hoodPos: ", hoodPositionFromDistance(distanceInches, telemetry));
 
 //        if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
 //            hood.setPosition(0);
