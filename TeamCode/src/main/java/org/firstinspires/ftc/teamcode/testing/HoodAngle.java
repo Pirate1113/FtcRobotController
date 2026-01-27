@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class HoodAngle {
 
     private final Servo hood;
@@ -36,19 +38,12 @@ public class HoodAngle {
     }
 
 
-    public void aimFromDistance(double distanceInches) {
+    public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
 
-        hood.setPosition(hoodPositionFromDistance(distanceInches));
+        //hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
 
         flywheel.setVelocity(3500);
-    }
-
-    public void aimFromLimelight(LimelightAngle limelight) {
-        if (!limelight.hasTarget()) return;
-
-        double distance = limelight.getDistanceInches();
-        aimFromDistance(distance);
     }
 
 
@@ -86,15 +81,13 @@ public class HoodAngle {
         return Math.toDegrees(projectileAngleRad);
     }
 
-    public double hoodPositionFromDistance(double distance) {
+    public double hoodPositionFromDistance(double distance, Telemetry telemetry) {
         double angleDeg = getProjectileAngle(distance);
-        double servoPos = angleDeg * SERVO_DEG_PER_HOOD / 255.0;
-        System.out.println("distance: " + distance);
-        System.out.println("angleDeg: " + angleDeg);
-        System.out.println("servoPos raw: " + servoPos);
-        System.out.println("servoPos clipped: " + Range.clip(servoPos, 0.0, 1.0));
+        double servoPos = Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0);
 
-        return Range.clip(servoPos, 0.0, 1.0);
+        telemetry.addData("Servoting: ", servoPos);
+
+        return servoPos;
     }
 
 
