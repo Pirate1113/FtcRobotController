@@ -117,7 +117,4 @@ public class TestSpindexer implements Subsystem {
     public double getLeftPower() {
         return powerLeft;
     }
-//    public String getRightGoal() {
-//        return controllerRight.getGoal().toString();
-//    }
 }
