@@ -70,9 +70,7 @@ public class HoodAngle {
     // projectile math fixed
 
     public static double getProjectileAngle(double v0, double R, Telemetry telemetry) {
-        double g = 386.09; // in/s^2
-
-        if (v0 <= 0 || R <= 0) return Double.NaN;
+        double g = 386.09;
 
         double A = (g * R * R) / (2.0 * v0 * v0);
         double B = -R;
@@ -80,15 +78,12 @@ public class HoodAngle {
 
         double D = B*B - 4*A*C;
         telemetry.addData("discrmination: ", D);
-//        if (D < 0) return Double.NaN; // unreachable
-
+        
         double sqrtD = Math.sqrt(D);
 
-        // choose low-angle solution (usually better for FTC)
-        double T = (-B - sqrtD) / (2*A);
+        double T = (-B - sqrtD) / (2*A); //low
 
-        // for high arc instead:
-        // double T = (-B + sqrtD) / (2*A);
+        // double T = (-B + sqrtD) / (2*A); //high
 
         return Math.atan(T); // radians
     }
