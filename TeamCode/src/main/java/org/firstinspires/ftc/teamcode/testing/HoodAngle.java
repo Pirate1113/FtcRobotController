@@ -68,7 +68,7 @@ public class HoodAngle {
     // projectile math fixed
 
     public double getProjectileAngle(double distance) {
-        double g = 386.4; // in/s^2
+        double g = -386.4; // in/s^2
         double y = tagHeight - shooterHeight; // y val
         double x = distance;
 
@@ -89,8 +89,14 @@ public class HoodAngle {
     public double hoodPositionFromDistance(double distance) {
         double angleDeg = getProjectileAngle(distance);
         double servoPos = angleDeg * SERVO_DEG_PER_HOOD / 255.0;
+        System.out.println("distance: " + distance);
+        System.out.println("angleDeg: " + angleDeg);
+        System.out.println("servoPos raw: " + servoPos);
+        System.out.println("servoPos clipped: " + Range.clip(servoPos, 0.0, 1.0));
+
         return Range.clip(servoPos, 0.0, 1.0);
     }
+
 
 
 }
