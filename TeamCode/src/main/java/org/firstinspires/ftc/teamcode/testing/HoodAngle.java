@@ -72,7 +72,7 @@ public class HoodAngle {
     // projectile math fixed
 
     public double getProjectileAngle(double distance, Telemetry telemetry) {
-        double g = -386.4; // in/s^2
+        double g = 386.4; // in/s^2
         double y = tagHeight - shooterHeight; // y val
         double x = distance;
 
