@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.testing;
 
 import static java.lang.Math.*;
+
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -34,15 +36,17 @@ public class HoodAngle {
         hood = hw.get(Servo.class, "hoodServo");
         flywheel = hw.get(DcMotorEx.class, "shooter1");
 
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
 
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
+        flywheel.setVelocity(3500);
 
         hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
-        flywheel.setVelocity(3500);
+
     }
 
 
@@ -76,7 +80,7 @@ public class HoodAngle {
         double tanTheta = (-b + Math.sqrt(discriminant)) / (2*a);
         // make the sign in front of the discriminant a positive for the high angle
         double projectileAngleRad = Math.atan(tanTheta);
-        double angleDeg = Math.toDegrees(projectileAngleRad);
+
         return Math.toDegrees(projectileAngleRad);
     }
 
