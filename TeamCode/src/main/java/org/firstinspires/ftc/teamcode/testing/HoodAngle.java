@@ -44,16 +44,14 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
         flywheel.setVelocity(3500);
-
-
-        hood.setPosition(0);
+        
         telemetry.addData("hoodPos: ", hoodPositionFromDistance(distanceInches, telemetry));
 
-//        if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
-//            hood.setPosition(0);
-//        } else {
-//            hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
-//        }
+        if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
+            hood.setPosition(0);
+        } else {
+            hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
+        }
 
     }
 
