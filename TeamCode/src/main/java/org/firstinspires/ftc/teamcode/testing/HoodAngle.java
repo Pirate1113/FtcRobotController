@@ -73,18 +73,7 @@ public class HoodAngle {
         return v;
     }
 
-    // projectile math
-    public double hoodPositionFromDistance(double distance) {
-        double verticalDiff = tagHeight - shooterHeight;
-
-        double g = 386.4;  // inches/s^2
-        double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(getInitialVelocity(1.5), 2));
-        double angleDeg = Math.toDegrees(projectileAngleRad);
-
-        double servoPos = angleDeg * SERVO_DEG_PER_HOOD/255;
-
-        return Range.clip(servoPos, 0, 1.0);
-    }
+    // projectile math fixed
 
     public double getProjectileAngle(double distance) {
         double g = 386.4; // in/s^2
@@ -99,9 +88,16 @@ public class HoodAngle {
 
         double discriminant = b*b - 4*a*c;
         double tanTheta = (-b - Math.sqrt(discriminant)) / (2*a);
-        // make the sign in front of the discriminant a positive for the high angle just went with low angle
+        // make the sign in front of the discriminant a positive for the high angle
         double projectileAngleRad = Math.atan(tanTheta);
+        double angleDeg = Math.toDegrees(projectileAngleRad);
         return Math.toDegrees(projectileAngleRad);
+    }
+
+    public double hoodPositionFromDistance(double distance) {
+        double angleDeg = getProjectileAngle(distance);
+        double servoPos = angleDeg * SERVO_DEG_PER_HOOD / 255.0;
+        return Range.clip(servoPos, 0.0, 1.0);
     }
 
 
