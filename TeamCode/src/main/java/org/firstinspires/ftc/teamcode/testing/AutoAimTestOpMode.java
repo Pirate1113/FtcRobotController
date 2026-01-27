@@ -35,7 +35,7 @@ public class AutoAimTestOpMode extends LinearOpMode {
 
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (in)", "%.1f", distance);
-                telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
+                telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance, telemetry));
 
                 telemetry.addData("Velocity (in/s)", "%.0f", velocity);
             } else telemetry.addData("Target Detected", false);

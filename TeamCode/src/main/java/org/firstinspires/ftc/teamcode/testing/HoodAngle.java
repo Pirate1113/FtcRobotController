@@ -44,7 +44,7 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
         flywheel.setVelocity(3500);
-        
+
         telemetry.addData("hoodPos: ", hoodPositionFromDistance(distanceInches, telemetry));
 
         if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
@@ -71,12 +71,13 @@ public class HoodAngle {
 
     // projectile math fixed
 
-    public double getProjectileAngle(double distance) {
+    public double getProjectileAngle(double distance, Telemetry telemetry) {
         double g = -386.4; // in/s^2
         double y = tagHeight - shooterHeight; // y val
         double x = distance;
 
         double v0 = getInitialVelocity(1.5);
+        telemetry.addData("velocity: ", v0);
 
         double a = (g*Math.pow(x, 2))/(2*Math.pow(v0, 2));
         double b = -x;
@@ -91,9 +92,10 @@ public class HoodAngle {
     }
 
     public double hoodPositionFromDistance(double distance, Telemetry telemetry) {
-        double angleDeg = getProjectileAngle(distance);
+        double angleDeg = getProjectileAngle(distance, telemetry);
         double servoPos = Math.abs(Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0));
 
+        telemetry.addData("what the hood is supposed to be at: ", angleDeg);
         telemetry.addData("Servoting: ", servoPos);
 
         return servoPos;
