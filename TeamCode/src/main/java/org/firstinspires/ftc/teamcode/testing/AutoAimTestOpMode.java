@@ -29,22 +29,14 @@ public class AutoAimTestOpMode extends LinearOpMode {
             if (limelight.hasTarget()) {
                 double distance = limelight.getDistanceInches();
                 hood.aimFromDistance(distance, telemetry);
-                double actualRpm = hood.getFlywheelRpm();
 
-                double g = -386.4;  // inches/s^2
-                double projectileAngleRad = 0.5 * asin((distance*g)/Math.pow(hood.getInitialVelocity(1.5), 2));
-                double angleDeg = Math.toDegrees(projectileAngleRad);
-
-                double servoPos = angleDeg * 8.125/255;
 
                 double velocity = hood.getInitialVelocity(1.5);
 
                 telemetry.addData("Target Detected", true);
                 telemetry.addData("Distance (in)", "%.1f", distance);
                 telemetry.addData("Projectile Angle", "%.1f°", hood.getProjectileAngle(distance));
-                telemetry.addData("Hood Servo Pos", "%.3f", servoPos);
 
-                telemetry.addData("Actual RPM", "%.0f", actualRpm);
                 telemetry.addData("Velocity (in/s)", "%.0f", velocity);
             } else telemetry.addData("Target Detected", false);
 
