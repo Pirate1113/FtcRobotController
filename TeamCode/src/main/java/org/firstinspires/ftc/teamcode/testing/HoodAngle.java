@@ -41,7 +41,7 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
 
-        hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
+        //hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
 
         flywheel.setVelocity(3500);
     }
