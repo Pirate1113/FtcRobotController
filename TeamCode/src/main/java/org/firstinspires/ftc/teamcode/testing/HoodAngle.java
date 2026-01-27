@@ -42,13 +42,13 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
         flywheel.setVelocity(3500);
+        double servoPos = hoodPositionFromDistance(distanceInches, telemetry);
+        telemetry.addData("hoodPos: ", servoPos);
 
-        telemetry.addData("hoodPos: ", hoodPositionFromDistance(distanceInches, telemetry));
-
-        if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
+        if (Double.isNaN(servoPos) ){
             hood.setPosition(0);
         } else {
-            hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
+            hood.setPosition(servoPos);
         }
 
     }
@@ -78,7 +78,7 @@ public class HoodAngle {
 
         double D = B*B - 4*A*C;
         telemetry.addData("discrmination: ", D);
-        
+
         double sqrtD = Math.sqrt(D);
 
         double T = (-B - sqrtD) / (2*A); //low
