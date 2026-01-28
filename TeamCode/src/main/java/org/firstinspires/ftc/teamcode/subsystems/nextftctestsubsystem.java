@@ -1,0 +1,40 @@
+package org.firstinspires.ftc.teamcode.subsystems;
+
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.hardware.controllable.RunToVelocity;
+import dev.nextftc.hardware.impl.MotorEx;
+import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.positionable.SetPosition;
+import dev.nextftc.hardware.powerable.SetPower;
+
+public class nextftctestsubsystem implements Subsystem {
+    public static final nextftctestsubsystem INSTANCE = new nextftctestsubsystem();
+    private double pos = 0;
+    private nextftctestsubsystem() {
+    }
+
+    private ServoEx palm;
+
+
+    public void initialize() {
+        palm = new ServoEx("feedServo");
+    }
+
+    public void periodic() {
+    }
+
+    public final Command on = new InstantCommand(() -> {
+        pos = 0;
+        palm.setPosition(0);
+    }).requires(this);
+    public final Command off = new InstantCommand(() -> {
+        pos = 0.38;
+        palm.setPosition(pos);
+    }).requires(this);
+    public double getPos() {
+        return pos;
+    }
+}
