@@ -47,9 +47,9 @@ public class SwerveDrivetrain implements Subsystem {
 
     public static double[][] PIDKVal = {
             {0.6, 0 ,0.2, 0}, // fL
-            {0.6, 0 ,0.2, 0}, // fR
+            {0.6, 0 ,0.6, 0}, // fR
             {0.6, 0 ,0.2, 0}, // bR
-            {0.6, 0 ,0.2, 0}  // bL
+            {0.6, 0 ,0.6, 0}  // bL
     };
 
     @NonNull

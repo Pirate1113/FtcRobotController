@@ -101,6 +101,7 @@ public class SwerveModule{
         } else {
             wheelFlipped = false;
         }
+        error = Angle.Companion.wrapAnglePiToPi(target - current);
 
         pid.setGoal(new KineticState(target));
 
@@ -111,15 +112,21 @@ public class SwerveModule{
             velocity = 0;
         }
 
+        lastCurrent = current;
+
         KineticState sCurrent = new KineticState(current, velocity);
 
         power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
     }
 
-    public void write(double wheelVel){
+    public void write(double wV){
+        this.wheelVel = wV;
         axon.setPower(power);
+
+
         if (wheelFlipped) wheelVel *= -1;
-        drive.setVelocity(wheelVel);
+
+        drive.setVelocity(Math.cos(Math.abs(error)) * wheelVel);
     }
 
     public void getTelemetry(Telemetry telemetry){
@@ -130,7 +137,7 @@ public class SwerveModule{
         telemetry.addData("Power", power);
         telemetry.addData("Rot vel", velocity);
         telemetry.addData("Wheel Flipped", wheelFlipped);
-        telemetry.addData("Drive power", wheelVel);
+        telemetry.addData("Drive vel: ", wheelVel);
     }
 
 }
