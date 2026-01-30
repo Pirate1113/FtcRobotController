@@ -88,17 +88,17 @@ public class TestSpindexer implements Subsystem {
 
     public Command b1 = new RunToPosition(
             controllerLeft,
-            0,
+            0, // -offset
             0.05   // absolute tolerance in units
     );
     public Command b2 = new RunToPosition(
             controllerLeft,
-            Math.PI/1.5,
+            Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public Command b3 = new RunToPosition(
             controllerLeft,
-            -Math.PI/1.5,
+            -Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public double getLeftPosition() {
