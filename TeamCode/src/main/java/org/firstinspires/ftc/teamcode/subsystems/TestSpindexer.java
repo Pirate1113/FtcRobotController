@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -22,8 +24,9 @@ public class TestSpindexer implements Subsystem {
     private FeedbackCRServoEx servoRight;
 
     // Control Systems (one for each servo)
+    private final PIDCoefficients pidValues = new PIDCoefficients(0.1, 0.0, 0.01);
     private final ControlSystem controllerLeft = ControlSystem.builder()
-            .posPid(0.1, 0.0, 0.01)
+            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
             .build();
 
     // Position tracking for left servo
@@ -59,7 +62,10 @@ public class TestSpindexer implements Subsystem {
 
         // Get actual velocity from servo, combine with unwrapped position
         velocityLeft = servoLeft.getVelocity();
-        powerLeft = controllerLeft.calculate(servoLeft.getState());
+
+        // Create KineticState with unwrapped position and velocity (like SwerveModule)
+        KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
+        powerLeft = controllerLeft.calculate(currentState);
 
         servoLeft.setPower(powerLeft);
         servoRight.setPower(powerLeft);
