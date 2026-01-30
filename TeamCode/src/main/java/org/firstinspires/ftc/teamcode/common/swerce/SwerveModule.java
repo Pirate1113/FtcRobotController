@@ -37,6 +37,7 @@ public class SwerveModule{
     double target;
     double lastTarget;
     double error;
+    private double lastTimeStamp;
     double period;
     double velocity;
 
@@ -50,7 +51,6 @@ public class SwerveModule{
     private DcMotorEx drive;
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
-
 
     /** Construcotr is:
      @param n name
@@ -91,6 +91,11 @@ public class SwerveModule{
     } // this comes out [-pi, pi)
 
     public void rotateTo(double tar){
+        double currentTimeStamp = (double) System.nanoTime() / 1E9;
+        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
+        period = currentTimeStamp - lastTimeStamp;
+        lastTimeStamp = currentTimeStamp;
+
         this.target = Angle.Companion.wrapAnglePiToPi(tar);
 
         this.error = Angle.Companion.wrapAnglePiToPi(target-current);
@@ -101,6 +106,7 @@ public class SwerveModule{
         } else {
             wheelFlipped = false;
         }
+        error = Angle.Companion.wrapAnglePiToPi(target - current);
 
         pid.setGoal(new KineticState(target));
 
@@ -111,15 +117,21 @@ public class SwerveModule{
             velocity = 0;
         }
 
+        lastCurrent = current;
+
         KineticState sCurrent = new KineticState(current, velocity);
 
         power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
     }
 
-    public void write(double wheelVel){
+    public void write(double wV){
+        this.wheelVel = wV;
         axon.setPower(power);
+
+
         if (wheelFlipped) wheelVel *= -1;
-        drive.setVelocity(wheelVel);
+
+        drive.setVelocity(Math.cos(Math.abs(error)) * wheelVel);
     }
 
     public void getTelemetry(Telemetry telemetry){
@@ -130,7 +142,7 @@ public class SwerveModule{
         telemetry.addData("Power", power);
         telemetry.addData("Rot vel", velocity);
         telemetry.addData("Wheel Flipped", wheelFlipped);
-        telemetry.addData("Drive power", wheelVel);
+        telemetry.addData("Drive vel: ", wheelVel);
     }
 
 }

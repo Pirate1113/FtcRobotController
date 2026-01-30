@@ -3,11 +3,12 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
-import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
 
 @Config
@@ -16,8 +17,8 @@ public class Interpolator extends LinearOpMode {
     private static final double LLHeight = 14;
     private  static final double tagHeight = 29.5;
 
-    private MotorEx shooter1;
-    private MotorEx shooter2;
+    private DcMotorEx shooter1;
+    private DcMotorEx shooter2;
 
     private ServoEx hood;
 
@@ -27,8 +28,8 @@ public class Interpolator extends LinearOpMode {
     public static double I = 0.00;
     public static double D = 0.1;
 
-    public static double targetRPM;
-    double currentRPM;
+    public static double targetVel;
+    double currentVel;
 
     double distance;
 
@@ -39,7 +40,7 @@ public class Interpolator extends LinearOpMode {
     boolean aPrev = false;
 
     public static double servoCurrent = 0.0;
-    public static double increment = 0.05;
+    public static double increment = 0.01;
 
     LimelightAngle limelight;
 
@@ -54,13 +55,12 @@ public class Interpolator extends LinearOpMode {
 
         limelight.pipelineSwitch(0);
 
-        shooter1 = new MotorEx("shooter1", 0.05);
-        shooter2 = new MotorEx("shooter2", 0.05);
-        shooter1.setDirection(-1);
-        shooter2.setDirection(1);
+        shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
+        shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
+        shooter1.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter2.setDirection(DcMotorSimple.Direction.FORWARD);
 
         hood = new ServoEx("hoodServo");
-
         palm = new ServoEx("feedServo");
 
         waitForStart();
@@ -76,13 +76,13 @@ public class Interpolator extends LinearOpMode {
 
 
             if (gamepad1.dpad_up && !dpadUpPrev) {
-                targetRPM += 100;
+                targetVel += 100;
             }
             if (gamepad1.dpad_down && !dpadDownPrev) {
-                targetRPM -= 100;
+                targetVel -= 100;
             }
 
-            targetRPM = Range.clip(targetRPM, 0, 6000);
+            targetVel = Range.clip(targetVel, 0, 6000);
 
             dpadUpPrev = gamepad1.dpad_up;
             dpadDownPrev = gamepad1.dpad_down;
@@ -99,9 +99,9 @@ public class Interpolator extends LinearOpMode {
 
             aPrev = gamepad1.a;
 
-            currentRPM = shooter1.getVelocity();
+            currentVel = shooter1.getVelocity();
 
-            vpid.setGoal(new KineticState(0, targetRPM));
+            vpid.setGoal(new KineticState(0, targetVel));
 
             double power = vpid.calculate(new KineticState(
                     shooter1.getCurrentPosition(),
@@ -109,11 +109,13 @@ public class Interpolator extends LinearOpMode {
                 )
             );
 
-            shooter1.setPower(power);
-            shooter2.setPower(power);
+//            shooter1.setPower(power);
+//            shooter2.setPower(power);
+            shooter1.setVelocity(targetVel);
+            shooter2.setVelocity(targetVel);
 
-            telemetry.addData("shooter1 current RPM: ", currentRPM);
-            telemetry.addData("target RPM: ", targetRPM);
+            telemetry.addData("shooter1 current RPM: ", currentVel*60/28);
+            telemetry.addData("target RPM: ", targetVel*60/28);
             telemetry.addData("hood servo current: ", servoCurrent);
             telemetry.addData("distance: ", distance);
 
