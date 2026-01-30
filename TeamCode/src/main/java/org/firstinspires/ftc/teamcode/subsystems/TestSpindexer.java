@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 
@@ -14,6 +15,7 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
 import dev.nextftc.hardware.controllable.RunToPosition;
 
+@Config
 public class TestSpindexer implements Subsystem {
     public static final TestSpindexer INSTANCE = new TestSpindexer();
 
@@ -23,11 +25,18 @@ public class TestSpindexer implements Subsystem {
     private FeedbackCRServoEx servoLeft;
     private FeedbackCRServoEx servoRight;
 
-    // Control Systems (one for each servo)
-    private final PIDCoefficients pidValues = new PIDCoefficients(0.1, 0.0, 0.01);
-    private final ControlSystem controllerLeft = ControlSystem.builder()
-            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
-            .build();
+    // PID coefficients - tunable via FTC Dashboard
+    public static double P = 0.1;
+    public static double I = 0.0;
+    public static double D = 0.01;
+
+    // Track last PID values to detect dashboard changes
+    private double lastP = P;
+    private double lastI = I;
+    private double lastD = D;
+
+    // Control System - rebuilt when PID values change
+    private ControlSystem controllerLeft;
 
     // Position tracking for left servo
     private double totalAngleLeft = 0.0;
@@ -53,10 +62,25 @@ public class TestSpindexer implements Subsystem {
                 () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright"); });
 
         startLeftPos = servoLeft.getCurrentPosition();
+
+        // Build control system with current PID values from dashboard
+        controllerLeft = ControlSystem.builder()
+                .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(P, I, D)))
+                .build();
     }
 
     @Override
     public void periodic() {
+        // Check if PID values changed via dashboard and rebuild controller if needed
+        if (P != lastP || I != lastI || D != lastD) {
+            controllerLeft = ControlSystem.builder()
+                    .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(P, I, D)))
+                    .build();
+            lastP = P;
+            lastI = I;
+            lastD = D;
+        }
+
         // Update position tracking for both servos
         updateLeftPosition();
 
