@@ -37,6 +37,7 @@ public class SwerveModule{
     double target;
     double lastTarget;
     double error;
+    private double lastTimeStamp;
     double period;
     double velocity;
 
@@ -50,7 +51,6 @@ public class SwerveModule{
     private DcMotorEx drive;
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
-
 
     /** Construcotr is:
      @param n name
@@ -91,6 +91,11 @@ public class SwerveModule{
     } // this comes out [-pi, pi)
 
     public void rotateTo(double tar){
+        double currentTimeStamp = (double) System.nanoTime() / 1E9;
+        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
+        period = currentTimeStamp - lastTimeStamp;
+        lastTimeStamp = currentTimeStamp;
+
         this.target = Angle.Companion.wrapAnglePiToPi(tar);
 
         this.error = Angle.Companion.wrapAnglePiToPi(target-current);
