@@ -10,10 +10,8 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.internal.hardware.android.GpioPin;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
 import dev.nextftc.core.subsystems.Subsystem;
@@ -23,8 +21,9 @@ public class SwerveDrivetrain implements Subsystem {
     public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
     private SwerveDrivetrain() {}
 
-    GoBildaPinpointDriver odo;
-    double heading;
+    public GoBildaPinpointDriver odo;
+
+    private double heading;
 
     Pose rawPose; //just use these as vectors
     Pose rotPose;
@@ -47,9 +46,9 @@ public class SwerveDrivetrain implements Subsystem {
 
     public static double[][] PIDKVal = {
             {0.6, 0 ,0.2, 0}, // fL
-            {0.6, 0 ,0.6, 0}, // fR
+            {0.6, 0 ,0.2, 0}, // fR
             {0.6, 0 ,0.2, 0}, // bR
-            {0.6, 0 ,0.6, 0}  // bL
+            {0.6, 0 ,0.2, 0}  // bL
     };
 
     @NonNull
@@ -92,26 +91,26 @@ public class SwerveDrivetrain implements Subsystem {
 //        }
     }
 
+
+
+
     @Override
     public void periodic() {
         for(SwerveModule m : swerveModules){
             m.read();
         }
 
-        double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x,
+        double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
                 rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
-                rawRightX = -ActiveOpMode.gamepad1().right_stick_x,
+                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
                 realRightX = rawRightX / Math.sqrt(2);
 
-        odo.update();
         heading = odo.getHeading(AngleUnit.RADIANS);
 
         rawPose = new Pose(rawLeftX, rawLeftY, realRightX);
-        rotPose = rawPose.rotate(-heading, false);
+//        rotPose = rawPose.rotate(-heading, false);
 
-        double x = rotPose.getX(),
-                y = rotPose.getY(),
-                head = rotPose.getHeading();
+        double x = rawPose.getX(), y = rawPose.getY(), head = rawPose.getHeading();
 
         double a = x - head * (WB / R),
                 b = x + head * (WB / R),
@@ -138,10 +137,7 @@ public class SwerveDrivetrain implements Subsystem {
             swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
         }
 
-        Telemetry tele = ActiveOpMode.telemetry();
 
-        tele.addData("heading: ", heading);
 
-        tele.update();
     }
 }
