@@ -57,8 +57,8 @@ public class Interpolator extends LinearOpMode {
 
         shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
         shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
-        shooter1.setDirection(DcMotorSimple.Direction.REVERSE);
-        shooter2.setDirection(DcMotorSimple.Direction.FORWARD);
+        shooter1.setDirection(DcMotorSimple.Direction.FORWARD);
+        shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         hood = new ServoEx("hoodServo");
         palm = new ServoEx("feedServo");
@@ -111,8 +111,8 @@ public class Interpolator extends LinearOpMode {
 
 //            shooter1.setPower(power);
 //            shooter2.setPower(power);
-            shooter1.setVelocity(targetVel);
-            shooter2.setVelocity(targetVel);
+            shooter1.setVelocity(-targetVel);
+            shooter2.setVelocity(-targetVel);
 
             telemetry.addData("shooter1 current RPM: ", currentVel*60/28);
             telemetry.addData("target RPM: ", targetVel*60/28);
@@ -120,6 +120,14 @@ public class Interpolator extends LinearOpMode {
             telemetry.addData("distance: ", distance);
 
             telemetry.update();
+            telemetry.addData(
+                    "real? shooter1 RPM",
+                    Math.abs(shooter1.getVelocity()) * 60.0 / 28.0
+            );
+            telemetry.addData(
+                    "real? target RPM",
+                    targetVel * 60.0 / 28.0
+            );
         }
     }
 }
