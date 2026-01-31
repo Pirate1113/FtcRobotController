@@ -1,7 +1,17 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -15,6 +25,7 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
 import dev.nextftc.hardware.controllable.RunToPosition;
 
+@Config
 public class TestSpindexer implements Subsystem {
     public static final TestSpindexer INSTANCE = new TestSpindexer();
 
@@ -23,10 +34,13 @@ public class TestSpindexer implements Subsystem {
     // Hardware
     private FeedbackCRServoEx servoLeft;
     private FeedbackCRServoEx servoRight;
+    public static double kP = 0.025;
+    public static double kI = 0;
+    public static double kD = 0.0;
 
     // Control Systems (one for each servo)
     private final PIDCoefficients pidValues = new PIDCoefficients(0.025, 0.0025, 0.0);
-    private final ControlSystem controllerLeft = ControlSystem.builder()
+    private ControlSystem controllerLeft = ControlSystem.builder()
             .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
             .build();
 
@@ -34,13 +48,13 @@ public class TestSpindexer implements Subsystem {
     private double totalAngleLeft = 0.0;
     private double previousAngleLeft = 0.0;
     private double velocityLeft = 0.0;
+    Telemetry dashboardTelemetry;
+    private double leftOffset;
 
-    private double startLeftPos;
-    // Position tracking for right servo
-    private double totalAngleRight = 0.0;
-    private double previousAngleRight = 0.0;
-
+    FtcDashboard dashboard;
     private double powerLeft;
+    public static double goal = 0;
+    private static double previousAngle;
 
     @Override
     public void initialize() {
@@ -53,14 +67,24 @@ public class TestSpindexer implements Subsystem {
                 () -> { return ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogRight"); },
                 () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright"); });
 
-        startLeftPos = servoLeft.getCurrentPosition();
+        controllerLeft = ControlSystem.builder()
+                .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(kP, kI, kD)))
+                .build();
+        dashboard = FtcDashboard.getInstance();
+
+        dashboardTelemetry = dashboard.getTelemetry();
+
     }
 
     @Override
     public void periodic() {
         // Update position tracking for both servos
         updateLeftPosition();
-
+        // Rebuild controller to pick up dashboard-tuned PID values, then set goal
+        controllerLeft = ControlSystem.builder()
+                .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(kP, kI, kD)))
+                .build();
+        controllerLeft.setGoal(new KineticState(goal));
         // Get actual velocity from servo, combine with unwrapped position
         velocityLeft = servoLeft.getVelocity();
 
@@ -68,8 +92,14 @@ public class TestSpindexer implements Subsystem {
         KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
         powerLeft = controllerLeft.calculate(currentState);
 
-        servoLeft.setPower(powerLeft);
-        servoRight.setPower(powerLeft);
+        servoLeft.setPower(-powerLeft);
+        servoRight.setPower(-powerLeft);
+
+        dashboardTelemetry.addData("Power", powerLeft);
+        dashboardTelemetry.addData("Goal", controllerLeft.getGoal().getPosition());
+        dashboardTelemetry.addData("Pos", totalAngleLeft);
+        dashboardTelemetry.addData("Error", totalAngleLeft-controllerLeft.getGoal().getPosition());
+        dashboardTelemetry.update();
     }
     public void updateLeftPosition(){
         totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
@@ -77,25 +107,21 @@ public class TestSpindexer implements Subsystem {
 
     public Command b1 = new RunToPosition(
             controllerLeft,
-            0, // -offset
+            goal, // -offset
             0.05   // absolute tolerance in units
     );
     public Command b2 = new RunToPosition(
             controllerLeft,
-            Math.PI/1.5, // - offset
+            goal, // - offset
             0.05   // absolute tolerance in units
     );
     public Command b3 = new RunToPosition(
             controllerLeft,
-            -Math.PI/1.5, // - offset
+            goal, // - offset
             0.05   // absolute tolerance in units
     );
     public double getLeftPosition() {
         return totalAngleLeft;
-    }
-
-    public double getRightPosition() {
-        return totalAngleRight;
     }
 
     public double getLeftRawPosition() {
