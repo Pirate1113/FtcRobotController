@@ -99,8 +99,6 @@ public class Interpolator extends LinearOpMode {
 
             aPrev = gamepad1.a;
 
-            currentVel = shooter1.getVelocity();
-
             vpid.setGoal(new KineticState(0, targetVel));
 
             double power = vpid.calculate(new KineticState(
@@ -113,6 +111,8 @@ public class Interpolator extends LinearOpMode {
 //            shooter2.setPower(power);
             shooter1.setVelocity(-targetVel);
             shooter2.setVelocity(-targetVel);
+
+            currentVel = shooter1.getVelocity();
 
             telemetry.addData("shooter1 current RPM: ", currentVel*60/28);
             telemetry.addData("target RPM: ", targetVel*60/28);
