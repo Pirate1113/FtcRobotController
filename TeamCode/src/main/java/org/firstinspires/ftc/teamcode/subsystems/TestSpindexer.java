@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 
@@ -11,11 +10,11 @@ import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.core.units.Angle;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
 import dev.nextftc.hardware.controllable.RunToPosition;
 
-@Config
 public class TestSpindexer implements Subsystem {
     public static final TestSpindexer INSTANCE = new TestSpindexer();
 
@@ -25,18 +24,11 @@ public class TestSpindexer implements Subsystem {
     private FeedbackCRServoEx servoLeft;
     private FeedbackCRServoEx servoRight;
 
-    // PID coefficients - tunable via FTC Dashboard
-    public static double P = 0.1;
-    public static double I = 0.0;
-    public static double D = 0.01;
-
-    // Track last PID values to detect dashboard changes
-    private double lastP = P;
-    private double lastI = I;
-    private double lastD = D;
-
-    // Control System - rebuilt when PID values change
-    private ControlSystem controllerLeft;
+    // Control Systems (one for each servo)
+    private final PIDCoefficients pidValues = new PIDCoefficients(0.025, 0.0025, 0.0);
+    private final ControlSystem controllerLeft = ControlSystem.builder()
+            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
+            .build();
 
     // Position tracking for left servo
     private double totalAngleLeft = 0.0;
@@ -62,25 +54,10 @@ public class TestSpindexer implements Subsystem {
                 () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright"); });
 
         startLeftPos = servoLeft.getCurrentPosition();
-
-        // Build control system with current PID values from dashboard
-        controllerLeft = ControlSystem.builder()
-                .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(P, I, D)))
-                .build();
     }
 
     @Override
     public void periodic() {
-        // Check if PID values changed via dashboard and rebuild controller if needed
-        if (P != lastP || I != lastI || D != lastD) {
-            controllerLeft = ControlSystem.builder()
-                    .angular(AngleType.RADIANS, feedback -> feedback.posPid(new PIDCoefficients(P, I, D)))
-                    .build();
-            lastP = P;
-            lastI = I;
-            lastD = D;
-        }
-
         // Update position tracking for both servos
         updateLeftPosition();
 
@@ -94,21 +71,9 @@ public class TestSpindexer implements Subsystem {
         servoLeft.setPower(powerLeft);
         servoRight.setPower(powerLeft);
     }
-
-    void updateLeftPosition() {
-
-        double currentAngle = servoLeft.getCurrentPosition() - startLeftPos;
-        double deltaAngle = currentAngle - previousAngleLeft;
-
-        if (deltaAngle > Math.PI) {
-            deltaAngle -= 2 * Math.PI;
-        } else if (deltaAngle < -Math.PI) {
-            deltaAngle += 2 * Math.PI;
-        }
-
-        totalAngleLeft += deltaAngle;
-        previousAngleLeft = currentAngle;
-    }
+    public void updateLeftPosition(){
+        totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
+    } // this comes out [-pi, pi)
 
     public Command b1 = new RunToPosition(
             controllerLeft,
