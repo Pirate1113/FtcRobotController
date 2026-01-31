@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.testing;
 
-import static java.lang.Math.*;
-
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import dev.nextftc.hardware.impl.ServoEx;
-
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import dev.nextftc.hardware.impl.ServoEx;
 
 
 public class HoodAngle {
@@ -42,13 +38,13 @@ public class HoodAngle {
     public void aimFromDistance(double distanceInches, Telemetry telemetry) {
         if (distanceInches < 1.0) return;
         flywheel.setVelocity(3500);
+        double servoPos = hoodPositionFromDistance(distanceInches, telemetry);
+        telemetry.addData("hoodPos: ", servoPos);
 
-        telemetry.addData("hoodPos: ", hoodPositionFromDistance(distanceInches, telemetry));
-
-        if (Double.isNaN(hoodPositionFromDistance(distanceInches, telemetry)) ){
+        if (Double.isNaN(servoPos) ){
             hood.setPosition(0);
         } else {
-            hood.setPosition(hoodPositionFromDistance(distanceInches, telemetry));
+            hood.setPosition(servoPos);
         }
 
     }
@@ -78,7 +74,7 @@ public class HoodAngle {
 
         double D = B*B - 4*A*C;
         telemetry.addData("discrmination: ", D);
-        
+
         double sqrtD = Math.sqrt(D);
 
         double T = (-B - sqrtD) / (2*A); //low
@@ -92,7 +88,7 @@ public class HoodAngle {
         double angleDeg = getProjectileAngle(getInitialVelocity(1.5), distance, telemetry);
         double servoPos = Math.abs(Range.clip((angleDeg * SERVO_DEG_PER_HOOD / 255.0), 0.0, 1.0));
 
-        telemetry.addData("what the hood is supposed to be at: ", angleDeg);
+            telemetry.addData("what the hood is supposed to be at: ", angleDeg);
         telemetry.addData("Servoting: ", servoPos);
 
         return servoPos;

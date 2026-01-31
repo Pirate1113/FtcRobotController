@@ -76,13 +76,13 @@ public class SwerveDrivetrain implements Subsystem {
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
-                4.5, true, false, PIDKVal[2]);
+                1.47, false, true, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
-                3.04, false, true, PIDKVal[3]);
+                6.12, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
@@ -90,6 +90,9 @@ public class SwerveDrivetrain implements Subsystem {
 //            m.rotateTo(startingAngle);
 //        }
     }
+
+
+
 
     @Override
     public void periodic() {
