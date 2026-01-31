@@ -65,10 +65,10 @@ public class Spindexer implements Subsystem {
 
         // Create KineticState with unwrapped position and velocity (like SwerveModule)
         KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
-//        powerLeft = controllerLeft.calculate(currentState);
-//
-//        servoLeft.setPower(-powerLeft);
-//        servoRight.setPower(-powerLeft);
+        powerLeft = controllerLeft.calculate(currentState);
+
+        servoLeft.setPower(-powerLeft);
+        servoRight.setPower(-powerLeft);
     }
     public void updateLeftPosition(){
         totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
@@ -76,17 +76,17 @@ public class Spindexer implements Subsystem {
 
     public Command b1 = new RunToPosition(
             controllerLeft,
-            -2.102, // -offset
+            -2.3419, // -offset
             0.05   // absolute tolerance in units
     );
     public Command b2 = new RunToPosition(
             controllerLeft,
-            -0.006, // - offset
+            -2.3419+Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public Command b3 = new RunToPosition(
             controllerLeft,
-            2.087, // - offset
+            -2.3419+2*Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
 
