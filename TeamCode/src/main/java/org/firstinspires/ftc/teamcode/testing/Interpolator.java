@@ -118,8 +118,6 @@ public class Interpolator extends LinearOpMode {
             telemetry.addData("target RPM: ", targetVel*60/28);
             telemetry.addData("hood servo current: ", servoCurrent);
             telemetry.addData("distance: ", distance);
-
-            telemetry.update();
             telemetry.addData(
                     "real? shooter1 RPM",
                     Math.abs(shooter1.getVelocity()) * 60.0 / 28.0
@@ -128,6 +126,7 @@ public class Interpolator extends LinearOpMode {
                     "real? target RPM",
                     targetVel * 60.0 / 28.0
             );
+            telemetry.update();
         }
     }
 }
