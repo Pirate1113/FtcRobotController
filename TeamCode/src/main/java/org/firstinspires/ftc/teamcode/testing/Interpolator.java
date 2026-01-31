@@ -89,7 +89,11 @@ public class Interpolator extends LinearOpMode {
                 targetVel -= 100;
             }
 
+
             targetVel = Range.clip(targetVel, 0, 6000);
+            
+            shooter1.setVelocity(targetVel);
+            shooter2.setVelocity(targetVel);
 
             dpadUpPrev = gamepad1.dpad_up;
             dpadDownPrev = gamepad1.dpad_down;
