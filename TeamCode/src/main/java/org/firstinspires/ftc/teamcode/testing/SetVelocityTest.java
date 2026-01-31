@@ -37,22 +37,22 @@ public class SetVelocityTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if (gamepad1.dpad_up && !dpadUpPrev) targetVel += 100;
+            /*if (gamepad1.dpad_up && !dpadUpPrev) targetVel += 100;
             if (gamepad1.dpad_down && !dpadDownPrev) targetVel -= 100;
             targetVel = Range.clip(targetVel, 0, 6000);
 
             dpadUpPrev = gamepad1.dpad_up;
             dpadDownPrev = gamepad1.dpad_down;
-
+*/
             shooter1.setVelocity(targetVel);
             shooter2.setVelocity(targetVel);
 
-            double motorRPM = shooter1.getVelocity() * 60.0 / TICKS_PER_REV;
+            /*double motorRPM = shooter1.getVelocity() * 60.0 / TICKS_PER_REV;
 
             // telemetry
             telemetry.addData("Target ticks/sec", targetVel);
             telemetry.addData("Motor RPM", motorRPM);
-            telemetry.update();
+            telemetry.update();*/
         }
     }
 }
