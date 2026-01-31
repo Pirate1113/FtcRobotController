@@ -89,7 +89,9 @@ public class Interpolator extends LinearOpMode {
                 targetVel -= 100;
             }
 
-            targetVel = Range.clip(targetVel, 500, 6000);
+
+            targetVel = Range.clip(targetVel, 0, 6000);
+            
             shooter1.setVelocity(targetVel);
             shooter2.setVelocity(targetVel);
 
