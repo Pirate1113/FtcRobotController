@@ -13,7 +13,6 @@ public class SpindexerVoltageTester extends LinearOpMode {
     private AnalogInput spindexerEncoder;
     private CRServo servoLeft;
     private CRServo servoRight;
-
     @Override
     public void runOpMode() {
 
