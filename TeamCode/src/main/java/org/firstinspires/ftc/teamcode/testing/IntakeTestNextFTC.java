@@ -34,9 +34,9 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
         Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
 
-        Gamepads.gamepad2().dpadLeft().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b1);
-        Gamepads.gamepad2().dpadUp().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b2);
-        Gamepads.gamepad2().dpadRight().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b3);
+        Gamepads.gamepad2().dpadLeft().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b1).whenBecomesFalse(Spindexer.INSTANCE.i1);
+        Gamepads.gamepad2().dpadUp().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b2).whenBecomesFalse(Spindexer.INSTANCE.i2);
+        Gamepads.gamepad2().dpadRight().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b3).whenBecomesFalse(Spindexer.INSTANCE.i3);
         Gamepads.gamepad2().a().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.eject).whenBecomesFalse(Spindexer.INSTANCE.uneject);//        Button dpadLeft = button(() -> someBooleanCondition);
         Gamepads.gamepad2().y().toggleOnBecomesFalse().whenBecomesTrue(Palm.INSTANCE.on).whenBecomesFalse(Palm.INSTANCE.off);
         Gamepads.gamepad2().rightTrigger().greaterThan(0.2).whenBecomesTrue(Flywheel.INSTANCE.setFlywheel).whenBecomesFalse(Flywheel.INSTANCE.off);

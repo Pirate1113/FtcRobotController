@@ -3,11 +3,15 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import java.time.Duration;
+
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.core.units.Angle;
@@ -89,7 +93,28 @@ public class Spindexer implements Subsystem {
             -2.3419+2*Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
-
+    public Command i1 = new RunToPosition(
+            controllerLeft,
+            -1.2376, // -offset
+            0.05   // absolute tolerance in units
+    );
+    public Command i2 = new RunToPosition(
+            controllerLeft,
+            -1.2376+Math.PI/1.5, // - offset
+            0.05   // absolute tolerance in units
+    );
+    public Command i3 = new RunToPosition(
+            controllerLeft,
+            -1.2376+2*Math.PI/1.5, // - offset
+            0.05   // absolute tolerance in units
+    );
+    public Command shoot = new SequentialGroup(
+            b1,
+            new Delay(1),
+            b2,
+            new Delay(1),
+            b3
+    );
     public Command uneject = new InstantCommand(() -> {
         ejectorPos = 0;
         ejector.getServo().setPosition(ejectorPos);
