@@ -4,161 +4,134 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
- 
-import java.time.Duration;
-
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
-import dev.nextftc.hardware.controllable.RunToPosition;
 import dev.nextftc.hardware.impl.ServoEx;
 
 public class Spindexer implements Subsystem {
+
     public static final Spindexer INSTANCE = new Spindexer();
 
-    private Spindexer() {}
-    private VoltageSensor voltageSensor;
+    private Spindexer() {
+    }
+
+    // consrants
     private static final double NOMINAL_VOLTAGE = 11.4;
 
-
-    // Hardware
+    // ===== Hardware =====
     private FeedbackCRServoEx servoLeft;
     private FeedbackCRServoEx servoRight;
     private ServoEx ejector;
+    private VoltageSensor voltageSensor;
+
     private static double ejectorPos = 0;
 
-    private final PIDCoefficients pidValues = new PIDCoefficients(0.56, 0.0000000009, 0.03);
-    private ControlSystem controllerLeft = ControlSystem.builder()
-            .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
-            .build();
+    // control
+    private final PIDCoefficients pid =
+            new PIDCoefficients(0.56, 0.0, 0.03);
 
-    // Position tracking for left servo
-    private double totalAngleLeft = 0.0;
-    private double previousAngleLeft = 0.0;
-    private double velocityLeft = 0.0;
-    private double leftOffset;
-    private double powerLeft;
-    private static double previousAngle;
+    private final ControlSystem controller =
+            ControlSystem.builder()
+                    .angular(AngleType.RADIANS, fb -> fb.posPid(pid))
+                    .build();
+
+    private double totalAngle = 0.0;
+    private double previousAngle = 0.0;
+    private double power = 0.0;
 
     @Override
     public void initialize() {
         voltageSensor = ActiveOpMode.hardwareMap().voltageSensor.iterator().next();
 
         servoLeft = new FeedbackCRServoEx(
-                0.00,
+                0.0,
                 () -> ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogLeft"),
                 () -> ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerleft")
         );
 
         servoRight = new FeedbackCRServoEx(
-                0.00,
+                0.0,
                 () -> ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogRight"),
                 () -> ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright")
         );
 
         ejector = new ServoEx("finger");
 
-        previousAngleLeft = servoLeft.getCurrentPosition();
-        totalAngleLeft = 0.0;
+        previousAngle = servoLeft.getCurrentPosition();
+        totalAngle = 0.0;
     }
 
+    // ===== Angle Unwrapping =====
+    private void updatePosition() {
+        double current = servoLeft.getCurrentPosition();
+        double delta = current - previousAngle;
 
-    public void updateLeftPosition(){
-        totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
-    } // this comes out [-pi, pi)
+        if (delta > Math.PI) delta -= 2 * Math.PI;
+        if (delta < -Math.PI) delta += 2 * Math.PI;
+
+        totalAngle += delta;
+        previousAngle = current;
+    }
+
     @Override
     public void periodic() {
-        updateLeftPosition();
+        updatePosition();
 
-        velocityLeft = servoLeft.getVelocity();
-        KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
+        KineticState state = new KineticState(
+                totalAngle,
+                servoLeft.getVelocity()
+        );
 
-        if (ejectorPos == 0) {
-            double rawPower = controllerLeft.calculate(currentState);
+        double raw = controller.calculate(state);
 
-            double voltage = voltageSensor.getVoltage();
-            double compensatedPower = rawPower * (NOMINAL_VOLTAGE / voltage);
+        double voltage = Math.max(voltageSensor.getVoltage(), 9.5);
+        double compensated = raw * (NOMINAL_VOLTAGE / voltage);
+        compensated = Math.max(-1.0, Math.min(1.0, compensated));
 
-            compensatedPower = Math.max(-1.0, Math.min(1.0, compensatedPower));
+        servoLeft.setPower(-compensated);
+        servoRight.setPower(-compensated);
 
-            servoLeft.setPower(-compensatedPower);
-            servoRight.setPower(-compensatedPower);
-
-            powerLeft = compensatedPower;
-        }
+        power = compensated;
     }
 
-    public Command b1 = new RunToPosition(
-            controllerLeft,
-            -2.3419, // -offset
-            0.05   // absolute tolerance in units
-    );
-    public Command b2 = new RunToPosition(
-            controllerLeft,
-            -2.3419+Math.PI/1.5, // - offset
-            0.05   // absolute tolerance in units
-    );
-    public Command b3 = new RunToPosition(
-            controllerLeft,
-            -2.3419+2*Math.PI/1.5, // - offset
-            0.05   // absolute tolerance in units
-    );
-    public Command i1 = new RunToPosition(
-            controllerLeft,
-            -1.2376, // -offset
-            0.05   // absolute tolerance in units
-    );
-    public Command i2 = new RunToPosition(
-            controllerLeft,
-            -1.2376+Math.PI/1.5, // - offset
-            0.05   // absolute tolerance in units
-    );
-    public Command i3 = new RunToPosition(
-            controllerLeft,
-            -1.2376+2*Math.PI/1.5, // - offset
-            0.05   // absolute tolerance in units
-    );
-    public Command shoot = new SequentialGroup(
-            b1,
-            new Delay(1),
-            b2,
-            new Delay(1),
-            b3
-    );
-    public Command uneject = new InstantCommand(() -> {
-        ejectorPos = 0;
-        ejector.getServo().setPosition(ejectorPos);
-    });
-    public Command eject = new InstantCommand(() -> {
-        ejectorPos = 1;
-        ejector.getServo().setPosition(ejectorPos);
-    });
-    public double getEjectorPos() {
-        return ejector.getServo().getPosition();
-    }
-    public double getLeftPosition() {
-        return totalAngleLeft;
+    private void setGoal(double angleRad) {
+        controller.setGoal(new KineticState(angleRad, 0.0));
     }
 
-    public double getLeftRawPosition() {
-        return servoLeft.getCurrentPosition();
-    }
-    public String getLeftGoal() {
-        return controllerLeft.getGoal().toString();
-    }
-    public double getLeftPower() {
-        return powerLeft;
-    }
+    // commands
+    public final Command b1 = new InstantCommand(() -> setGoal(-2.3419));
+    public final Command b2 = new InstantCommand(() -> setGoal(-2.3419 + Math.PI / 1.5));
+    public final Command b3 = new InstantCommand(() -> setGoal(-2.3419 + 2 * Math.PI / 1.5));
+
+    public final Command i1 = new InstantCommand(() -> setGoal(-1.2376));
+    public final Command i2 = new InstantCommand(() -> setGoal(-1.2376 + Math.PI / 1.5));
+    public final Command i3 = new InstantCommand(() -> setGoal(-1.2376 + 2 * Math.PI / 1.5));
+
+    public final Command shoot =
+            new SequentialGroup(b1, b2, b3);
+
+    public final Command eject =
+            new InstantCommand(() -> {
+                ejectorPos = 1;
+                ejector.getServo().setPosition(ejectorPos);
+            });
+
+    public final Command uneject =
+            new InstantCommand(() -> {
+                ejectorPos = 0;
+                ejector.getServo().setPosition(ejectorPos);
+            });
+
 }
+
 
 //TUNNING CODE:
 //package org.firstinspires.ftc.teamcode.subsystems;
