@@ -75,25 +75,25 @@ public class Interpolator extends LinearOpMode {
         while (opModeIsActive()) {
             distance = limelight.getDistanceInches();
 
-            double stick = -gamepad1.right_stick_y; // up = positive
-            if (Math.abs(stick) < 0.05) stick = 0;
-            servoCurrent += stick * increment;
+//            double stick = -gamepad1.right_stick_y; // up = positive
+//            if (Math.abs(stick) < 0.05) stick = 0;
+//            servoCurrent += stick * increment;
+//            servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
+            servoCurrent = -36.79717*Math.pow(distance,-1.08794)+0.494168;
             servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
             hood.setPosition(servoCurrent);
 
 
-            if (gamepad1.dpad_up && !dpadUpPrev) {
-                targetVel += 100;
-            }
-            if (gamepad1.dpad_down && !dpadDownPrev) {
-                targetVel -= 100;
-            }
+//            if (gamepad1.dpad_up && !dpadUpPrev) {
+//                targetVel += 100;
+//            }
+//            if (gamepad1.dpad_down && !dpadDownPrev) {
+//                targetVel -= 100;
+//            }
 
-
+            targetVel = (10.88255*distance+2691.0285)*28/60;
             targetVel = Range.clip(targetVel, 0, 6000);
 
-            shooter1.setVelocity(targetVel);
-            shooter2.setVelocity(targetVel);
 
             dpadUpPrev = gamepad1.dpad_up;
             dpadDownPrev = gamepad1.dpad_down;
