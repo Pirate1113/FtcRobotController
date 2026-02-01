@@ -123,7 +123,7 @@ public class Interpolator extends LinearOpMode {
             shooter1.setVelocity(-targetVel);
             shooter2.setVelocity(-targetVel);
 
-            currentVel = shooter1.getVelocity();
+            currentVel = -shooter1.getVelocity();
 
             telemetry.addData("shooter1 current RPM: ", currentVel*60/28);
             telemetry.addData("target RPM: ", targetVel*60/28);
