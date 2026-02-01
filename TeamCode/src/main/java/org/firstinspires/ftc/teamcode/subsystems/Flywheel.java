@@ -49,16 +49,6 @@ public class Flywheel implements Subsystem {
 
     });
 
-//    controller, 0.0,0).requires(this).named("FlywheelOff");
-    public final Command runPID = new RunToVelocity(controller, 2200 + distance * 67,50).requires(this).named("FlywheelOn");
-    public final Command stopPID = new RunToVelocity(controller, 0,0).requires(this).named("FlywheelOn");
-    public final Command stopPID1 = new InstantCommand(() -> {
-      new RunToVelocity(controller, 0, 0).schedule();
-    });
-    public final Command RunPID1 = new InstantCommand(() -> {
-        new RunToVelocity(controller, 2200+distance*67, 50).schedule();
-    });
-//    RunToVelocity(controller, 0,0).requires(this).named("FlywheelOn");
     public final Command setFlywheel = new InstantCommand(() -> {
         power = 1;
         shooter1.setPower(-power);
@@ -73,6 +63,7 @@ public class Flywheel implements Subsystem {
         shooter1.setPower(-power);
         shooter2.setPower(power);
     });
+
     public double getPower() {
         return power;
     }
