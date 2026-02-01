@@ -84,7 +84,7 @@ public class AutoAim implements Subsystem {
         enabled = false;
         shooter1.setPower(0.2);
         shooter2.setPower(0.2);
-    }); 
+    });
 
     // Telemetry getters
     public double getDistance() { return distance; }
