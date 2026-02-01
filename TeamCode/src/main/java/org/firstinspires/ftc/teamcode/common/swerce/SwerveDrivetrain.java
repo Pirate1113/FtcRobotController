@@ -100,9 +100,9 @@ public class SwerveDrivetrain implements Subsystem {
             m.read();
         }
 
-        double rawLeftX = ActiveOpMode.gamepad1().left_stick_x,
+        double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x,
                 rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
-                rawRightX = ActiveOpMode.gamepad1().right_stick_x,
+                rawRightX = -ActiveOpMode.gamepad1().right_stick_x,
                 realRightX = rawRightX / Math.sqrt(2);
 
         heading = odo.getHeading(AngleUnit.RADIANS);
