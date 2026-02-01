@@ -47,9 +47,9 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         BindingManager.update();
         telemetry.addData("Left Intake Power", Intake.INSTANCE.getLeftPower());
         telemetry.addData("Right Intake Power", Intake.INSTANCE.getRightPower());
-        telemetry.addData("Spindexer Power", Spindexer.INSTANCE.getLeftPower());
-        telemetry.addData("Spindexer Goal", Spindexer.INSTANCE.getLeftGoal());
-        telemetry.addData("Spindexer Pos", Spindexer.INSTANCE.getLeftPosition());
+        telemetry.addData("Spindexer Power", Spindexer.INSTANCE.getRightPower());
+        telemetry.addData("Spindexer Goal", Spindexer.INSTANCE.getRightGoal());
+        telemetry.addData("Spindexer Pos", Spindexer.INSTANCE.getRightPosition());
         telemetry.addData("EjectorPos", "%.2f", Spindexer.INSTANCE.getEjectorPos());
         telemetry.addData("PalmPos", Palm.INSTANCE.getPos());
         telemetry.addData("AutoAim Enabled", AutoAim.INSTANCE.isEnabled());
