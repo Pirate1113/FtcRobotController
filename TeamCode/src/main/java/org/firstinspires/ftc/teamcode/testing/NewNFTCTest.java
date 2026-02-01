@@ -35,9 +35,9 @@ public class NewNFTCTest extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         BindingManager.update();
-        telemetry.addData("Right Power", Spindexer.INSTANCE.getRightPower());
-        telemetry.addData("Right Goal", Spindexer.INSTANCE.getRightGoal());
-        telemetry.addData("Right Pos", Spindexer.INSTANCE.getRightPosition());
+        telemetry.addData("Left Power", Spindexer.INSTANCE.getLeftPower());
+        telemetry.addData("Left Goal", Spindexer.INSTANCE.getLeftGoal());
+        telemetry.addData("Left Pos", Spindexer.INSTANCE.getLeftPosition());
         telemetry.addData("Ejector Pos", Spindexer.INSTANCE.getEjectorPos());
 //        telemetry.addData("Left Servo Pow", "%.2f", Spindexer.INSTANCE.getLeftPower());
 //        telemetry.addData("Right Servo Pow", "%.2f", Spindexer.INSTANCE.getRightPower());

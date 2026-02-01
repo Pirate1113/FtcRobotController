@@ -37,17 +37,16 @@ public class Spindexer implements Subsystem {
     private static double ejectorPos = 0;
 
     private final PIDCoefficients pidValues = new PIDCoefficients(0.56, 0.0000000009, 0.03);
-    private ControlSystem controllerRight = ControlSystem.builder()
+    private ControlSystem controllerLeft = ControlSystem.builder()
             .angular(AngleType.RADIANS, feedback -> feedback.posPid(pidValues))
             .build();
 
     // Position tracking for left servo
-    private double totalAngleRight = 0.0;
-    private double previousAngleRight = 0.0;
-    private double velocityRight = 0.0;
-    private double rightOffset;
+    private double totalAngleLeft = 0.0;
+    private double previousAngleLeft = 0.0;
+    private double velocityLeft = 0.0;
+    private double leftOffset;
     private double powerLeft;
-    private double powerRight;
     private static double previousAngle;
 
     @Override
@@ -68,25 +67,23 @@ public class Spindexer implements Subsystem {
 
         ejector = new ServoEx("finger");
 
-        previousAngleRight = servoRight.getCurrentPosition();
-        totalAngleRight = 0.0;
+        previousAngleLeft = servoLeft.getCurrentPosition();
+        totalAngleLeft = 0.0;
     }
 
 
-    public void updateRightPosition(){
-        totalAngleRight = Angle.Companion.wrapAnglePiToPi(servoRight.getCurrentPosition());
+    public void updateLeftPosition(){
+        totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
     } // this comes out [-pi, pi)
-
-
     @Override
     public void periodic() {
-        updateRightPosition();
+        updateLeftPosition();
 
-        velocityRight = servoRight.getVelocity();
-        KineticState currentState = new KineticState(totalAngleRight, velocityRight);
+        velocityLeft = servoLeft.getVelocity();
+        KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
 
         if (ejectorPos == 0) {
-            double rawPower = controllerRight.calculate(currentState);
+            double rawPower = controllerLeft.calculate(currentState);
 
             double voltage = voltageSensor.getVoltage();
             double compensatedPower = rawPower * (NOMINAL_VOLTAGE / voltage);
@@ -97,37 +94,36 @@ public class Spindexer implements Subsystem {
             servoRight.setPower(-compensatedPower);
 
             powerLeft = compensatedPower;
-            powerRight = compensatedPower;
         }
     }
 
     public Command b1 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -2.3419, // -offset
             0.05   // absolute tolerance in units
     );
     public Command b2 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -2.3419+Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public Command b3 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -2.3419+2*Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public Command i1 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -1.2376, // -offset
             0.05   // absolute tolerance in units
     );
     public Command i2 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -1.2376+Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
     public Command i3 = new RunToPosition(
-            controllerRight,
+            controllerLeft,
             -1.2376+2*Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
@@ -149,18 +145,18 @@ public class Spindexer implements Subsystem {
     public double getEjectorPos() {
         return ejector.getServo().getPosition();
     }
-    public double getRightPosition() {
-        return totalAngleRight;
+    public double getLeftPosition() {
+        return totalAngleLeft;
     }
 
-    public double getRightRawPosition() {
-        return servoRight.getCurrentPosition();
+    public double getLeftRawPosition() {
+        return servoLeft.getCurrentPosition();
     }
-    public String getRightGoal() {
-        return controllerRight.getGoal().toString();
+    public String getLeftGoal() {
+        return controllerLeft.getGoal().toString();
     }
-    public double getRightPower() {
-        return powerRight;
+    public double getLeftPower() {
+        return powerLeft;
     }
 }
 
