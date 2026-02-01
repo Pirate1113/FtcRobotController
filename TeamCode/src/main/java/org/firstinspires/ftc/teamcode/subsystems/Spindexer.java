@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
 
 import java.time.Duration;
 
@@ -24,6 +26,8 @@ public class Spindexer implements Subsystem {
     public static final Spindexer INSTANCE = new Spindexer();
 
     private Spindexer() {}
+    private VoltageSensor voltageSensor;
+    private static final double NOMINAL_VOLTAGE = 11.4;
 
 
     // Hardware
@@ -47,37 +51,58 @@ public class Spindexer implements Subsystem {
 
     @Override
     public void initialize() {
+        voltageSensor = ActiveOpMode.hardwareMap().voltageSensor.iterator().next();
+
         servoLeft = new FeedbackCRServoEx(
-            0.00,
-            () -> { return ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogLeft"); },
-            () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerleft"); });
+                0.00,
+                () -> ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogLeft"),
+                () -> ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerleft")
+        );
+
         servoRight = new FeedbackCRServoEx(
                 0.00,
-                () -> { return ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogRight"); },
-                () -> { return ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright"); });
+                () -> ActiveOpMode.hardwareMap().get(AnalogInput.class, "analogRight"),
+                () -> ActiveOpMode.hardwareMap().get(CRServo.class, "spindexerright")
+        );
 
         ejector = new ServoEx("finger");
+
+        previousAngleLeft = servoLeft.getCurrentPosition();
+        totalAngleLeft = 0.0;
+    }
+
+    private void updateLeftPosition() {
+        double current = servoLeft.getCurrentPosition();
+        double delta = current - previousAngleLeft;
+
+        if (delta > Math.PI) delta -= 2 * Math.PI;
+        if (delta < -Math.PI) delta += 2 * Math.PI;
+
+        totalAngleLeft += delta;
+        previousAngleLeft = current;
     }
 
     @Override
     public void periodic() {
-        // Update position tracking for both servos
         updateLeftPosition();
-        // Rebuild controller to pick up dashboard-tuned PID values, then set goal
-        // Get actual velocity from servo, combine with unwrapped position
-        velocityLeft = servoLeft.getVelocity();
 
-        // Create KineticState with unwrapped position and velocity (like SwerveModule)
+        velocityLeft = servoLeft.getVelocity();
         KineticState currentState = new KineticState(totalAngleLeft, velocityLeft);
+
         if (ejectorPos == 0) {
-            powerLeft = controllerLeft.calculate(currentState);
-            servoLeft.setPower(-powerLeft);
-            servoRight.setPower(-powerLeft);
+            double rawPower = controllerLeft.calculate(currentState);
+
+            double voltage = voltageSensor.getVoltage();
+            double compensatedPower = rawPower * (NOMINAL_VOLTAGE / voltage);
+
+            compensatedPower = Math.max(-1.0, Math.min(1.0, compensatedPower));
+
+            servoLeft.setPower(-compensatedPower);
+            servoRight.setPower(-compensatedPower);
+
+            powerLeft = compensatedPower;
         }
     }
-    public void updateLeftPosition(){
-        totalAngleLeft = Angle.Companion.wrapAnglePiToPi(servoLeft.getCurrentPosition());
-    } // this comes out [-pi, pi)
 
     public Command b1 = new RunToPosition(
             controllerLeft,
