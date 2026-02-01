@@ -129,11 +129,11 @@ public class Spindexer implements Subsystem {
     );
     public Command shoot() {
         return new SequentialGroup(
-                b1,
+                b1, //go to position
                 new Delay(1),
-                b2,
+                b2, //go to position
                 new Delay(1),
-                b3
+                b3 //go to position
         );
     }
     public Command uneject = new InstantCommand(() -> {

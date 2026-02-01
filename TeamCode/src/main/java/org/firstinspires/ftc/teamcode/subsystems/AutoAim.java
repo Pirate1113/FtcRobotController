@@ -82,7 +82,7 @@ public class AutoAim implements Subsystem {
 
     public final Command reverse = new InstantCommand(() -> {
         enabled = false;
-        shooter1.setPower(0.2);
+        shooter1.setPower(-0.2);
         shooter2.setPower(-0.2);
     });
 

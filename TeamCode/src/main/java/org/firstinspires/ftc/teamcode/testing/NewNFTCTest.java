@@ -30,7 +30,7 @@ public class NewNFTCTest extends NextFTCOpMode {
         Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.b1).whenBecomesFalse(Spindexer.INSTANCE.b2);
         Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Spindexer.INSTANCE.b3);
         Gamepads.gamepad2().y().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.eject).whenBecomesFalse(Spindexer.INSTANCE.uneject);
-        Gamepads.gamepad2().a().whenTrue(Spindexer.INSTANCE.shoot);
+        Gamepads.gamepad2().a().toggleOnBecomesFalse().whenBecomesTrue(() -> Spindexer.INSTANCE.shoot().schedule());
     }
     @Override
     public void onUpdate() {

@@ -81,19 +81,16 @@ public class ColorSensor implements Subsystem {
         return DetectedColor.NONE;
     }
 
-    /** Get current hue value (0-360) */
     public float getHue() {
         updateHSV();
         return hsv[0];
     }
 
-    /** Get current saturation value (0-1) */
     public float getSaturation() {
         updateHSV();
         return hsv[1];
     }
 
-    /** Get current value/brightness (0-1) */
     public float getValue() {
         updateHSV();
         return hsv[2];

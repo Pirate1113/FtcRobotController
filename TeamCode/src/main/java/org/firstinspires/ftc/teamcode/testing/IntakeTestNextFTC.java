@@ -9,6 +9,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Palm;
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 import dev.nextftc.bindings.BindingManager;
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
@@ -24,13 +27,32 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         );
     }
-
+    public Command intakeL() {
+        return new SequentialGroup(
+                Spindexer.INSTANCE.i1,
+                new Delay(0.2),
+                Intake.INSTANCE.moveLeft, //go to position
+                new Delay(0.5),
+                Spindexer.INSTANCE.b1,
+                new Delay(0.2)
+        );
+    }
+    public Command intakeR() {
+        return new SequentialGroup(
+                Spindexer.INSTANCE.i1,
+                new Delay(0.2),
+                Intake.INSTANCE.moveRight, //go to position
+                new Delay(0.5),
+                Spindexer.INSTANCE.b1,
+                new Delay(0.2)
+        );
+    }
     @Override
     public void onStartButtonPressed() {
         //left intake control
 
-        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveLeft).whenBecomesFalse(Intake.INSTANCE.stopLeft);
-        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveRight).whenBecomesFalse(Intake.INSTANCE.stopRight);
+        Gamepads.gamepad2().x().toggleOnBecomesFalse().whenBecomesTrue(() -> intakeL().schedule()).whenBecomesFalse(Intake.INSTANCE.stopLeft);
+        Gamepads.gamepad2().b().toggleOnBecomesFalse().whenBecomesTrue(() -> intakeR().schedule()).whenBecomesFalse(Intake.INSTANCE.stopRight);
 
         Gamepads.gamepad2().dpadLeft().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b1).whenBecomesFalse(Spindexer.INSTANCE.i1);
         Gamepads.gamepad2().dpadUp().toggleOnBecomesFalse().whenBecomesTrue(Spindexer.INSTANCE.b2).whenBecomesFalse(Spindexer.INSTANCE.i2);
