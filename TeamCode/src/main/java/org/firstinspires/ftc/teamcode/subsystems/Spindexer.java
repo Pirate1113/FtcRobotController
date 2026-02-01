@@ -72,16 +72,11 @@ public class Spindexer implements Subsystem {
         totalAngleRight = 0.0;
     }
 
-    private void updateRightPosition() {
-        double current = servoRight.getCurrentPosition();
-        double delta = current - previousAngleRight;
 
-        if (delta > Math.PI) delta -= 2 * Math.PI;
-        if (delta < -Math.PI) delta += 2 * Math.PI;
+    public void updateRightPosition(){
+        totalAngleRight = Angle.Companion.wrapAnglePiToPi(servoRight.getCurrentPosition());
+    } // this comes out [-pi, pi)
 
-        totalAngleRight += delta;
-        previousAngleRight = current;
-    }
 
     @Override
     public void periodic() {
