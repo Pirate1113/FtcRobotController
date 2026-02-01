@@ -27,7 +27,7 @@ public class Spindexer implements Subsystem {
 
     private Spindexer() {}
     private VoltageSensor voltageSensor;
-    private static final double NOMINAL_VOLTAGE = 11.4;
+    private static final double NOMINAL_VOLTAGE = 14.0;
 
 
     // Hardware
