@@ -12,8 +12,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
@@ -50,6 +55,13 @@ public class SwerveDrivetrain implements Subsystem {
             {0.65, 0 ,0.2, 0}, // bR
             {0.65, 0 ,0.2, 0}  // bL
     };
+
+//    public static PIDCoefficients HEADING_PID_COEFFS = new PIDCoefficients(1.8, 0, 0.1);
+//
+//    ControlSystem headingPID = ControlSystem.builder().angular(AngleType.RADIANS,
+//            feedback -> {feedback.posPid(HEADING_PID_COEFFS);}
+//            )
+//            .build();
 
     @NonNull
     @Override
@@ -90,8 +102,6 @@ public class SwerveDrivetrain implements Subsystem {
 //            m.rotateTo(startingAngle);
 //        }
     }
-
-
 
 
     @Override
@@ -140,5 +150,47 @@ public class SwerveDrivetrain implements Subsystem {
 
 
 
+    }
+
+    public void autoDrive(double power) {
+        double currentHeading = odo.getHeading(AngleUnit.RADIANS);
+        for (SwerveModule m : swerveModules){
+            m.read();
+        }
+//        double headingVeloicty = odo.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
+//
+//        headingPID.setGoal(new KineticState(0, 0));
+//
+//        double headingPower = headingPID.calculate(new KineticState(currentHeading, headingVeloicty));
+
+        Pose drivePose = new Pose(0, power, 0);
+
+        double x = drivePose.getX(), y = drivePose.getY(), head = drivePose.getHeading();
+
+        double a = x - head * (WB / R),
+                b = x + head * (WB / R),
+                c = y - head * (TW / R),
+                d = y + head * (TW / R);
+
+        wheelSpeeds = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
+        angles = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
+
+        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+        if (max > 1.0) {
+            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
+        }
+
+        for(int i = 0; i<swerveModules.length; i++){
+            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
+            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
+        }
+
+    }
+
+    public void stop() {
+        for (SwerveModule m : swerveModules) {
+            m.write(0);
+        }
     }
 }

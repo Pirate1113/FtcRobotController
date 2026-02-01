@@ -26,6 +26,11 @@ public class AbsoluteAnalogEncoder {
         offset = 0;
         inverted = false;
     }
+
+    public void setAnalogRange(double aRange){
+        this.analogRange = aRange;
+    }
+
     public AbsoluteAnalogEncoder zero(double off){
         offset = off;
         return this;
