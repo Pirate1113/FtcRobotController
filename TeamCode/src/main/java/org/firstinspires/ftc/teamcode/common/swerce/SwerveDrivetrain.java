@@ -5,11 +5,13 @@ import static java.lang.Math.hypot;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
@@ -25,6 +27,9 @@ import dev.nextftc.ftc.ActiveOpMode;
 public class SwerveDrivetrain implements Subsystem {
     public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
     private SwerveDrivetrain() {}
+
+    Telemetry dashboardTelemetry;
+    FtcDashboard dashboard;
 
     public GoBildaPinpointDriver odo;
 
@@ -50,10 +55,10 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.65, 0 ,0.2, 0}, // fL
-            {0.65, 0 ,0.2, 0}, // fR
-            {0.65, 0 ,0.2, 0}, // bR
-            {0.65, 0 ,0.2, 0}  // bL
+            {0.6, 0 ,0.02, 0}, // fL
+            {0.6, 0 ,0.02, 0}, // fR
+            {0.6, 0 ,0.02, 0}, // bR
+            {0.6, 0 ,0.02, 0}  // bL
     };
 
 //    public static PIDCoefficients HEADING_PID_COEFFS = new PIDCoefficients(1.8, 0, 0.1);
@@ -97,6 +102,9 @@ public class SwerveDrivetrain implements Subsystem {
                 6.12, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
+
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
 
 //        for (SwerveModule m : swerveModules) {
 //            m.rotateTo(startingAngle);
@@ -183,7 +191,7 @@ public class SwerveDrivetrain implements Subsystem {
         for(int i = 0; i<swerveModules.length; i++){
             swerveModules[i].rotateTo(angles[i]);
             swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
+            swerveModules[i].getTelemetry(dashboardTelemetry);
         }
 
     }

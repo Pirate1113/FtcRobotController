@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
-
-import android.service.controls.Control;
-
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,6 +17,7 @@ import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.core.units.Angle;
+import dev.nextftc.hardware.impl.FeedbackCRServoEx;
 
 
 @Config
@@ -51,7 +49,9 @@ public class SwerveModule{
 
     private DcMotorEx drive;
     private CRServoEx axon;
+    private FeedbackCRServoEx ax3on;
     private AbsoluteAnalogEncoder enc;
+    private double lastTimeStamp;
 
     /** Construcotr is:
      @param n name
@@ -85,6 +85,8 @@ public class SwerveModule{
 
         axon.setPower(1);
         axon.setPower(0);
+
+        ax3on = new FeedbackCRServoEx(0.05, ()->e, ()->s);
     }
 
     public void read(){
@@ -102,17 +104,23 @@ public class SwerveModule{
         } else {
             wheelFlipped = false;
         }
-
         error = Angle.Companion.wrapAnglePiToPi(target - current);
 
         pid.setGoal(new KineticState(target));
 
-        //calculating velocity for use in D term
-        if (Math.abs(period) > 1E-6) {
-            velocity = (current - lastCurrent) / period;
-        } else {
-            velocity = 0;
-        }
+//        double currentTimeStamp = (double) System.nanoTime() / 1E9;
+//        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
+//        period = currentTimeStamp - lastTimeStamp;
+//        lastTimeStamp = currentTimeStamp;
+//
+//        //calculating velocity for use in D term
+//        if (Math.abs(period) > 1E-6) {
+//            velocity = (current - lastCurrent) / period;
+//        } else {
+//            velocity = 0;
+//        }
+
+        velocity = ax3on.getVelocity();
 
         KineticState sCurrent = new KineticState(current, velocity);
 
