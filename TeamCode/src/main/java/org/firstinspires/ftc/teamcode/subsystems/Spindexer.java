@@ -127,13 +127,15 @@ public class Spindexer implements Subsystem {
             -1.2376+2*Math.PI/1.5, // - offset
             0.05   // absolute tolerance in units
     );
-    public Command shoot = new SequentialGroup(
-            b1,
-            new Delay(1),
-            b2,
-            new Delay(1),
-            b3
-    );
+    public Command shoot() {
+        return new SequentialGroup(
+                b1,
+                new Delay(1),
+                b2,
+                new Delay(1),
+                b3
+        );
+    }
     public Command uneject = new InstantCommand(() -> {
         ejectorPos = 0;
         ejector.getServo().setPosition(ejectorPos);
