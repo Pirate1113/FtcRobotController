@@ -51,7 +51,6 @@ public class SwerveModule{
     private CRServoEx axon;
     private AbsoluteAnalogEncoder enc;
 
-
     /** Construcotr is:
      @param n name
      @param m motor
@@ -102,6 +101,8 @@ public class SwerveModule{
             wheelFlipped = false;
         }
 
+        error = Angle.Companion.wrapAnglePiToPi(target - current);
+
         pid.setGoal(new KineticState(target));
 
         //calculating velocity for use in D term
@@ -116,10 +117,11 @@ public class SwerveModule{
         power = pid.calculate(sCurrent) + (Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power);
     }
 
-    public void write(double wheelVel){
+    public void write(double wV){
+        this.wheelVel = wV;
         axon.setPower(power);
         if (wheelFlipped) wheelVel *= -1;
-        drive.setVelocity(wheelVel);
+        drive.setVelocity(Math.cos(Math.abs(error))*wheelVel);
     }
 
     public void getTelemetry(Telemetry telemetry){

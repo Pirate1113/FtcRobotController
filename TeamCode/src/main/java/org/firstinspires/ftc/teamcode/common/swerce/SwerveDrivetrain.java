@@ -106,11 +106,12 @@ public class SwerveDrivetrain implements Subsystem {
                 realRightX = rawRightX / Math.sqrt(2);
 
         heading = odo.getHeading(AngleUnit.RADIANS);
+        odo.update();
 
         rawPose = new Pose(rawLeftX, rawLeftY, realRightX);
-//        rotPose = rawPose.rotate(-heading, false);
+        rotPose = rawPose.rotate(heading, false);
 
-        double x = rawPose.getX(), y = rawPose.getY(), head = rawPose.getHeading();
+        double x = rotPose.getX(), y = rotPose.getY(), head = rotPose.getHeading();
 
         double a = x - head * (WB / R),
                 b = x + head * (WB / R),
