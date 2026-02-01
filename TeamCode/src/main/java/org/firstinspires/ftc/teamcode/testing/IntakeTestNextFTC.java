@@ -63,6 +63,7 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         // AutoAim: right trigger enables, right bumper reverses
         Gamepads.gamepad2().rightTrigger().greaterThan(0.2).whenBecomesTrue(AutoAim.INSTANCE.enable).whenBecomesFalse(AutoAim.INSTANCE.off);
         Gamepads.gamepad2().rightBumper().toggleOnBecomesFalse().whenBecomesTrue(AutoAim.INSTANCE.reverse).whenBecomesFalse(AutoAim.INSTANCE.off);
+        Gamepads.gamepad2().leftTrigger().greaterThan(0.2).whenTrue(AutoAim.INSTANCE.on).whenBecomesFalse(AutoAim.INSTANCE.off);
     }
     @Override
     public void onUpdate() {
