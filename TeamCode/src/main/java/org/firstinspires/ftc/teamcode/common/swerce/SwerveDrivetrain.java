@@ -116,6 +116,7 @@ public class SwerveDrivetrain implements Subsystem {
     public void periodic() {
         for(SwerveModule m : swerveModules){
             m.read();
+            moveToTargetPose();
         }
 
         double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x,
@@ -194,6 +195,54 @@ public class SwerveDrivetrain implements Subsystem {
         }
 
     }
+
+    // Target pose
+    private double targetX, targetY, targetHeading;
+    private double targetPower;
+
+    public void setTargetPose(double dx, double dy, double dHeading, double power) {
+        targetX = dx;
+        targetY = dy;
+        targetHeading = dHeading;
+        targetPower = power;
+    }
+
+    public boolean isAtTargetPose(double posTolerance, double headingTolerance) {
+        double xError = Math.abs(targetX - rawPose.getX());
+        double yError = Math.abs(targetY - rawPose.getY());
+        double headingError = Math.abs(targetHeading - odo.getHeading());
+
+        return xError <= posTolerance && yError <= posTolerance && headingError <= headingTolerance;
+    }
+
+    public void moveToTargetPose() {
+        // Compute relative Pose vector
+        Pose targetPose = new Pose(targetX - rawPose.getX(), targetY - rawPose.getY(), targetHeading - odo.getHeading());
+        Pose rotatedPose = targetPose.rotate(odo.getHeading(), false);
+
+        double x = rotatedPose.getX();
+        double y = rotatedPose.getY();
+        double head = rotatedPose.getHeading();
+
+        double a = x - head * (WB / R);
+        double b = x + head * (WB / R);
+        double c = y - head * (TW / R);
+        double d = y + head * (TW / R);
+
+        wheelSpeeds = new double[]{Math.hypot(b, c), Math.hypot(b, d), Math.hypot(a, d), Math.hypot(a, c)};
+        angles = new double[]{Math.atan2(b, c), Math.atan2(b, d), Math.atan2(a, d), Math.atan2(a, c)};
+
+        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+        if (max > 1.0) {
+            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
+        }
+
+        for (int i = 0; i < swerveModules.length; i++) {
+            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].write(wheelSpeeds[i] * targetPower * MAX_SPEED);
+        }
+    }
+
 
     public void stop() {
         for (SwerveModule m : swerveModules) {
