@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import static java.lang.Math.atan2;
 import static java.lang.Math.hypot;
@@ -103,8 +104,7 @@ public class SwerveDrivetrain implements Subsystem {
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
+
 
 //        for (SwerveModule m : swerveModules) {
 //            m.rotateTo(startingAngle);
@@ -191,7 +191,6 @@ public class SwerveDrivetrain implements Subsystem {
         for(int i = 0; i<swerveModules.length; i++){
             swerveModules[i].rotateTo(angles[i]);
             swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-            swerveModules[i].getTelemetry(dashboardTelemetry);
         }
 
     }

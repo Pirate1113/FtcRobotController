@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
@@ -37,6 +39,7 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
                 new Delay(0.2)
         );
     }
+
     public Command intakeR() {
         return new SequentialGroup(
                 Spindexer.INSTANCE.i1,
@@ -64,6 +67,15 @@ public class IntakeTestNextFTC extends NextFTCOpMode {
         Gamepads.gamepad2().rightTrigger().greaterThan(0.2).whenBecomesTrue(AutoAim.INSTANCE.enable).whenBecomesFalse(AutoAim.INSTANCE.off);
         Gamepads.gamepad2().rightBumper().toggleOnBecomesFalse().whenBecomesTrue(AutoAim.INSTANCE.reverse).whenBecomesFalse(AutoAim.INSTANCE.off);
     }
+
+    @Override
+    public void onInit() {
+        telemetry = new MultipleTelemetry(
+                telemetry,
+                FtcDashboard.getInstance().getTelemetry()
+        );
+    }
+
     @Override
     public void onUpdate() {
         BindingManager.update();
