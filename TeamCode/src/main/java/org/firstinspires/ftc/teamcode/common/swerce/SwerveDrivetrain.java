@@ -15,7 +15,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
@@ -52,8 +51,6 @@ public class SwerveDrivetrain implements Subsystem {
     private  final double WB = 13.36;
     private final double R = hypot(TW, WB);
 
-    private Pose currentPose = new Pose(0, 0, 0);
-    private Pose targetPose;
 
     private double startingAngle = 0;
     private static final double CACHE_TOLERANCE = 0.05;
@@ -75,8 +72,6 @@ public class SwerveDrivetrain implements Subsystem {
     @NonNull
     @Override
     public void initialize() {
-        odo.resetPosAndIMU();
-        currentPose = new Pose(0, 0, 0);
         odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, "odo");
         odo.setOffsets(-2.50688543, -6.70373543, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
@@ -108,8 +103,6 @@ public class SwerveDrivetrain implements Subsystem {
                 6.12, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
-        odo.resetPosAndIMU();
-        currentPose = new Pose(0, 0, 0);
 
 
 
@@ -164,14 +157,6 @@ public class SwerveDrivetrain implements Subsystem {
             swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
         }
 
-        Pose2D odoPose = odo.getPose();
-
-        currentPose = new Pose(
-                odoPose.getX(DistanceUnit.INCH),
-                odoPose.getY(DistanceUnit.INCH),
-                odoPose.getHeading(AngleUnit.RADIANS)
-        );
-
 
 
     }
@@ -216,49 +201,19 @@ public class SwerveDrivetrain implements Subsystem {
     private double targetPower;
 
     public void setTargetPose(double dx, double dy, double dHeading, double power) {
-        if (currentPose == null) return;
-
-        targetPose = new Pose(
-                currentPose.getX() + dx,
-                currentPose.getY() + dy,
-                currentPose.getHeading() + dHeading
-        );
+        targetX = dx;
+        targetY = dy;
+        targetHeading = dHeading;
+        targetPower = power;
     }
 
-    public boolean isAtTargetPose(double tol, double headingTol) {
-        if (currentPose == null || targetPose == null) return false;
+    public boolean isAtTargetPose(double posTolerance, double headingTolerance) {
+        double xError = Math.abs(targetX - rawPose.getX());
+        double yError = Math.abs(targetY - rawPose.getY());
+        double headingError = Math.abs(targetHeading - odo.getHeading());
 
-        return Math.hypot(
-                targetPose.getX() - currentPose.getX(),
-                targetPose.getY() - currentPose.getY()
-        ) < tol &&
-                Math.abs(targetPose.getHeading() - currentPose.getHeading()) < headingTol;
+        return xError <= posTolerance && yError <= posTolerance && headingError <= headingTolerance;
     }
-
-    private void autoDrivePose(double x, double y, double rot) {
-        // Same math as teleop, just no gamepad
-        rawPose = new Pose(x, y, rot);
-        rotPose = rawPose.rotate(heading, false);
-    }
-
-
-    public void driveToTarget(double power) {
-        if (currentPose == null || targetPose == null) return;
-
-        double dx = targetPose.getX() - currentPose.getX();
-        double dy = targetPose.getY() - currentPose.getY();
-        double dHeading = targetPose.getHeading() - currentPose.getHeading();
-
-        // Normalize to [-1,1]
-        double mag = Math.hypot(dx, dy);
-        if (mag > 1) {
-            dx /= mag;
-            dy /= mag;
-        }
-
-        autoDrivePose(dx * power, dy * power, dHeading * 0.5);
-    }
-
 
     public void moveToTargetPose() {
         // Compute relative Pose vector
