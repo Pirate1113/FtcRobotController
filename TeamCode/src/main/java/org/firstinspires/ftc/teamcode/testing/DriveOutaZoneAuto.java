@@ -23,7 +23,7 @@ public class DriveOutaZoneAuto extends LinearOpMode {
         timer.reset();
 
         // Drive forward for 1.0 seconds
-        while (opModeIsActive() && timer.seconds() < 0.5) {
+        while (opModeIsActive() && timer.seconds() < 1.0) {
             drivetrain.autoDrive(0.4); // Tune this power as needed
 
             telemetry.addData("Auto Status", "Driving Forward");
