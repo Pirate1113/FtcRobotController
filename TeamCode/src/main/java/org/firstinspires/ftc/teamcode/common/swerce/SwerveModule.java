@@ -109,18 +109,6 @@ public class SwerveModule{
 
         pid.setGoal(new KineticState(target));
 
-//        double currentTimeStamp = (double) System.nanoTime() / 1E9;
-//        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
-//        period = currentTimeStamp - lastTimeStamp;
-//        lastTimeStamp = currentTimeStamp;
-//
-//        //calculating velocity for use in D term
-//        if (Math.abs(period) > 1E-6) {
-//            velocity = (current - lastCurrent) / period;
-//        } else {
-//            velocity = 0;
-//        }
-
         velocity = ax3on.getVelocity();
 
         KineticState sCurrent = new KineticState(current, velocity);
