@@ -56,9 +56,10 @@ public class Auto extends NextFTCOpMode {
 
         @Override
         public void update() {
-            // ts called repeatedly
+            SwerveDrivetrain.INSTANCE.driveToTarget(power);
+
             if (SwerveDrivetrain.INSTANCE.isAtTargetPose(TOLERANCE, HEADING_TOL)) {
-                SwerveDrivetrain.INSTANCE.stop(); // stops when target reached
+                SwerveDrivetrain.INSTANCE.stop();
                 finished = true;
             }
         }
@@ -69,4 +70,6 @@ public class Auto extends NextFTCOpMode {
         }
 
         }
+
+
     }
