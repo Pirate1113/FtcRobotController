@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -14,7 +15,6 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class SwerveTeleOp extends NextFTCOpMode {
 
     Telemetry dashboardTelemetry;
-    FtcDashboard dashboard;
 
 
     public SwerveTeleOp() {
@@ -26,12 +26,14 @@ public class SwerveTeleOp extends NextFTCOpMode {
     }
 
     @Override
-    public void onStartButtonPressed() {}
+    public void onStartButtonPressed() {
+        dashboardTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    }
 
 
     @Override
     public void onUpdate(){
-        telemetry.update();
+        dashboardTelemetry.update();
     }
 
 }

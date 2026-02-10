@@ -14,7 +14,10 @@ import com.acmerobotics.dashboard.config.Config;
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.FeedbackType;
 import dev.nextftc.control.feedback.PIDCoefficients;
+import dev.nextftc.control.feedback.PIDController;
+import dev.nextftc.control.feedback.PIDElement;
 import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.core.units.Angle;
 import dev.nextftc.hardware.impl.FeedbackCRServoEx;
@@ -46,6 +49,7 @@ public class SwerveModule{
     PIDCoefficients pidValues;
     double K_STATIC;
     public ControlSystem pid;
+    public PIDElement controller;
 
     private DcMotorEx drive;
     private CRServoEx axon;
@@ -93,7 +97,11 @@ public class SwerveModule{
         Angle.Companion.wrapAnglePiToPi(current = enc.getCurrentPosition());
     } // this comes out [-pi, pi)
 
-    public void rotateTo(double tar){
+    public void rotateTo(double tar, double[] PIDK){
+        this.pidValues.kP = PIDK [0];
+        this.pidValues.kI = PIDK[1];
+        this.pidValues.kD = PIDK[2];
+
         this.target = Angle.Companion.wrapAnglePiToPi(tar);
 
         this.error = Angle.Companion.wrapAnglePiToPi(target-current);
@@ -124,13 +132,13 @@ public class SwerveModule{
 
     public void getTelemetry(Telemetry telemetry){
         telemetry.addData("", name);
-        telemetry.addData("Target", target);
-        telemetry.addData("Current", current);
-        telemetry.addData("Error", error);
-        telemetry.addData("Power", power);
-        telemetry.addData("Rot vel", velocity);
-        telemetry.addData("Wheel Flipped", wheelFlipped);
-        telemetry.addData("Drive power", wheelVel);
+        telemetry.addData(name + " Target", target);
+        telemetry.addData(name + "Current", current);
+        telemetry.addData(name + "Error", error);
+        telemetry.addData(name + "Power", power);
+        telemetry.addData(name + "Rot vel", velocity);
+        telemetry.addData(name + "Wheel Flipped", wheelFlipped);
+        telemetry.addData(name + "Drive power", wheelVel);
     }
 
 }

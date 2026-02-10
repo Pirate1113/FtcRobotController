@@ -6,6 +6,8 @@ import static java.lang.Math.hypot;
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -14,22 +16,21 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
+
 import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
+@Config
 public class SwerveDrivetrain implements Subsystem {
     public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
     private SwerveDrivetrain() {}
 
-    Telemetry dashboardTelemetry;
-    FtcDashboard dashboard;
+    Telemetry telemetry;
 
     public GoBildaPinpointDriver odo;
 
@@ -55,18 +56,19 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.6, 0 ,0.02, 0}, // fL
-            {0.6, 0 ,0.02, 0}, // fR
+            {0.53, 0 ,0.009, 0}, // fL
+            {0.65, 0 ,0.005, 0}, // fR
             {0.6, 0 ,0.02, 0}, // bR
-            {0.6, 0 ,0.02, 0}  // bL
+            {0.65, 0 ,0.008, 0}  // bL
     };
 
-//    public static PIDCoefficients HEADING_PID_COEFFS = new PIDCoefficients(1.8, 0, 0.1);
-//
-//    ControlSystem headingPID = ControlSystem.builder().angular(AngleType.RADIANS,
-//            feedback -> {feedback.posPid(HEADING_PID_COEFFS);}
-//            )
-//            .build();
+    public static PIDCoefficients HEADING_PID_COEFFS = new PIDCoefficients(1.8, 0, 0.1);
+
+    ControlSystem headingPID = ControlSystem.builder()
+            .angular(AngleType.RADIANS,
+            feedback -> {feedback.posPid(HEADING_PID_COEFFS);}
+            )
+            .build();
 
     @NonNull
     @Override
@@ -77,40 +79,38 @@ public class SwerveDrivetrain implements Subsystem {
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         odo.resetPosAndIMU();
 
+        fL = new SwerveModule("frontLeft",
+                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
+                ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
+                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
+                6.12, false, true, PIDKVal[0]);
+
         fR = new SwerveModule("frontRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fr_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"),
-                4.22, false, true, PIDKVal[0]);
+                4.22, false, true, PIDKVal[1]);
 
         bR = new SwerveModule("backRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "br_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"),
-                6.01, false, true, PIDKVal[1]);
+                6.01, false, true, PIDKVal[2]);
 
         bL = new SwerveModule("backLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
-                1.47, false, true, PIDKVal[2]);
-
-        fL = new SwerveModule("frontLeft",
-                ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
-                ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
-                ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
-                6.12, false, true, PIDKVal[3]);
+                1.47, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
+        telemetry = new MultipleTelemetry(ActiveOpMode.telemetry(), FtcDashboard.getInstance().getTelemetry());
 
 //        for (SwerveModule m : swerveModules) {
 //            m.rotateTo(startingAngle);
 //        }
     }
-
 
     @Override
     public void periodic() {
@@ -152,12 +152,12 @@ public class SwerveDrivetrain implements Subsystem {
             if (!joystickIsIdle){
                 cacheAngles[i] = angles[i];
             }
-            swerveModules[i].rotateTo(cacheAngles[i]);
+            swerveModules[i].rotateTo(cacheAngles[i], PIDKVal[i]);
             swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
+            swerveModules[i].getTelemetry(telemetry);
         }
 
-
+        telemetry.update();
 
     }
 
@@ -190,9 +190,9 @@ public class SwerveDrivetrain implements Subsystem {
         }
 
         for(int i = 0; i<swerveModules.length; i++){
-            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].rotateTo(angles[i], PIDKVal[i]);
             swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-            swerveModules[i].getTelemetry(dashboardTelemetry);
+            swerveModules[i].getTelemetry(telemetry);
         }
 
     }

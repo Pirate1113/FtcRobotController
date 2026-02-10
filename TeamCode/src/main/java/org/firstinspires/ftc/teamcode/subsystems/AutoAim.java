@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.testing.LimelightAngle;
 public class AutoAim implements Subsystem {
     public static final AutoAim INSTANCE = new AutoAim();
 
-    private AutoAim() {}
-
+    private AutoAim() {
+    }
     private static final double LL_HEIGHT = 14;
     private static final double TAG_HEIGHT = 29.5;
 
