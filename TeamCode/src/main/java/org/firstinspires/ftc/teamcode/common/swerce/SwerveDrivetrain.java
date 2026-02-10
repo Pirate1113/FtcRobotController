@@ -239,7 +239,7 @@ public class SwerveDrivetrain implements Subsystem {
         }
 
         for (int i = 0; i < swerveModules.length; i++) {
-            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].rotateTo(angles[i], PIDKVal[i]);
             swerveModules[i].write(wheelSpeeds[i] * targetPower * MAX_SPEED);
         }
     }
