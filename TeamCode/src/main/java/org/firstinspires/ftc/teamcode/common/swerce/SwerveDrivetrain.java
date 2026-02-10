@@ -172,7 +172,7 @@ public class SwerveDrivetrain implements Subsystem {
 //
 //        double headingPower = headingPID.calculate(new KineticState(currentHeading, headingVeloicty));
 
-        Pose drivePose = new Pose(power, 0, 0);
+        Pose drivePose = new Pose(0, power, 0);
 
         double x = drivePose.getX(), y = drivePose.getY(), head = drivePose.getHeading();
 
