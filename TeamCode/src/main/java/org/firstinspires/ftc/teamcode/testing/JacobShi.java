@@ -38,7 +38,6 @@ public class JacobShi extends OpMode {
 
         dashboard = FtcDashboard.getInstance();
     }
-
     
 
     public void loop() {
