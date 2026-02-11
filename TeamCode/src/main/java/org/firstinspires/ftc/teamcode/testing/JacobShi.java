@@ -39,6 +39,8 @@ public class JacobShi extends OpMode {
         dashboard = FtcDashboard.getInstance();
     }
 
+    
+
     public void loop() {
 //        if (gamepad1.dpad_up && !previousDpadUp) {
 //            power += 0.1;
