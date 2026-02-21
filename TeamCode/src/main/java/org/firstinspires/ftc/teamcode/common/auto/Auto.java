@@ -26,10 +26,20 @@ public class Auto extends NextFTCOpMode {
         double power = 0.8;
 
         return new SequentialGroup(
+
                 new PoseDriveCommand(0, side, 0, power),
+
+                new PoseDriveCommand(0, side, Math.PI/2, power),
+
                 new PoseDriveCommand(side, side, Math.PI/2, power),
+
+                new PoseDriveCommand(side, side, Math.PI, power),
+
                 new PoseDriveCommand(side, 0, Math.PI, power),
-                new PoseDriveCommand(0, 0, -Math.PI/2, power)   
+
+                new PoseDriveCommand(side, 0, -Math.PI/2, power),
+
+                new PoseDriveCommand(0, 0, -Math.PI/2, power)
         );
     }
 
