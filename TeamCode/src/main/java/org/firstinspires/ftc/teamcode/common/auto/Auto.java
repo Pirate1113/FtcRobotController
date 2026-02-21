@@ -21,14 +21,15 @@ public class Auto extends NextFTCOpMode {
         autoSequence().schedule();
     }
 
-    // All coordinates are ABSOLUTE from the starting position (odo is reset on init).
-    // X = strafe (positive = right), Y = forward (positive = forward), heading in radians.
     public Command autoSequence() {
+        double side = 24; // 24 inches per side
+        double power = 0.8;
+
         return new SequentialGroup(
-                new PoseDriveCommand(0,  1, 0,            1.0), // forward 24 in
-                new PoseDriveCommand(-2, 1, 0,            0.8), // strafe right 12 in
-                new PoseDriveCommand(-2, 1, Math.PI / 2,  0.5), // rotate 90°
-                new PoseDriveCommand(-2,  0, Math.PI / 2,  1.0)  // backward 24 in
+                new PoseDriveCommand(0, side, 0, power),       // Forward
+                new PoseDriveCommand(side, side, 0, power),    // Strafe right
+                new PoseDriveCommand(side, 0, 0, power),       // Backward
+                new PoseDriveCommand(0, 0, 0, power)           // Strafe left, back to start
         );
     }
 
