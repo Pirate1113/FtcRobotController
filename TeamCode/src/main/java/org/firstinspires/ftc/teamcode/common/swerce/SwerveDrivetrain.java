@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
+
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import static java.lang.Math.atan2;
@@ -15,19 +16,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
-import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
-import dev.nextftc.control.feedback.AngleType;
-import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class SwerveDrivetrain implements Subsystem {
     public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
     private SwerveDrivetrain() {}
+
+    private enum ControlMode { TELEOP, AUTO }
+    private ControlMode controlMode = ControlMode.TELEOP;
 
     Telemetry dashboardTelemetry;
     FtcDashboard dashboard;
@@ -36,38 +35,32 @@ public class SwerveDrivetrain implements Subsystem {
 
     private double heading;
 
-    Pose rawPose; //just use these as vectors
+    Pose rawPose;
     Pose rotPose;
 
     public SwerveModule fR, bR, bL, fL;
     public SwerveModule[] swerveModules;
 
-    public double[] wheelSpeeds = new double [4];
-    public static final double MAX_SPEED = 6000; //TODO find
+    public double[] wheelSpeeds = new double[4];
+    public static final double MAX_SPEED = 6000;
     public double[] angles = new double[4];
     public double[] cacheAngles = new double[4];
 
     private final double TW = 13.36;
-    private  final double WB = 13.36;
+    private final double WB = 13.36;
     private final double R = hypot(TW, WB);
 
-
-    private double startingAngle = 0;
     private static final double CACHE_TOLERANCE = 0.05;
 
     public static double[][] PIDKVal = {
-            {0.6, 0 ,0.02, 0}, // fL
-            {0.6, 0 ,0.02, 0}, // fR
-            {0.6, 0 ,0.02, 0}, // bR
-            {0.6, 0 ,0.02, 0}  // bL
+            {0.6, 0, 0.02, 0},
+            {0.6, 0, 0.02, 0},
+            {0.6, 0, 0.02, 0},
+            {0.6, 0, 0.02, 0}
     };
 
-//    public static PIDCoefficients HEADING_PID_COEFFS = new PIDCoefficients(1.8, 0, 0.1);
-//
-//    ControlSystem headingPID = ControlSystem.builder().angular(AngleType.RADIANS,
-//            feedback -> {feedback.posPid(HEADING_PID_COEFFS);}
-//            )
-//            .build();
+    private double targetX, targetY, targetHeading;
+    private double targetPower;
 
     @NonNull
     @Override
@@ -75,7 +68,10 @@ public class SwerveDrivetrain implements Subsystem {
         odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, "odo");
         odo.setOffsets(-2.50688543, -6.70373543, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odo.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.REVERSED,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
+        );
         odo.resetPosAndIMU();
 
         fR = new SwerveModule("frontRight",
@@ -103,136 +99,144 @@ public class SwerveDrivetrain implements Subsystem {
                 6.12, false, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
-
-
-
-//        for (SwerveModule m : swerveModules) {
-//            m.rotateTo(startingAngle);
-//        }
     }
-
 
     @Override
     public void periodic() {
-        for(SwerveModule m : swerveModules){
+
+        for (SwerveModule m : swerveModules) {
             m.read();
-            moveToTargetPose();
         }
 
-        double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x,
-                rawLeftY = -ActiveOpMode.gamepad1().left_stick_y,
-                rawRightX = -ActiveOpMode.gamepad1().right_stick_x,
-                realRightX = rawRightX / Math.sqrt(2);
-
-        heading = odo.getHeading(AngleUnit.RADIANS);
         odo.update();
 
-        rawPose = new Pose(rawLeftX, rawLeftY, realRightX);
+        if (controlMode == ControlMode.AUTO) {
+            moveToTargetPose();
+            return;
+        }
+
+        double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x;
+        double rawLeftY = -ActiveOpMode.gamepad1().left_stick_y;
+        double rawRightX = -ActiveOpMode.gamepad1().right_stick_x;
+        double realRightX = rawRightX / Math.sqrt(2);
+
+        heading = odo.getHeading(AngleUnit.RADIANS);
+
+
+
+        rawPose = new Pose(odo.getPosX(DistanceUnit.INCH), odo.getPosY(DistanceUnit.INCH), odo.getHeading(AngleUnit.RADIANS));
         rotPose = rawPose.rotate(heading, false);
 
-        double x = rotPose.getX(), y = rotPose.getY(), head = rotPose.getHeading();
+        double x = rotPose.getX();
+        double y = rotPose.getY();
+        double head = rotPose.getHeading();
 
-        double a = x - head * (WB / R),
-                b = x + head * (WB / R),
-                c = y - head * (TW / R),
-                d = y + head * (TW / R);
-
-        wheelSpeeds = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
-        angles = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
-
-        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
-        if (max > 1.0) {
-            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
-        }
-
-        boolean joystickIsIdle = (Math.abs(rawLeftX) <= CACHE_TOLERANCE && Math.abs(rawLeftY) <= CACHE_TOLERANCE && Math.abs(rawRightX) <= CACHE_TOLERANCE);
-
-
-        for(int i = 0; i<swerveModules.length; i++){
-            if (!joystickIsIdle){
-                cacheAngles[i] = angles[i];
-            }
-            swerveModules[i].rotateTo(cacheAngles[i]);
-            swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
-        }
-
-
-
-    }
-
-    public void autoDrive(double power) {
-        double currentHeading = odo.getHeading(AngleUnit.RADIANS);
-        for (SwerveModule m : swerveModules){
-            m.read();
-        }
-//        double headingVeloicty = odo.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
-//
-//        headingPID.setGoal(new KineticState(0, 0));
-//
-//        double headingPower = headingPID.calculate(new KineticState(currentHeading, headingVeloicty));
-
-        Pose drivePose = new Pose(0, power, 0);
-
-        double x = drivePose.getX(), y = drivePose.getY(), head = drivePose.getHeading();
-
-        double a = x - head * (WB / R),
-                b = x + head * (WB / R),
-                c = y - head * (TW / R),
-                d = y + head * (TW / R);
-
-        wheelSpeeds = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
-        angles = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
-
-        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
-        if (max > 1.0) {
-            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
-        }
-
-        for(int i = 0; i<swerveModules.length; i++){
-            swerveModules[i].rotateTo(angles[i]);
-            swerveModules[i].write(wheelSpeeds[i]*MAX_SPEED);
-        }
-
-    }
-
-    // Target pose
-    private double targetX, targetY, targetHeading;
-    private double targetPower;
-
-    public void setTargetPose(double dx, double dy, double dHeading, double power) {
-        targetX = dx;
-        targetY = dy;
-        targetHeading = dHeading;
-        targetPower = power;
-    }
-
-    public boolean isAtTargetPose(double posTolerance, double headingTolerance) {
-        double xError = Math.abs(targetX - rawPose.getX());
-        double yError = Math.abs(targetY - rawPose.getY());
-        double headingError = Math.abs(targetHeading - odo.getHeading());
-
-        return xError <= posTolerance && yError <= posTolerance && headingError <= headingTolerance;
-    }
-
-    public void moveToTargetPose() {
-        // Compute relative Pose vector
-        Pose targetPose = new Pose(targetX - rawPose.getX(), targetY - rawPose.getY(), targetHeading - odo.getHeading());
-        Pose rotatedPose = targetPose.rotate(odo.getHeading(), false);
-
-        double x = rotatedPose.getX();
-        double y = rotatedPose.getY();
-        double head = rotatedPose.getHeading();
 
         double a = x - head * (WB / R);
         double b = x + head * (WB / R);
         double c = y - head * (TW / R);
         double d = y + head * (TW / R);
 
-        wheelSpeeds = new double[]{Math.hypot(b, c), Math.hypot(b, d), Math.hypot(a, d), Math.hypot(a, c)};
-        angles = new double[]{Math.atan2(b, c), Math.atan2(b, d), Math.atan2(a, d), Math.atan2(a, c)};
+        wheelSpeeds = new double[]{
+                hypot(b, c),
+                hypot(b, d),
+                hypot(a, d),
+                hypot(a, c)
+        };
 
-        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+        angles = new double[]{
+                atan2(b, c),
+                atan2(b, d),
+                atan2(a, d),
+                atan2(a, c)
+        };
+
+        double max = Math.max(
+                Math.max(wheelSpeeds[0], wheelSpeeds[1]),
+                Math.max(wheelSpeeds[2], wheelSpeeds[3])
+        );
+
+        if (max > 1.0) {
+            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
+        }
+
+        boolean joystickIsIdle =
+                Math.abs(rawLeftX) <= CACHE_TOLERANCE &&
+                        Math.abs(rawLeftY) <= CACHE_TOLERANCE &&
+                        Math.abs(rawRightX) <= CACHE_TOLERANCE;
+
+        for (int i = 0; i < swerveModules.length; i++) {
+            if (!joystickIsIdle) {
+                cacheAngles[i] = angles[i];
+            }
+            swerveModules[i].rotateTo(cacheAngles[i]);
+            swerveModules[i].write(wheelSpeeds[i] * MAX_SPEED);
+            swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
+        }
+    }
+
+    public void setTargetPose(double dx, double dy, double dHeading, double power) {
+        targetX = dx;
+        targetY = dy;
+        targetHeading = dHeading;
+        targetPower = power;
+        controlMode = ControlMode.AUTO;
+    }
+
+    public boolean isAtTargetPose(double posTolerance, double headingTolerance) {
+        double currentX = odo.getPosX(DistanceUnit.INCH);
+        double currentY = odo.getPosY(DistanceUnit.INCH);
+        double currentHeading = odo.getHeading(AngleUnit.RADIANS);
+
+        double xError = Math.abs(targetX - currentX);
+        double yError = Math.abs(targetY - currentY);
+        double headingError = Math.abs(targetHeading - currentHeading);
+
+        return xError <= posTolerance &&
+                yError <= posTolerance &&
+                headingError <= headingTolerance;
+    }
+
+    private void moveToTargetPose() {
+        double currentX = odo.getPosX(DistanceUnit.INCH);
+        double currentY = odo.getPosY(DistanceUnit.INCH);
+        double currentHeading = odo.getHeading(AngleUnit.RADIANS);
+
+        double dx = targetX - currentX;
+        double dy = targetY - currentY;
+        double dh = targetHeading - currentHeading;
+
+        Pose errorPose = new Pose(dx, dy, dh)
+                .rotate(currentHeading, false);
+
+        double x = errorPose.getX();
+        double y = errorPose.getY();
+        double head = errorPose.getHeading();
+
+        double a = x - head * (WB / R);
+        double b = x + head * (WB / R);
+        double c = y - head * (TW / R);
+        double d = y + head * (TW / R);
+
+        wheelSpeeds = new double[]{
+                hypot(b, c),
+                hypot(b, d),
+                hypot(a, d),
+                hypot(a, c)
+        };
+
+        angles = new double[]{
+                atan2(b, c),
+                atan2(b, d),
+                atan2(a, d),
+                atan2(a, c)
+        };
+
+        double max = Math.max(
+                Math.max(wheelSpeeds[0], wheelSpeeds[1]),
+                Math.max(wheelSpeeds[2], wheelSpeeds[3])
+        );
+
         if (max > 1.0) {
             for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
         }
@@ -243,10 +247,10 @@ public class SwerveDrivetrain implements Subsystem {
         }
     }
 
-
     public void stop() {
         for (SwerveModule m : swerveModules) {
             m.write(0);
         }
+        controlMode = ControlMode.TELEOP;
     }
 }
