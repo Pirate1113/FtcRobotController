@@ -20,14 +20,19 @@ public class Auto extends NextFTCOpMode {
     }
 
     /**
-     * example auto sequence
+     * example auto
      */
+
+    // supposed to be square
     public Command autoSequence() {
+        double sideLength = 24; // in inches
+        double power = 0.8;
+
         return new SequentialGroup(
-                new PoseDriveCommand(0, 24, 0, 1.0),    // Move forward 24 in
-                new PoseDriveCommand(12, 0, 0, 0.8),    // Strafe right 12 in
-                new PoseDriveCommand(0, 0, Math.PI/2, 0.5), // Rotate 90 deg CW
-                new PoseDriveCommand(0, -24, 0, 1.0)    // Move backward 24 in
+                new PoseDriveCommand(0, sideLength, 0, power),
+                new PoseDriveCommand(sideLength, 0, 0, power),
+                new PoseDriveCommand(0, -sideLength, 0, power),
+                new PoseDriveCommand(-sideLength, 0, 0, power)
         );
     }
 
