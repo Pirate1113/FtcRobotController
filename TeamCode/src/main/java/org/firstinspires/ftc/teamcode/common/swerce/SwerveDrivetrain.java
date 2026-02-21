@@ -253,4 +253,38 @@ public class SwerveDrivetrain implements Subsystem {
         }
         controlMode = ControlMode.TELEOP;
     }
+
+    public void autoDrive(double power) {
+        double currentHeading = odo.getHeading(AngleUnit.RADIANS);
+        for (SwerveModule m : swerveModules) {
+            m.read();
+        }
+//        double headingVeloicty = odo.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
+//
+//        headingPID.setGoal(new KineticState(0, 0));
+//
+//        double headingPower = headingPID.calculate(new KineticState(currentHeading, headingVeloicty));
+
+        Pose drivePose = new Pose(0, power, 0);
+
+        double x = drivePose.getX(), y = drivePose.getY(), head = drivePose.getHeading();
+
+        double a = x - head * (WB / R),
+                b = x + head * (WB / R),
+                c = y - head * (TW / R),
+                d = y + head * (TW / R);
+
+        wheelSpeeds = new double[]{hypot(b, c), hypot(b, d), hypot(a, d), hypot(a, c)};
+        angles = new double[]{atan2(b, c), atan2(b, d), atan2(a, d), atan2(a, c)};
+
+        double max = Math.max(Math.max(wheelSpeeds[0], wheelSpeeds[1]), Math.max(wheelSpeeds[2], wheelSpeeds[3]));
+        if (max > 1.0) {
+            for (int i = 0; i < 4; i++) wheelSpeeds[i] /= max;
+        }
+
+        for (int i = 0; i < swerveModules.length; i++) {
+            swerveModules[i].rotateTo(angles[i]);
+            swerveModules[i].write(wheelSpeeds[i] * MAX_SPEED);
+        }
+    }
 }
