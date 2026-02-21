@@ -22,14 +22,14 @@ public class Auto extends NextFTCOpMode {
     }
 
     public Command autoSequence() {
-        double side = 24; // 24 inches per side
+        double side = 24; // inches
         double power = 0.8;
 
         return new SequentialGroup(
-                new PoseDriveCommand(0, side, 0, power),       // Forward
-                new PoseDriveCommand(side, side, 0, power),    // Strafe right
-                new PoseDriveCommand(side, 0, 0, power),       // Backward
-                new PoseDriveCommand(0, 0, 0, power)           // Strafe left, back to start
+                new PoseDriveCommand(0, side, 0, power),
+                new PoseDriveCommand(side, side, Math.PI/2, power),
+                new PoseDriveCommand(side, 0, Math.PI, power),
+                new PoseDriveCommand(0, 0, -Math.PI/2, power)   
         );
     }
 
