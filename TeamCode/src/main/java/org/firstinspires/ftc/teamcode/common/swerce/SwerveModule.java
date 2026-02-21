@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.common.swerce;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -108,18 +109,6 @@ public class SwerveModule{
 
         pid.setGoal(new KineticState(target));
 
-//        double currentTimeStamp = (double) System.nanoTime() / 1E9;
-//        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
-//        period = currentTimeStamp - lastTimeStamp;
-//        lastTimeStamp = currentTimeStamp;
-//
-//        //calculating velocity for use in D term
-//        if (Math.abs(period) > 1E-6) {
-//            velocity = (current - lastCurrent) / period;
-//        } else {
-//            velocity = 0;
-//        }
-
         velocity = ax3on.getVelocity();
 
         KineticState sCurrent = new KineticState(current, velocity);
@@ -134,15 +123,49 @@ public class SwerveModule{
         drive.setVelocity(Math.pow(Math.cos(Math.abs(error)), 8)*wheelVel);
     }
 
-    public void getTelemetry(Telemetry telemetry){
-        telemetry.addData("", name);
-        telemetry.addData("Target", target);
-        telemetry.addData("Current", current);
-        telemetry.addData("Error", error);
-        telemetry.addData("Power", power);
-        telemetry.addData("Rot vel", velocity);
-        telemetry.addData("Wheel Flipped", wheelFlipped);
-        telemetry.addData("Drive power", wheelVel);
+    public String getName() {
+        return name;
+    }
+
+    public double getTarget() {
+        return target;
+    }
+
+    public double getCurrent() {
+        return current;
+    }
+
+    public double getError() {
+        return error;
+    }
+
+    public double getPower() {
+        return power;
+    }
+
+    public double getRotationalVelocity() {
+        return velocity;
+    }
+
+    public boolean isWheelFlipped() {
+        return wheelFlipped;
+    }
+
+    public double getWheelVelocity() {
+        return wheelVel;
+    }
+
+
+
+    public void getTelemetry(Telemetry telemetry) {
+        telemetry.addData("Module", getName());
+        telemetry.addData("Target", getTarget());
+        telemetry.addData("Current", getCurrent());
+        telemetry.addData("Error", getError());
+        telemetry.addData("Power", getPower());
+        telemetry.addData("Rot vel", getRotationalVelocity());
+        telemetry.addData("Wheel Flipped", isWheelFlipped());
+        telemetry.addData("Drive power", getWheelVelocity());
     }
 
 }

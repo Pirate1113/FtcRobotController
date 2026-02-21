@@ -10,131 +10,108 @@ public class ColorSensor implements Subsystem {
 
     private ColorSensor() {}
 
-    // Spindexer sensors (one for each third)
-    private NormalizedColorSensor colorLeft;
-    private NormalizedColorSensor colorRight;
-    private NormalizedColorSensor colorFloor;
-    // Shooter sensor
-    private NormalizedColorSensor colorShooter;
-
+    private NormalizedColorSensor colorSensor;
     private float gain = 2.0f;
 
     public void initialize() {
-        colorLeft = ActiveOpMode.hardwareMap().get(NormalizedColorSensor.class, "colorleft");
-        colorRight = ActiveOpMode.hardwareMap().get(NormalizedColorSensor.class, "colorright");
-        colorFloor = ActiveOpMode.hardwareMap().get(NormalizedColorSensor.class, "colorfloor");
-        colorShooter = ActiveOpMode.hardwareMap().get(NormalizedColorSensor.class, "colorshooter");
-
-        colorLeft.setGain(gain);
-        colorRight.setGain(gain);
-        colorFloor.setGain(gain);
-        colorShooter.setGain(gain);
+        colorSensor = ActiveOpMode.hardwareMap().get(NormalizedColorSensor.class, "colorSensor");
+        colorSensor.setGain(gain);
     }
+
+    // ===== COLOR DETECTION =====
+
+    /** Get the current RGBA values from the sensor */
+    public NormalizedRGBA getRGBA() {
+        return colorSensor.getNormalizedColors();
+    }
+
+    /** Get red value (0-1) */
+    public float getRed() {
+        return colorSensor.getNormalizedColors().red;
+    }
+
+    /** Get green value (0-1) */
+    public float getGreen() {
+        return colorSensor.getNormalizedColors().green;
+    }
+
+    /** Get blue value (0-1) */
+    public float getBlue() {
+        return colorSensor.getNormalizedColors().blue;
+    }
+
+    /** Get alpha/intensity value (0-1) */
+    public float getAlpha() {
+        return colorSensor.getNormalizedColors().alpha;
+    }
+
+    // ===== COLOR IDENTIFICATION =====
 
     public enum DetectedColor {
         GREEN, PURPLE, NONE
     }
 
-    public enum Sensor {
-        LEFT, RIGHT, FLOOR, SHOOTER
-    }
+    private float[] hsv = new float[3];
 
-    private NormalizedColorSensor getSensor(Sensor sensor) {
-        switch (sensor) {
-            case LEFT: return colorLeft;
-            case RIGHT: return colorRight;
-            case FLOOR: return colorFloor;
-            case SHOOTER: return colorShooter;
-            default: return colorLeft;
-        }
-    }
-
-    // ===== COLOR DETECTION =====
-
-    private float[] rgbToHsv(NormalizedRGBA colors) {
-        float[] hsv = new float[3];
+    /** Update HSV values from the sensor */
+    private void updateHSV() {
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
         android.graphics.Color.RGBToHSV(
                 (int) (colors.red * 255),
                 (int) (colors.green * 255),
                 (int) (colors.blue * 255),
                 hsv
         );
-        return hsv;
     }
 
-    public DetectedColor getDetectedColor(Sensor sensor) {
-        float[] hsv = rgbToHsv(getSensor(sensor).getNormalizedColors());
+    /** Detect which game element color is present */
+    public DetectedColor getDetectedColor() {
+        updateHSV();
         float hue = hsv[0];
 
+        // Purple detection (hue 260-300)
         if (hue >= 260 && hue <= 300) {
             return DetectedColor.PURPLE;
         }
+        // Green detection (hue 90-150)
         if (hue >= 90 && hue <= 150) {
             return DetectedColor.GREEN;
         }
+
         return DetectedColor.NONE;
     }
 
-    public float getHue(Sensor sensor) {
-        return rgbToHsv(getSensor(sensor).getNormalizedColors())[0];
+    public float getHue() {
+        updateHSV();
+        return hsv[0];
     }
 
-    public NormalizedRGBA getRGBA(Sensor sensor) {
-        return getSensor(sensor).getNormalizedColors();
+    public float getSaturation() {
+        updateHSV();
+        return hsv[1];
     }
 
-    // ===== SPINDEXER HELPERS =====
-
-    public DetectedColor getLeftColor() {
-        return getDetectedColor(Sensor.LEFT);
+    public float getValue() {
+        updateHSV();
+        return hsv[2];
     }
 
-    public DetectedColor getRightColor() {
-        return getDetectedColor(Sensor.RIGHT);
+    /** Check if a specific color is detected */
+    public boolean isColor(DetectedColor target) {
+        return getDetectedColor() == target;
     }
 
-    public DetectedColor getFloorColor() {
-        return getDetectedColor(Sensor.FLOOR);
-    }
-
-    public boolean hasLeftSample() {
-        return getLeftColor() != DetectedColor.NONE;
-    }
-
-    public boolean hasRightSample() {
-        return getRightColor() != DetectedColor.NONE;
-    }
-
-    public boolean hasFloorSample() {
-        return getFloorColor() != DetectedColor.NONE;
-    }
-
-    public int getSampleCount() {
-        int count = 0;
-        if (hasLeftSample()) count++;
-        if (hasRightSample()) count++;
-        if (hasFloorSample()) count++;
-        return count;
-    }
-
-    // ===== SHOOTER HELPERS =====
-
-    public DetectedColor getShooterColor() {
-        return getDetectedColor(Sensor.SHOOTER);
-    }
-
-    public boolean hasShooterSample() {
-        return getShooterColor() != DetectedColor.NONE;
+    /** Check if any game element color is detected */
+    public boolean hasGameElement() {
+        return getDetectedColor() != DetectedColor.NONE;
     }
 
     // ===== CONFIGURATION =====
 
+    /** Set the sensor gain (higher = more sensitive) */
     public void setGain(float newGain) {
         this.gain = newGain;
-        colorLeft.setGain(gain);
-        colorRight.setGain(gain);
-        colorFloor.setGain(gain);
-        colorShooter.setGain(gain);
+        colorSensor.setGain(gain);
     }
 
     public float getGain() {
