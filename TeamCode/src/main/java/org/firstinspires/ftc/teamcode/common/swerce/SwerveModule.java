@@ -97,10 +97,7 @@ public class SwerveModule{
         Angle.Companion.wrapAnglePiToPi(current = enc.getCurrentPosition());
     } // this comes out [-pi, pi)
 
-    public void rotateTo(double tar, double[] PIDK){
-        this.pidValues.kP = PIDK [0];
-        this.pidValues.kI = PIDK[1];
-        this.pidValues.kD = PIDK[2];
+    public void rotateTo(double tar){
 
         this.target = Angle.Companion.wrapAnglePiToPi(tar);
 
