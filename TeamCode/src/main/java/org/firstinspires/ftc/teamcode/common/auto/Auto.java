@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.common.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
+
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -19,46 +21,55 @@ public class Auto extends NextFTCOpMode {
         autoSequence().schedule();
     }
 
-    /**
-     * example auto sequence
-     */
     public Command autoSequence() {
+        double side = 24; // inches
+        double power = 0.8;
+
         return new SequentialGroup(
-                new PoseDriveCommand(0, 24, 0, 1.0),    // Move forward 24 in
-                new PoseDriveCommand(12, 0, 0, 0.8),    // Strafe right 12 in
-                new PoseDriveCommand(0, 0, Math.PI/2, 0.5), // Rotate 90 deg CW
-                new PoseDriveCommand(0, -24, 0, 1.0)    // Move backward 24 in
+
+                new PoseDriveCommand(0, side, 0, power),
+
+                new PoseDriveCommand(0, side, Math.PI/2, power),
+
+                new PoseDriveCommand(side, side, Math.PI/2, power),
+
+                new PoseDriveCommand(side, side, Math.PI, power),
+
+                new PoseDriveCommand(side, 0, Math.PI, power),
+
+                new PoseDriveCommand(side, 0, -Math.PI/2, power),
+
+                new PoseDriveCommand(0, 0, -Math.PI/2, power)
         );
     }
 
-    /**
-     * relative to starting position
-     */
+    // Drives to an absolute field position (measured from odometry reset at init).
     public static class PoseDriveCommand extends Command {
-        private final double dx, dy, dHeading;
+        private final double targetX, targetY, targetHeading;
         private final double power;
-        private static final double TOLERANCE = 0.5; // in inches
-        private static final double HEADING_TOL = 0.02; // in radians
+
+        private static final double POS_TOLERANCE     = 0.5;  // inches
+        private static final double HEADING_TOLERANCE = 0.02; // radians
+
         private boolean finished = false;
 
-        public PoseDriveCommand(double dx, double dy, double dHeading, double power) {
-            this.dx = dx;
-            this.dy = dy;
-            this.dHeading = dHeading;
-            this.power = power;
+        public PoseDriveCommand(double targetX, double targetY, double targetHeading, double power) {
+            this.targetX       = targetX;
+            this.targetY       = targetY;
+            this.targetHeading = targetHeading;
+            this.power         = power;
         }
 
         @Override
         public void start() {
-            // called once at command start
-            SwerveDrivetrain.INSTANCE.setTargetPose(dx, dy, dHeading, power);
+            finished = false;
+            SwerveDrivetrain.INSTANCE.setTargetPose(targetX, targetY, targetHeading, power);
         }
 
         @Override
         public void update() {
-            // ts called repeatedly
-            if (SwerveDrivetrain.INSTANCE.isAtTargetPose(TOLERANCE, HEADING_TOL)) {
-                SwerveDrivetrain.INSTANCE.stop(); // stops when target reached
+            if (SwerveDrivetrain.INSTANCE.isAtTargetPose(POS_TOLERANCE, HEADING_TOLERANCE)) {
+                SwerveDrivetrain.INSTANCE.stop();
                 finished = true;
             }
         }
@@ -67,6 +78,5 @@ public class Auto extends NextFTCOpMode {
         public boolean isDone() {
             return finished;
         }
-
-        }
     }
+}

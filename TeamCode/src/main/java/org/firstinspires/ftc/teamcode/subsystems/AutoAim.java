@@ -73,6 +73,11 @@ public class AutoAim implements Subsystem {
 
     // Commands
     public final Command enable = new InstantCommand(() -> enabled = true);
+    public final Command on = new InstantCommand(() -> {
+        enabled = false;
+        shooter1.setPower(-1);
+        shooter2.setPower(-1);
+    });
 
     public final Command off = new InstantCommand(() -> {
         enabled = false;
