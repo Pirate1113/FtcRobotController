@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.AutoAim;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.Palm;
-import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 import dev.nextftc.bindings.BindingManager;
 import dev.nextftc.core.commands.Command;

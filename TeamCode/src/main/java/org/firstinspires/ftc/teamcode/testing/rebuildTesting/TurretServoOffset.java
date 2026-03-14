@@ -43,10 +43,10 @@ public class TurretServoOffset extends LinearOpMode {
 
             // Increment logic (0.001 is now viable because we bypass the cache)
             if (gamepad1.dpad_up && !lastUp) {
-                if (tuningLeft) leftPos += 0.001; else rightPos += 0.001;
+                if (tuningLeft) leftPos += 0.03; else rightPos += 0.03;
             }
             if (gamepad1.dpad_down && !lastDown) {
-                if (tuningLeft) leftPos -= 0.001; else rightPos -= 0.001;
+                if (tuningLeft) leftPos -= 0.03; else rightPos -= 0.03;
             }
 
             lastUp = gamepad1.dpad_up;
