@@ -13,68 +13,41 @@ public class Intake implements Subsystem {
 
     private Intake() {}
 
-    private MotorEx intakeLeft;
-    private MotorEx intakeRight;
-    private MotorGroup intakeMotors;
-
-    private double powerLeft = 0;
-    private double powerRight = 0;
+    private MotorEx intakeFront;
+    private MotorEx intakeBack;
+    private double powerFront = 0;
+    private double powerBack = 0;
 
     public void initialize() {
-        intakeLeft = new MotorEx("intakeLeft").floatMode();
-        intakeRight = new MotorEx("intakeRight").reversed().floatMode();
-        intakeMotors = new MotorGroup(intakeRight, intakeLeft);
+        intakeFront = new MotorEx("f_intake").floatMode();
+        intakeBack = new MotorEx("b_intake").reversed().floatMode();
     }
 
-    // ===== SYNCHRONIZED CONTROL =====
-
-    /** Run both intake motors at full power to intake artifacts */
-
-    /** Set both motors to a specific power */
-    public Command setPower(double power) {
-        powerLeft = power;
-        powerRight = power;
-        return new SetPower(intakeMotors, power).named("Set Intake Power");
-    }
 
     // ===== INDEPENDENT MOTOR CONTROL =====
-    public Command moveLeft = new InstantCommand(() -> {
-        powerLeft = POWER;
-        intakeLeft.getMotor().setPower(-powerLeft);
+    public Command moveFront = new InstantCommand(() -> {
+        powerFront = POWER;
+        intakeFront.getMotor().setPower(-powerFront);
     });
-    public Command moveRight = new InstantCommand(() -> {
-        powerRight = POWER;
-        intakeRight.getMotor().setPower(-powerRight);
+    public Command moveBack = new InstantCommand(() -> {
+        powerBack = POWER;
+        intakeBack.getMotor().setPower(-powerBack);
     });
-    public Command stopLeft = new InstantCommand(() -> {
-        powerLeft = 0;
-        intakeLeft.getMotor().setPower(powerLeft);
+    public Command stopFront = new InstantCommand(() -> {
+        powerFront = 0;
+        intakeFront.getMotor().setPower(powerFront);
     });
-    public Command stopRight = new InstantCommand(() -> {
-        powerRight = 0;
-        intakeRight.getMotor().setPower(-powerRight);
+    public Command stopBack = new InstantCommand(() -> {
+        powerBack = 0;
+        intakeBack.getMotor().setPower(-powerBack);
     });
 
-    /** Set left motor to specific power */
-    public Command setLeftPower(double power) {
-        powerLeft = Math.max(-1.0, Math.min(1.0, power));
-        return new SetPower(intakeLeft, powerLeft).named("Set Left Power");
+    public double getFrontPower() {
+        return powerFront;
     }
 
-    /** Set right motor to specific power */
-    public Command setRightPower(double power) {
-        powerRight = Math.max(-1.0, Math.min(1.0, power));
-        return new SetPower(intakeRight, powerRight).named("Set Right Power");
-    }
-
-    // ===== GETTERS FOR TELEMETRY =====
-
-    public double getLeftPower() {
-        return powerLeft;
-    }
-
-    public double getRightPower() {
-        return powerRight;
+    public double getBackPower() {
+        return powerBack;
     }
 }
 //import com.acmerobotics.dashboard.config.Config;

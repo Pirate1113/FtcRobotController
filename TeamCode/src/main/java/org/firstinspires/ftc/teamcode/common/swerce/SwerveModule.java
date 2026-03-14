@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.seattlesolvers.solverslib.hardware.motors.Motor;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
@@ -67,7 +68,7 @@ public class SwerveModule{
      @param analogReverse is the enc reversed>
      @param PIDK an array of the PIDK values
      */
-    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean servoReverse, boolean analogReverse, double[] PIDK){
+    public SwerveModule(String n, DcMotorEx m, CRServo s, AnalogInput e, double eOffset, boolean servoReverse, boolean motorReverse, boolean analogReverse, double[] PIDK){
         this.name = n;
 
         this.drive = m;
@@ -85,6 +86,7 @@ public class SwerveModule{
                 .build();
 
         if(servoReverse) this.axon.getServo().setDirection(CRServo.Direction.REVERSE);
+        if(motorReverse) this.drive.setDirection(DcMotorSimple.Direction.REVERSE);
         if(analogReverse) this.enc.setInverted(true);
 
         axon.setPower(1);

@@ -57,7 +57,7 @@ public class SwerveDrivetrain implements Subsystem {
     private static final double CACHE_TOLERANCE = 0.05;
     public static double[][] PIDKVal = {
             {0.6, 0 ,0.02, 0}, // fL
-            {0.6, 0 ,0.02, 0}, // fR
+            {0.3, 0 ,0.02, 0}, // fR
             {0.6, 0 ,0.02, 0}, // bR
             {0.6, 0 ,0.02, 0}  // bL
     };
@@ -82,25 +82,25 @@ public class SwerveDrivetrain implements Subsystem {
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fr_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fr_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fr_absolute"),
-                4.22, false, true, PIDKVal[0]);
+                4.22, false, false, true, PIDKVal[0]);
 
         bR = new SwerveModule("backRight",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "br_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "br_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "br_absolute"),
-                6.01, false, true, PIDKVal[1]);
+                6.01, false, false, true, PIDKVal[1]);
 
         bL = new SwerveModule("backLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "bl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "bl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "bl_absolute"),
-                1.47, false, true, PIDKVal[2]);
+                1.47, false, true, true, PIDKVal[2]);
 
         fL = new SwerveModule("frontLeft",
                 ActiveOpMode.hardwareMap().get(DcMotorEx.class, "fl_motor"),
                 ActiveOpMode.hardwareMap().get(CRServo.class, "fl_rotation"),
                 ActiveOpMode.hardwareMap().get(AnalogInput.class, "fl_absolute"),
-                6.12, false, true, PIDKVal[3]);
+                6.12, false, true, true, PIDKVal[3]);
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
