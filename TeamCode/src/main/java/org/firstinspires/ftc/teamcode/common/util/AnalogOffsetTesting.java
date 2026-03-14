@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.common.util;
 
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -24,8 +23,6 @@ public class AnalogOffsetTesting extends OpMode {
     AnalogInput bL;
     AnalogInput fL;
 
-    AnalogInput SpindexerL;
-    AnalogInput SpindexerR;
 
     @Override
     public void init() {
@@ -46,6 +43,8 @@ public class AnalogOffsetTesting extends OpMode {
 //        fRServo.setPower(1);
 //        fRServo.setPower(0);
         fRServo.setPwmEnable();
+        fRServo.setPower(0.1);
+        fRServo.setPower(0);
     }
 
     @Override
@@ -58,9 +57,6 @@ public class AnalogOffsetTesting extends OpMode {
         telemetry.addData("bR", doTheThing(bR.getVoltage()));
         telemetry.addData("bL", doTheThing(bL.getVoltage()));
         telemetry.addData("fL", doTheThing(fL.getVoltage()));
-
-//        telemetry.addData("Spindexer Right", doTheThing(SpindexerR.getVoltage()));
-//        telemetry.addData("Spindexer Left", doTheThing(SpindexerL.getVoltage()));
 
         telemetry.update();
     }

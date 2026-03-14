@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.common.RobotConstants;
 import org.firstinspires.ftc.teamcode.common.hardware.GoBildaPinpointDriver;
 
 import dev.nextftc.control.ControlSystem;
@@ -54,7 +55,6 @@ public class SwerveDrivetrain implements Subsystem {
 
     private double startingAngle = 0;
     private static final double CACHE_TOLERANCE = 0.05;
-
     public static double[][] PIDKVal = {
             {0.6, 0 ,0.02, 0}, // fL
             {0.6, 0 ,0.02, 0}, // fR
@@ -104,8 +104,6 @@ public class SwerveDrivetrain implements Subsystem {
 
         swerveModules = new SwerveModule[]{fL, fR, bR, bL};
 
-
-
 //        for (SwerveModule m : swerveModules) {
 //            m.rotateTo(startingAngle);
 //        }
@@ -116,7 +114,6 @@ public class SwerveDrivetrain implements Subsystem {
     public void periodic() {
         for(SwerveModule m : swerveModules){
             m.read();
-            moveToTargetPose();
         }
 
         double rawLeftX = -ActiveOpMode.gamepad1().left_stick_x,
