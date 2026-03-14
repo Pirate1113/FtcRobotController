@@ -11,7 +11,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants()
+    public static FollowerConstants followerConstan = new FollowerConstants()
             .mass(13.2)
             .forwardZeroPowerAcceleration(-25.9346931313679598)
             .lateralZeroPowerAcceleration(-67.342491844080064)
