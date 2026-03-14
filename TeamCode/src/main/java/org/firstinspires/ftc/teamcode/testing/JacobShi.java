@@ -23,33 +23,29 @@ public class JacobShi extends OpMode {
 
     double RPM;
 
-    FtcDashboard dashboard;
-
     @Override
     public void init() {
         shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
 
         shooter1.setDirection(DcMotor.Direction.REVERSE);
-        shooter1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2.setDirection(DcMotor.Direction.FORWARD);
-        shooter2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        dashboard = FtcDashboard.getInstance();
+        shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     
 
     public void loop() {
-//        if (gamepad1.dpad_up && !previousDpadUp) {
-//            power += 0.1;
-//        } else if (gamepad1.dpad_down && !previousDpadDown) {
-//            power -= 0.1;
-//        }
+        if (gamepad1.dpad_up && !previousDpadUp) {
+            power += 0.1;
+        } else if (gamepad1.dpad_down && !previousDpadDown) {
+            power -= 0.1;
+        }
 
-        shooter1.setPower(-1.0);
-        shooter2.setPower(-1.0);
+        shooter1.setPower(power);
+        shooter2.setPower(power);
 
         RPM = shooter1.getVelocity()*60/28;
 

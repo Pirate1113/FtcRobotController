@@ -29,13 +29,11 @@ public class TurretAutoAim extends Command {
 
         double newAngle = turret.getAngle() + tx;
 
-        double delta = newAngle - turret.getAngle();
-
-        if (Math.abs(delta) > maxDeltaPerUpdate) {
-            delta = Math.signum(delta) * maxDeltaPerUpdate;
+        if (Math.abs(tx) > maxDeltaPerUpdate) {
+            tx = Math.signum(tx) * maxDeltaPerUpdate;
         }
 
-        turret.adjustAngle(delta);
+        turret.adjustAngle(tx);
     }
 
     @Override

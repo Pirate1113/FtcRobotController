@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
+
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.core.commands.Command;
@@ -9,6 +12,7 @@ import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
 
+@Config
 public class Flywheel implements Subsystem {
     public static final Flywheel INSTANCE = new Flywheel();
 
@@ -23,31 +27,25 @@ public class Flywheel implements Subsystem {
 
     private final ControlSystem controller = ControlSystem.builder()
             .velPid(0.005, 0, 0)
-            .basicFF(0.01, 0.02, 0.03)
             .build();
 
     public void initialize() {
         shooter1 = new MotorEx("shooter1");
         shooter2 = new MotorEx("shooter2");
+        controller.setGoal(new KineticState(0.0, 0.0));
     }
 
     public void periodic() {
-//        power1 = controller.calculate(shooter1.getState());
-//        power2 = controller.calculate(shooter2.getState());
-//        shooter1.setPower(power1);
-//        shooter2.setPower(power2);
+        power1 = controller.calculate(shooter1.getState());
+        shooter1.setPower(power1);
+        shooter2.setPower(power1);
     }
 
     public void setDistance(double set) {
         distance = set;
     }
 
-    public final Command off = new InstantCommand(() -> {
-        power = 0;
-        shooter1.setPower(power);
-        shooter2.setPower(power);
-
-    });
+    public final Command off = new RunToVelocity(controller, 0);
 
     public final Command setFlywheel = new InstantCommand(() -> {
         power = 1;
