@@ -49,7 +49,12 @@ public class Turret implements Subsystem {
         leftServo.setPosition(pos);
 //        rightServo.setPosition(1.0 - pos);
     }
-
+    public Command set = new InstantCommand(() -> {
+//        setAngle(0);
+        leftServo.setPosition(0);
+    }).then(Delay(2)).then(new InstantCommand(() -> {
+        leftServo.setPosition(1);
+    }));
     public void adjustAngle(double delta) {
         setAngle(currentAngle + delta);
     }
