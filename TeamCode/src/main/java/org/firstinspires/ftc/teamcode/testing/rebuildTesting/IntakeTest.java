@@ -52,6 +52,7 @@ public class IntakeTest extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         BindingManager.update();
+        telemetry.addLine("Controls: X=back intake toggle | B=front intake toggle | A=ramp override");
         telemetry.addData("Intake Front Power", Intake.INSTANCE.getFrontPower());
         telemetry.addData("Intake Back Power", Intake.INSTANCE.getBackPower());
         telemetry.addData("Ramp Pos", Ramp.INSTANCE.getRamp());
