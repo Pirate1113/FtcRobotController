@@ -7,7 +7,6 @@ import dev.nextftc.core.components.SubsystemComponent;
 
 @TeleOp(name = "Recycler Test")
 public class RecyclerTeleOp extends NextFTCOpMode {
-
     public RecyclerTeleOp() {
         addComponents(new SubsystemComponent(Recycler.INSTANCE));
     }
