@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -11,15 +12,28 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.ServoEx;
 
+import org.firstinspires.ftc.teamcode.common.RobotConstants;
 import org.firstinspires.ftc.teamcode.testing.LimelightAngle;
 
+@Config
 public class AutoAim implements Subsystem {
     public static final AutoAim INSTANCE = new AutoAim();
 
     private AutoAim() {
     }
-    private static final double LL_HEIGHT = 14;
+    private static final double LL_HEIGHT = 13.5;
     private static final double TAG_HEIGHT = 29.5;
+
+    // Tunable via FTC Dashboard — how aggressively the turret chases limelight yaw.
+    // Increase until the turret tracks without oscillating.
+    public static double TURRET_YAW_P = 1.0;
+
+    // Velocity PIDF for the flywheel — tune via FTC Dashboard.
+    // Start with F only (P=I=D=0), increase F until motor approaches target, then add P.
+    public static double PIDF_P = 5.0;
+    public static double PIDF_I = 0.0;
+    public static double PIDF_D = 0.0;
+    public static double PIDF_F = 12.0;
 
     // Hardware
     private LimelightAngle limelight;
@@ -32,6 +46,7 @@ public class AutoAim implements Subsystem {
     private double distance = 0;
     private double hoodPosition = 0;
     private double targetVelocity = 0;
+    private double yaw = 0;
 
     @Override
     public void initialize() {
@@ -43,7 +58,7 @@ public class AutoAim implements Subsystem {
         );
         limelight.pipelineSwitch(0);
 
-        hood = new ServoEx("hoodServo");
+        hood = new ServoEx(RobotConstants.hood_name);
 
         shooter1 = ActiveOpMode.hardwareMap().get(DcMotorEx.class, "shooter1");
         shooter2 = ActiveOpMode.hardwareMap().get(DcMotorEx.class, "shooter2");
@@ -51,6 +66,8 @@ public class AutoAim implements Subsystem {
         shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter1.setVelocityPIDFCoefficients(PIDF_P, PIDF_I, PIDF_D, PIDF_F);
+        shooter2.setVelocityPIDFCoefficients(PIDF_P, PIDF_I, PIDF_D, PIDF_F);
     }
 
     @Override
@@ -58,6 +75,11 @@ public class AutoAim implements Subsystem {
         if (!enabled) return;
 
         distance = limelight.getDistanceInches();
+        yaw      = limelight.getYaw();
+
+        // Turret: drive toward zero yaw error using encoder-relative P control
+        double currentAngle = Turret.INSTANCE.getEncoderAngle();
+        Turret.INSTANCE.setBaseAngle(currentAngle + yaw * TURRET_YAW_P);
 
         // Interpolated hood position
         hoodPosition = -36.79717 * Math.pow(distance, -1.08794) + 0.494168;
@@ -92,10 +114,11 @@ public class AutoAim implements Subsystem {
     });
 
     // Telemetry getters
-    public double getDistance() { return distance; }
-    public double getHoodPosition() { return hoodPosition; }
-    public double getTargetRPM() { return targetVelocity * 60 / 28; }
-    public double getCurrentRPM() { return Math.abs(shooter1.getVelocity()) * 60 / 28; }
-    public boolean isEnabled() { return enabled; }
-    public boolean hasTarget() { return limelight != null && limelight.hasTarget(); }
+    public double getDistance()    { return distance; }
+    public double getYaw()         { return yaw; }
+    public double getHoodPosition(){ return hoodPosition; }
+    public double getTargetRPM()   { return targetVelocity * 60 / 28; }
+    public double getCurrentRPM()  { return Math.abs(shooter1.getVelocity()) * 60 / 28; }
+    public boolean isEnabled()     { return enabled; }
+    public boolean hasTarget()     { return limelight != null && limelight.hasTarget(); }
 }

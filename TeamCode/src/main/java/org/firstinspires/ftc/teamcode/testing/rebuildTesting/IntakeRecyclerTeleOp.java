@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.testing.rebuildTesting;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Ramp;
 import org.firstinspires.ftc.teamcode.subsystems.Recycler;
@@ -19,7 +20,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class IntakeRecyclerTeleOp extends NextFTCOpMode {
     public IntakeRecyclerTeleOp() {
         addComponents(
-                new SubsystemComponent(Intake.INSTANCE, Ramp.INSTANCE, Recycler.INSTANCE),
+                new SubsystemComponent(SwerveDrivetrain.INSTANCE, Intake.INSTANCE, Ramp.INSTANCE, Recycler.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
