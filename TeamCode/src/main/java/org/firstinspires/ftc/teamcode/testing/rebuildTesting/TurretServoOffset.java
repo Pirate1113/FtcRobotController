@@ -1,79 +1,78 @@
 package org.firstinspires.ftc.teamcode.testing.rebuildTesting;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.common.RobotConstants;
 
-import dev.nextftc.hardware.impl.ServoEx;
+@TeleOp(name="Axon Turret Full Sweep")
+public class TurretServoOffset extends OpMode {
 
-@TeleOp(name="Axon Turret Calibration")
-public class TurretServoOffset extends LinearOpMode {
+    Servo rt;
+    Servo lt;
 
-    private double leftPos = 0.5;
-    private double rightPos = 0.5;
-    private boolean tuningLeft = true;
+    // Range limits as requested
+    private final double MIN_POS = 0.00;
+    private final double MAX_POS = 1.0;
 
-    private boolean lastUp = false;
-    private boolean lastDown = false;
+    private double ltPos = 0.5;
+    private double sweepSpeed = 0.4; // Percent of range per second (0.4 = 40% per sec)
+    private int direction = 1;       // 1 for increasing, -1 for decreasing
+
+    private boolean autoSweep = false;
+    private boolean lastA = false;
 
     @Override
-    public void runOpMode() {
-        // Keeping your 0.02 tolerance for the wrapper
-        ServoEx leftTurretEx = new ServoEx(RobotConstants.leftTurret, 0.02);
-        ServoEx rightTurretEx = new ServoEx(RobotConstants.rightTurret, 0.02);
+    public void init() {
+        rt = hardwareMap.get(Servo.class, "rt_servo");
+        lt = hardwareMap.get(Servo.class, "lt_servo");
 
-        // Bypass the wrapper by using the internal RobotCore servos directly
-        // This ensures the 0.001 increments actually MOVE the motor immediately
-        Servo leftInternal = leftTurretEx.getServo();
-        Servo rightInternal = rightTurretEx.getServo();
+        // Start at center for safety
+        rt.setPosition(0.5);
+        lt.setPosition(0.5);
+    }
 
-        telemetry.addLine("=== AXON 1:1 CALIBRATION ===");
-        telemetry.addLine("A -> Tune Left | B -> Tune Right");
-        telemetry.update();
-
-        waitForStart();
-
-        while (opModeIsActive()) {
-            if (gamepad1.a) tuningLeft = true;
-            if (gamepad1.b) tuningLeft = false;
-
-            // Increment logic (0.001 is now viable because we bypass the cache)
-            if (gamepad1.dpad_up && !lastUp) {
-                if (tuningLeft) leftPos += 0.03; else rightPos += 0.03;
-            }
-            if (gamepad1.dpad_down && !lastDown) {
-                if (tuningLeft) leftPos -= 0.03; else rightPos -= 0.03;
-            }
-
-            lastUp = gamepad1.dpad_up;
-            lastDown = gamepad1.dpad_down;
-
-            leftPos = Range.clip(leftPos, 0.0, 1.0);
-            rightPos = Range.clip(rightPos, 0.0, 1.0);
-
-            // Using internal servos to ensure every 0.001 change is sent to the Hub
-            if (tuningLeft) {
-                ((PwmControl) rightInternal).setPwmDisable();
-                ((PwmControl) leftInternal).setPwmEnable();
-                leftInternal.setPosition(leftPos);
-            } else {
-                ((PwmControl) leftInternal).setPwmDisable();
-                ((PwmControl) rightInternal).setPwmEnable();
-                rightInternal.setPosition(rightPos);
-            }
-
-            double currentDeg = (tuningLeft ? leftPos : rightPos) * RobotConstants.turretServoRange;
-            double centerDiff = currentDeg - 177.5;
-
-            telemetry.addData("Tuning", tuningLeft ? "LEFT" : "RIGHT");
-            telemetry.addData("Current Degrees", "%.2f°", currentDeg);
-            telemetry.addData("Sync Offset (Delta)", "%.2f°", centerDiff);
-            telemetry.addLine("\nEvery D-pad click now moves the servo exactly 0.001 in pos");
-            telemetry.update();
+    @Override
+    public void loop() {
+        // Toggle Auto-Sweep
+        if (gamepad1.a && !lastA) {
+            autoSweep = !autoSweep;
         }
+        lastA = gamepad1.a;
+
+        if (autoSweep) {
+            // Linear constant-speed sweep logic
+            // We use 0.01 (10ms loop estimate) or better yet, a delta time
+            double deltaTime = 0.02; // Roughly 50Hz loop speed
+
+            ltPos += direction * sweepSpeed * deltaTime;
+
+            // Check boundaries and flip direction
+            if (ltPos >= MAX_POS) {
+                ltPos = MAX_POS;
+                direction = -1;
+            } else if (ltPos <= MIN_POS) {
+                ltPos = MIN_POS;
+                direction = 1;
+            }
+        } else {
+            // Manual adjustment via stick for testing specific spots
+            if (Math.abs(gamepad1.left_stick_y) > 0.1) {
+                ltPos -= gamepad1.left_stick_y * 0.01;
+            }
+        }
+
+        // Final safety clamp
+        ltPos = Range.clip(ltPos, MIN_POS, MAX_POS);
+
+        rt.setPosition(ltPos);
+        lt.setPosition(ltPos);
+
+        telemetry.addData("Mode", autoSweep ? "SWEEPING" : "MANUAL");
+        telemetry.addData("Position", "%.3f", ltPos);
+        telemetry.addData("Target Range", "[%.2f - %.2f]", MIN_POS, MAX_POS);
+        telemetry.update();
     }
 }
