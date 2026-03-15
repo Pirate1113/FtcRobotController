@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -13,8 +14,17 @@ import org.firstinspires.ftc.teamcode.testing.LimelightAngle;
 public class Auto extends NextFTCOpMode {
 
     private LimelightAngle limelight;
+    private ElapsedTime timer = new ElapsedTime();
 
-    public Auto () {
+    private enum State {
+        DRIVE_FORWARD,
+        AIM,
+        DONE
+    }
+
+    private State state = State.DRIVE_FORWARD;
+
+    public Auto() {
         addComponents(
                 new SubsystemComponent(SwerveDrivetrain.INSTANCE),
                 new SubsystemComponent(Turret.INSTANCE)
@@ -36,26 +46,47 @@ public class Auto extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        timer.reset();
+        state = State.DRIVE_FORWARD;
+    }
 
-        try {
+    @Override
+    public void onUpdate() {
 
-            // move forward a short distance
-            SwerveDrivetrain.INSTANCE.autoDrive(0.4);
-            Thread.sleep(1200);
-            SwerveDrivetrain.INSTANCE.stop();
+        switch (state) {
 
-            // aim using limelight?? this needs work?
-            if (limelight.hasTarget()) {
+            case DRIVE_FORWARD:
 
-                double yaw = limelight.getYaw();
+                SwerveDrivetrain.INSTANCE.autoDrive(0.4);
 
-                // turn turret to angle
-                Turret.INSTANCE.setBaseAngle(yaw);
+                if (timer.seconds() > 1.2) {
+                    SwerveDrivetrain.INSTANCE.stop();
+                    timer.reset();
+                    state = State.AIM;
+                }
 
-            }
+                break;
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            case AIM:
+
+                if (limelight.hasTarget()) {
+
+                    double yaw = limelight.getYaw();
+
+                    // turret subsystem handles offsets internally
+                    Turret.INSTANCE.setBaseAngle(yaw);
+                }
+
+                // aim for ~1 second
+                if (timer.seconds() > 1.0) {
+                    state = State.DONE;
+                }
+
+                break;
+
+            case DONE:
+                // robot finished
+                break;
         }
     }
 }
