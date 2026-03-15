@@ -14,8 +14,8 @@ public class TurretServoOffset extends OpMode {
     Servo lt;
 
     // Range limits as requested
-    private final double MIN_POS = 0.00;
-    private final double MAX_POS = 1.0;
+    private final double MIN_POS = 0.01;
+    private final double MAX_POS = 0.99;
 
     private double ltPos = 0.5;
     private double sweepSpeed = 0.4; // Percent of range per second (0.4 = 40% per sec)
@@ -62,6 +62,7 @@ public class TurretServoOffset extends OpMode {
             if (Math.abs(gamepad1.left_stick_y) > 0.1) {
                 ltPos -= gamepad1.left_stick_y * 0.01;
             }
+            ltPos = Range.clip(ltPos, MIN_POS, MAX_POS);
         }
 
         // Final safety clamp
