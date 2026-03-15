@@ -42,19 +42,21 @@ public class Recycler implements Subsystem {
 
     @Override
     public void periodic() {
-        // Continuously check color sensor and control gate
+        // Only act on confident color reads; hold current gate state in the dead zone
         if (selectedColor == ColorChoice.GREEN) {
             if (isGreen()) {
-                openGate.schedule(); // open gate to let green through
-            } else {
+                openGate.schedule();  // open gate to let green through
+            } else if (isPurple()) {
                 closeGate.schedule(); // close gate to block purple
             }
+            // dead zone: neither detected — hold current state
         } else { // PURPLE selected
             if (isPurple()) {
-                openGate.schedule(); // open gate to let purple through
-            } else {
+                openGate.schedule();  // open gate to let purple through
+            } else if (isGreen()) {
                 closeGate.schedule(); // close gate to block green
             }
+            // dead zone: neither detected — hold current state
         }
     }
 
@@ -91,10 +93,10 @@ public class Recycler implements Subsystem {
 
     // Color detection methods
     public boolean isGreen() {
-        return colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue();
+        return colorSensor.green() > colorSensor.blue();
     }
 
     public boolean isPurple() {
-        return colorSensor.red() > colorSensor.green() && colorSensor.blue() > colorSensor.green();
+        return colorSensor.blue() > colorSensor.green();
     }
 }

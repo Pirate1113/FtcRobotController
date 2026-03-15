@@ -31,6 +31,7 @@ public class RecyclerTeleOp extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         BindingManager.update();
+        telemetry.addLine("Controls: A = Green  |  B = Purple");
         telemetry.addData("Selected Color", Recycler.INSTANCE.getSelectedColor());
         telemetry.addData("Sees Green?", Recycler.INSTANCE.isGreen());
         telemetry.addData("Sees Purple?", Recycler.INSTANCE.isPurple());
