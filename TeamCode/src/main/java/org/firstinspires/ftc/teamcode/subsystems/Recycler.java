@@ -20,8 +20,8 @@ public class Recycler implements Subsystem {
     private ServoEx gateServo;
     private ColorSensor colorSensor;
 
-    private final double GATE_OPEN = 0.8;
-    private final double GATE_CLOSED = 0.2;
+    private final double GATE_OPEN = 0.2;
+    private final double GATE_CLOSED = 0.8;
 
     // Baseline sensor readings when nothing is in the recycler
     private static final int EMPTY_RED   = 42;

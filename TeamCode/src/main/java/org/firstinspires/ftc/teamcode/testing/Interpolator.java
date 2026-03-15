@@ -15,7 +15,7 @@ import dev.nextftc.hardware.impl.ServoEx;
 @Config
 @TeleOp(name="Interpolating test")
 public class Interpolator extends LinearOpMode {
-    private static final double LLHeight = 14;
+    private static final double LLHeight = 13.5;
     private  static final double tagHeight = 29.5;
 
     private DcMotorEx shooter1;
@@ -33,7 +33,6 @@ public class Interpolator extends LinearOpMode {
     boolean dpadUpPrev = false;
     boolean dpadDownPrev = false;
 
-    boolean palmOn = false;
     boolean aPrev = false;
 
     public static double servoCurrent = 0.0;
@@ -50,22 +49,18 @@ public class Interpolator extends LinearOpMode {
         limelight.pipelineSwitch(0);
 
         shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
+        shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooter1.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
-
         shooter1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         shooter1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        hood = new ServoEx("hoodServo");
-
+        hood = new ServoEx("hood_servo");
         waitForStart();
-
         while (opModeIsActive()) {
             distance = limelight.getDistanceInches();
-
             double stick = -gamepad1.right_stick_y; // up = positive
             if (Math.abs(stick) < 0.05) stick = 0;
             servoCurrent += stick * increment;
