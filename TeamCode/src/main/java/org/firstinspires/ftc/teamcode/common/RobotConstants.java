@@ -27,6 +27,7 @@ public class RobotConstants {
     public static final String leftTurret = "lt_servo";
     public static final String rightTurret = "rt_servo";
     public static final String ramp = "ramp_servo";
+    public static final String gate = "gate";
     public static final double LTZERO = 0.0;
     public static final double RTZERO = 0.0;
     public static double turretServoRange = 355;

@@ -1,16 +1,23 @@
-package org.firstinspires.ftc.teamcode.testing.rebuildTesting;
+package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.common.RobotConstants;
+
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
+import dev.nextftc.hardware.impl.ServoEx;
 
 public class Recycler implements Subsystem {
 
     public static final Recycler INSTANCE = new Recycler();
-    Recycler() {}
 
-    private Servo gate;
+    private Recycler() {
+    }
+
+    private ServoEx gateServo;
     private ColorSensor colorSensor;
 
     private final double GATE_OPEN = 0.8;
@@ -26,11 +33,11 @@ public class Recycler implements Subsystem {
     @Override
     public void initialize() {
         // Initialize hardware
-        gate = ActiveOpMode.hardwareMap().get(Servo.class, "gate");
+        gateServo = new ServoEx(RobotConstants.gate);
         colorSensor = ActiveOpMode.hardwareMap().get(ColorSensor.class, "color");
 
         // Start with gate closed
-        closeGate();
+        gateServo.getServo().setPosition(GATE_CLOSED);
     }
 
     @Override
@@ -38,27 +45,27 @@ public class Recycler implements Subsystem {
         // Continuously check color sensor and control gate
         if (selectedColor == ColorChoice.GREEN) {
             if (isGreen()) {
-                closeGate(); // keep gate closed IF green is detected
+                openGate.schedule(); // open gate to let green through
             } else {
-                openGate();  // open gate for purplepurple
+                closeGate.schedule(); // close gate to block purple
             }
         } else { // PURPLE selected
             if (isPurple()) {
-                closeGate(); // keep gate closed if purple is detected
+                openGate.schedule(); // open gate to let purple through
             } else {
-                openGate();  // open gate for green
+                closeGate.schedule(); // close gate to block green
             }
         }
     }
 
     // gate control methods
-    public void openGate() {
-        gate.setPosition(GATE_OPEN);
-    }
+    public Command openGate = new InstantCommand(() -> {
+        gateServo.getServo().setPosition(GATE_OPEN);
+    });
 
-    public void closeGate() {
-        gate.setPosition(GATE_CLOSED);
-    }
+    public Command closeGate = new InstantCommand(() -> {
+        gateServo.getServo().setPosition(GATE_CLOSED);
+    });
 
     // gamepad selection
     public void selectGreen() {
@@ -73,6 +80,15 @@ public class Recycler implements Subsystem {
         return selectedColor;
     }
 
+    public double getGatePosition() {
+        return gateServo.getServo().getPosition();
+    }
+
+    // Raw sensor values
+    public int rawRed()   { return colorSensor.red(); }
+    public int rawGreen() { return colorSensor.green(); }
+    public int rawBlue()  { return colorSensor.blue(); }
+
     // Color detection methods
     public boolean isGreen() {
         return colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue();
@@ -82,5 +98,3 @@ public class Recycler implements Subsystem {
         return colorSensor.red() > colorSensor.green() && colorSensor.blue() > colorSensor.green();
     }
 }
-
-
