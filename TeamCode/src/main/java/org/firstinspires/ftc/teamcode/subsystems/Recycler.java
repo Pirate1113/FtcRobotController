@@ -46,14 +46,19 @@ public class Recycler implements Subsystem {
         gateServo.getServo().setPosition(GATE_CLOSED);
     }
 
+    // Change to true if you want the gate open when the sensor can't classify the ball
+    public static boolean UNKNOWN_OPENS_GATE = false;
+
     @Override
     public void periodic() {
         boolean wantGreen = selectedColor == ColorChoice.GREEN;
         boolean hasUnwanted = (!wantGreen && isGreen()) || (wantGreen && isPurple());
-        if (hasUnwanted) {
+        boolean isUnknown  = !isEmpty() && !isGreen() && !isPurple();
+
+        if (hasUnwanted || (isUnknown && UNKNOWN_OPENS_GATE)) {
             openGate.schedule();  // confirmed wrong color → eject
         } else {
-            closeGate.schedule(); // wanted color OR empty/noise → hold closed
+            closeGate.schedule(); // wanted, empty, or unknown (default) → hold closed
         }
     }
 
