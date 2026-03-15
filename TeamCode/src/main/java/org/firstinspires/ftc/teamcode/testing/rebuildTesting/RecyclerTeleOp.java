@@ -33,7 +33,8 @@ public class RecyclerTeleOp extends NextFTCOpMode {
         BindingManager.update();
         telemetry.addLine("Controls: A = Green  |  B = Purple");
         telemetry.addData("Selected Color", Recycler.INSTANCE.getSelectedColor());
-        telemetry.addData("Sees Green?", Recycler.INSTANCE.isGreen());
+        telemetry.addData("Empty?",       Recycler.INSTANCE.isEmpty());
+        telemetry.addData("Sees Green?",  Recycler.INSTANCE.isGreen());
         telemetry.addData("Sees Purple?", Recycler.INSTANCE.isPurple());
         telemetry.addData("Gate Position", Recycler.INSTANCE.getGatePosition());
         telemetry.addLine("--- Raw Sensor ---");

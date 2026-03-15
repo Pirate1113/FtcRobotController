@@ -95,10 +95,10 @@ public class Recycler implements Subsystem {
     }
 
     public boolean isGreen() {
-        return !isEmpty() && colorSensor.green() > colorSensor.blue();
+        return !isEmpty() && colorSensor.green() > colorSensor.blue() + 10;
     }
 
     public boolean isPurple() {
-        return !isEmpty() && colorSensor.blue() > colorSensor.green();
+        return !isEmpty() && colorSensor.blue() > colorSensor.green() + 10;
     }
 }
