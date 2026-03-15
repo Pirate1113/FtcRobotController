@@ -49,10 +49,11 @@ public class Recycler implements Subsystem {
     @Override
     public void periodic() {
         boolean wantGreen = selectedColor == ColorChoice.GREEN;
-        if ((wantGreen && isGreen()) || (!wantGreen && isPurple())) {
-            openGate.schedule();
+        boolean hasUnwanted = (!wantGreen && isGreen()) || (wantGreen && isPurple());
+        if (hasUnwanted) {
+            openGate.schedule();  // confirmed wrong color → eject
         } else {
-            closeGate.schedule(); // undesired color OR no ball → hold closed
+            closeGate.schedule(); // wanted color OR empty/noise → hold closed
         }
     }
 
