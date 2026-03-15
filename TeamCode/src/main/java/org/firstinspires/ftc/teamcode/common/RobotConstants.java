@@ -18,14 +18,15 @@ public class RobotConstants {
     public static double hoodMax = 0.99, hoodMin = 0;
 
     //intake
-    public static final String leftIntake = "front_intake";
-    public static final String rightIntake = "right_intake";
+    public static final String leftIntake = "f_intake";
+    public static final String rightIntake = "r_intake";
     public static final boolean rightIntakeReversed = false;
     public static double intakeBoost = 0;
 
     //turret
     public static final String leftTurret = "lt_servo";
     public static final String rightTurret = "rt_servo";
+    public static final String ramp = "ramp_servo";
     public static final double LTZERO = 0.0;
     public static final double RTZERO = 0.0;
     public static double turretServoRange = 355;

@@ -1,3 +1,54 @@
+package org.firstinspires.ftc.teamcode.testing;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.common.swerce.SwerveDrivetrain;
+import org.firstinspires.ftc.teamcode.subsystems.AutoAim;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Ramp;
+
+import dev.nextftc.bindings.BindingManager;
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.components.BindingsComponent;
+import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.Gamepads;
+import dev.nextftc.ftc.NextFTCOpMode;
+import dev.nextftc.ftc.components.BulkReadComponent;
+
+@TeleOp(name = "Intake Test NextFTC Version")
+public class IntakeTest extends NextFTCOpMode {
+    public IntakeTest() {
+        addComponents(
+                new SubsystemComponent(Intake.INSTANCE, Ramp.INSTANCE),
+                BulkReadComponent.INSTANCE,
+                BindingsComponent.INSTANCE
+        );
+    }
+    @Override
+    public void onStartButtonPressed() {
+        //left intake control
+        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveFront).whenBecomesFalse(Intake.INSTANCE.stopFront);
+        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveBack).whenBecomesFalse(Intake.INSTANCE.stopBack);
+        Gamepads.gamepad2().dpadLeft().toggleOnBecomesFalse().whenBecomesTrue(Ramp.INSTANCE.front).whenBecomesFalse(Ramp.INSTANCE.back);
+
+
+    }
+    @Override
+    public void onUpdate() {
+        BindingManager.update();
+        telemetry.addData("Intake Front Power", Intake.INSTANCE.getFrontPower());
+        telemetry.addData("Intake Back Power", Intake.INSTANCE.getBackPower());
+        telemetry.addData("Ramp Pos", Ramp.INSTANCE.getRamp());
+        telemetry.update();
+    }
+}
+
+
+
+
+
 //package org.firstinspires.ftc.teamcode.testing;
 //
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
