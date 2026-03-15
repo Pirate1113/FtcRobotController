@@ -23,6 +23,12 @@ public class Recycler implements Subsystem {
     private final double GATE_OPEN = 0.8;
     private final double GATE_CLOSED = 0.2;
 
+    // Baseline sensor readings when nothing is in the recycler
+    private static final int EMPTY_RED   = 42;
+    private static final int EMPTY_GREEN = 70;
+    private static final int EMPTY_BLUE  = 58;
+    private static final int EMPTY_ERROR = 4;   // ±4 on each channel
+
     public enum ColorChoice {
         GREEN,
         PURPLE
@@ -42,21 +48,11 @@ public class Recycler implements Subsystem {
 
     @Override
     public void periodic() {
-        // Only act on confident color reads; hold current gate state in the dead zone
-        if (selectedColor == ColorChoice.GREEN) {
-            if (isGreen()) {
-                openGate.schedule();  // open gate to let green through
-            } else if (isPurple()) {
-                closeGate.schedule(); // close gate to block purple
-            }
-            // dead zone: neither detected — hold current state
-        } else { // PURPLE selected
-            if (isPurple()) {
-                openGate.schedule();  // open gate to let purple through
-            } else if (isGreen()) {
-                closeGate.schedule(); // close gate to block green
-            }
-            // dead zone: neither detected — hold current state
+        boolean wantGreen = selectedColor == ColorChoice.GREEN;
+        if ((wantGreen && isGreen()) || (!wantGreen && isPurple())) {
+            openGate.schedule();
+        } else {
+            closeGate.schedule(); // undesired color OR no ball → hold closed
         }
     }
 
@@ -92,11 +88,17 @@ public class Recycler implements Subsystem {
     public int rawBlue()  { return colorSensor.blue(); }
 
     // Color detection methods
+    public boolean isEmpty() {
+        return Math.abs(colorSensor.red()   - EMPTY_RED)   <= EMPTY_ERROR
+            && Math.abs(colorSensor.green() - EMPTY_GREEN) <= EMPTY_ERROR
+            && Math.abs(colorSensor.blue()  - EMPTY_BLUE)  <= EMPTY_ERROR;
+    }
+
     public boolean isGreen() {
-        return colorSensor.green() > colorSensor.blue();
+        return !isEmpty() && colorSensor.green() > colorSensor.blue() + 10;
     }
 
     public boolean isPurple() {
-        return colorSensor.blue() > colorSensor.green();
+        return !isEmpty() && colorSensor.blue() > colorSensor.green() + 10;
     }
 }
