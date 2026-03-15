@@ -1,74 +1,85 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.qualcomm.robotcore.hardware.PwmControl;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.teamcode.common.RobotConstants;
+import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.ServoEx;
 
 public class Turret implements Subsystem {
-
     public static final Turret INSTANCE = new Turret();
+
+    private Turret() {
+    }
 
     private ServoEx leftServo;
     private ServoEx rightServo;
+    private AbsoluteAnalogEncoder encoder;
 
-    private final double range;
+    private double offset = 0;
+    private double baseAngle = 0;
+    private boolean isLoose = false;
 
-    // Track the desired angle state
-    private double targetAngle = 0.0;
-    private boolean isDead = false;
-
-    private Turret() {
-        this.range = RobotConstants.turretServoRange;
-    }
+    public static double turretZero = 0.5;
+    public static double turretServoRange = 360.0;
+    public static double ENCODER_OFFSET_DEG = 187.75;
 
     @Override
     public void initialize() {
-        this.leftServo = new ServoEx(RobotConstants.leftTurret, 0.02);
-        this.rightServo = new ServoEx(RobotConstants.rightTurret, 0.02);
-
-        // Start centered
-        this.targetAngle = 0.0;
-        this.isDead = false;
-    }
-
-    /**
-     * Call this from your OpMode or other subsystems to update the target.
-     * Angle: -177.5 to 177.5
-     */
-    public void setTargetAngle(double angle) {
-        this.targetAngle = angle;
-        this.isDead = false; // Re-enable if a new angle is requested
-    }
-
-    public void setDead() {
-        this.isDead = true;
+        leftServo = new ServoEx(RobotConstants.leftTurret);
+        rightServo = new ServoEx(RobotConstants.rightTurret);
+        
+        // Using raw hardware for encoder as AbsoluteAnalogEncoder takes AnalogInput
+        AnalogInput ai = ActiveOpMode.hardwareMap().get(AnalogInput.class, "t_absolute");
+        encoder = new AbsoluteAnalogEncoder(ai, 3.3).zero(Math.toRadians(ENCODER_OFFSET_DEG));
     }
 
     @Override
     public void periodic() {
-        // If we want the turret to be limp, disable PWM and skip movement
-        if (isDead) {
-            ((PwmControl) leftServo.getServo()).setPwmDisable();
-            ((PwmControl) rightServo.getServo()).setPwmDisable();
-            return;
+        if (isLoose) {
+            leftServo.getServo().getController().pwmDisable();
+            rightServo.getServo().getController().pwmDisable();
+        } else {
+            // Re-enable if it was disabled
+            // Note: ServoEx doesn't directly expose pwmEnable easily, so using raw servo
+            // This assumes the controller is the same for both
+            leftServo.getServo().getController().pwmEnable();
+            
+            double totalAngle = baseAngle + offset;
+            double rawTarget = turretZero + (totalAngle / turretServoRange);
+            double wrappedTarget = rawTarget % 1.0;
+            if (wrappedTarget < 0) wrappedTarget += 1.0;
+
+            leftServo.setPosition(wrappedTarget);
+            rightServo.setPosition(wrappedTarget);
         }
+    }
 
-        // 1. Calculate the 0.0 - 1.0 position
-        // Midpoint is 177.5 (0.5 position)
-        double targetPos = (targetAngle + 177.5) / range;
+    public void setBaseAngle(double angle) {
+        this.baseAngle = angle;
+    }
 
-        // 2. Clip to protect physical 355-degree limits
-        targetPos = Range.clip(targetPos, 0.0, 1.0);
+    public void setOffset(double offset) {
+        this.offset = offset;
+    }
 
-        // 3. Ensure PWM is enabled
-        ((PwmControl) leftServo.getServo()).setPwmEnable();
-        ((PwmControl) rightServo.getServo()).setPwmEnable();
+    public void addOffset(double delta) {
+        this.offset += delta;
+    }
 
-        // 4. Update hardware
-        leftServo.setPosition(targetPos);
-        rightServo.setPosition(targetPos);
+    public void setLoose(boolean loose) {
+        this.isLoose = loose;
+    }
+
+    public double getEncoderAngle() {
+        return Math.toDegrees(encoder.getCurrentPosition());
+    }
+
+    public double getTargetAngle() {
+        return baseAngle + offset;
     }
 }

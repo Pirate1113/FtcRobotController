@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 
@@ -16,25 +15,19 @@ import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 @TeleOp(name="Axon Turret Calibration")
 public class TurretServoOffset extends OpMode {
 
-    public static double SERVO_MIN = 0.05;
-    public static double SERVO_MAX = 0.95;
-
-    // The physical limits of your turret's travel in Degrees
-    public static double ENC_MIN_DEG = 10.0;
-    public static double ENC_MAX_DEG = 350.0;
-
-    // YOUR OFFSET
+    public static double turretZero = 0.5;
+    public static double turretServoRange = 360.0;
     public static double ENCODER_OFFSET_DEG = 187.75;
-    public static boolean INVERT_ENCODER = false;
 
     ServoImplEx rt, lt;
     AnalogInput ai;
     AbsoluteAnalogEncoder enc;
 
-    private double currentTargetServo = 0.5;
+    public double offset = 0;
+    private double currentBaseAngle = 0;
+
     private boolean isLoose = false;
     private boolean lastB = false;
-    private double lastDeg = Double.NaN;  // NaN = not yet initialized
 
     @Override
     public void init() {
@@ -44,22 +37,34 @@ public class TurretServoOffset extends OpMode {
         lt = (ServoImplEx) hardwareMap.get(Servo.class, "lt_servo");
         ai = hardwareMap.get(AnalogInput.class, "t_absolute");
 
-        // Zeroing with your 187.75 offset
         enc = new AbsoluteAnalogEncoder(ai, 3.3).zero(Math.toRadians(ENCODER_OFFSET_DEG));
-        enc.setInverted(INVERT_ENCODER);
 
-        rt.setPosition(0.5);
-        lt.setPosition(0.5);
+        toAngle(0);
+    }
+
+    public void toAngle(double angle) {
+        // 1:1 Math
+        double totalAngle = angle + offset;
+
+        // Calculate the raw servo command (could be 1.5, -0.2, etc.)
+        double rawTarget = turretZero + (totalAngle / turretServoRange);
+
+        // MODULO WRAP: This keeps the hardware command between 0 and 1
+        // but keeps the movement direction consistent.
+        double wrappedTarget = rawTarget % 1.0;
+        if (wrappedTarget < 0) wrappedTarget += 1.0;
+
+        // Apply to hardware
+        rt.setPosition(wrappedTarget);
+        lt.setPosition(wrappedTarget);
+
+        telemetry.addData("Wrapped Servo Pos", "%.3f", wrappedTarget);
     }
 
     @Override
     public void loop() {
         if (gamepad1.b && !lastB) isLoose = !isLoose;
         lastB = gamepad1.b;
-
-        // Force a fresh read; convert [-180, 180) → [0, 360) so ENC_MIN/MAX are meaningful
-        double rawDeg = Math.toDegrees(enc.getCurrentPosition());
-        double currentDeg = rawDeg < 0 ? rawDeg + 360.0 : rawDeg;
 
         if (isLoose) {
             rt.setPwmDisable();
@@ -70,29 +75,18 @@ public class TurretServoOffset extends OpMode {
                 lt.setPwmEnable();
             }
 
-            // D-pad movement
-            if (gamepad1.dpad_up) currentTargetServo += 0.005;
-            if (gamepad1.dpad_down) currentTargetServo -= 0.005;
+            // D-pad now increments the offset infinitely.
+            // Up will ALWAYS increase the angle, Down will ALWAYS decrease it.
+            if (gamepad1.dpad_up) offset += 2.0;
+            if (gamepad1.dpad_down) offset -= 2.0;
 
-            // WHIP LOGIC
-            // If we hit the Max degree limit, whip the servo back to the Min position
-            if (currentDeg >= ENC_MAX_DEG) {
-                currentTargetServo = SERVO_MIN;
-            }
-            // If we hit the Min degree limit, whip the servo forward to the Max position
-            else if (currentDeg <= ENC_MIN_DEG) {
-                currentTargetServo = SERVO_MAX;
-            }
+            if (gamepad1.x) offset = 0;
 
-            currentTargetServo = Range.clip(currentTargetServo, 0, 1);
-
-            rt.setPosition(currentTargetServo);
-            lt.setPosition(currentTargetServo);
+            toAngle(currentBaseAngle);
         }
 
-        telemetry.addData("Encoder Deg", "%.2f°", currentDeg);
-        telemetry.addData("Servo Command", "%.3f", currentTargetServo);
-        telemetry.addData("Raw Voltage", "%.3fV", ai.getVoltage());
+        telemetry.addData("Encoder Deg", "%.2f°", Math.toDegrees(enc.getCurrentPosition()));
+        telemetry.addData("Total Target Angle", "%.2f°", (currentBaseAngle + offset));
         telemetry.update();
     }
 }
