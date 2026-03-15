@@ -61,41 +61,42 @@ public class Interpolator extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             distance = limelight.getDistanceInches();
-            double stick = -gamepad1.right_stick_y; // up = positive
-            if (Math.abs(stick) < 0.05) stick = 0;
-            servoCurrent += stick * increment;
+//            double stick = -gamepad1.right_stick_y; // up = positive
+//            if (Math.abs(stick) < 0.05) stick = 0;
+//            servoCurrent += stick * increment;
+//            servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
+            servoCurrent = -36.79717*Math.pow(distance,-1.08794)+0.494168;
             servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
-
-            hood.setPosition(servoCurrent);
-
-
-            if (gamepad1.dpad_up && !dpadUpPrev) {
-                targetVel += 100;
-            }
-            if (gamepad1.dpad_down && !dpadDownPrev) {
-                targetVel -= 100;
-            }
-
-            dpadUpPrev = gamepad1.dpad_up;
-            dpadDownPrev = gamepad1.dpad_down;
+            hood.setPosition(1-servoCurrent);
 
 
-            aPrev = gamepad1.a;
+//            if (gamepad1.dpad_up && !dpadUpPrev) {
+//                targetVel += 100;
+//            }
+//            if (gamepad1.dpad_down && !dpadDownPrev) {
+//                targetVel -= 100;
+//            }
 
-//            vpid.setGoal(new KineticState(0, targetVel));
+            targetVel = (10.88255*distance+2691.0285)*28/60;
+            targetVel = Range.clip(targetVel, 0, 6000);
+
 //
-//            double power = vpid.calculate(new KineticState(
-//                    shooter1.getCurrentPosition(),
-//                    shooter1.getVelocity()
-//                )
-//            );
-
-//            shooter1.setPower(power);
-//            shooter2.setPower(power);
+//            if (gamepad1.dpad_up && !dpadUpPrev) {
+//                targetVel += 100;
+//            }
+//            if (gamepad1.dpad_down && !dpadDownPrev) {
+//                targetVel -= 100;
+//            }
+//
+//            dpadUpPrev = gamepad1.dpad_up;
+//            dpadDownPrev = gamepad1.dpad_down;
+//
+//
+//            aPrev = gamepad1.a;
             shooter1.setVelocity(-targetVel);
             shooter2.setVelocity(-targetVel);
 
-            currentVel = -shooter1.getVelocity();
+            currentVel = -shooter2.getVelocity();
 
             telemetry.addLine("--- Controls ---");
             telemetry.addLine("D-Pad Up/Down : shooter speed +/-100 ticks/s");

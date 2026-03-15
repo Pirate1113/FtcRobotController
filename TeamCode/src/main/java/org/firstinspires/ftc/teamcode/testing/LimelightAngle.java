@@ -64,7 +64,7 @@ public class LimelightAngle {
 
         double pitchDeg = result.getTy();
 
-        double pitchRad = Math.toRadians(pitchDeg);
+        double pitchRad = Math.toRadians(pitchDeg+15*Math.PI/180);
         double verticalDiff = tagHeight - LLHeight;
 
         return verticalDiff / Math.tan(pitchRad);
