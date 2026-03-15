@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Ramp;
 
 import dev.nextftc.bindings.BindingManager;
+import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
@@ -23,9 +24,27 @@ public class IntakeTest extends NextFTCOpMode {
     }
     @Override
     public void onStartButtonPressed() {
-        //left intake control
-        Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveFront).whenBecomesFalse(Intake.INSTANCE.stopFront);
-        Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveBack).whenBecomesFalse(Intake.INSTANCE.stopBack);
+        // back intake: run both intakes + ramp to front
+        Gamepads.gamepad2().x().toggleOnBecomesTrue()
+                .whenBecomesTrue(new ParallelGroup(
+                        Intake.INSTANCE.moveBack,
+                        Intake.INSTANCE.moveFront,
+                        Ramp.INSTANCE.front
+                ))
+                .whenBecomesFalse(new ParallelGroup(
+                        Intake.INSTANCE.stopBack,
+                        Intake.INSTANCE.stopFront
+                ));
+
+        // front intake: run front intake + ramp to back
+        Gamepads.gamepad2().b().toggleOnBecomesTrue()
+                .whenBecomesTrue(new ParallelGroup(
+                        Intake.INSTANCE.moveFront,
+                        Ramp.INSTANCE.back
+                ))
+                .whenBecomesFalse(Intake.INSTANCE.stopFront);
+
+        // manual ramp override (unchanged)
         Gamepads.gamepad2().a().toggleOnBecomesFalse().whenBecomesTrue(Ramp.INSTANCE.front).whenBecomesFalse(Ramp.INSTANCE.back);
 
 
