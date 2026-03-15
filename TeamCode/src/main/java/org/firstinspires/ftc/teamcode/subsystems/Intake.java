@@ -19,8 +19,8 @@ public class Intake implements Subsystem {
     private double powerBack = 0;
 
     public void initialize() {
-        intakeFront = new MotorEx("f_intake").floatMode();
-        intakeBack = new MotorEx("b_intake").reversed().floatMode();
+        intakeFront = new MotorEx("f_intake").reversed().floatMode();
+        intakeBack = new MotorEx("b_intake").floatMode();
     }
 
 

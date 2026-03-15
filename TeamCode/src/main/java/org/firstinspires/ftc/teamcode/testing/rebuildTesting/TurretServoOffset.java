@@ -26,6 +26,7 @@ public class TurretServoOffset extends OpMode {
 
     @Override
     public void init() {
+
         rt = hardwareMap.get(Servo.class, "rt_servo");
         lt = hardwareMap.get(Servo.class, "lt_servo");
 
