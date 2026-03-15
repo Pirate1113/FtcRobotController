@@ -11,8 +11,8 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.ServoEx;
 
 public class Turret implements Subsystem {
-
     public static final Turret INSTANCE = new Turret();
+
     private Turret() {}
 
     private ServoEx leftServo;
@@ -28,10 +28,6 @@ public class Turret implements Subsystem {
     private boolean isLoose = false;
     private boolean autoAimEnabled = false;
 
-    // Auto-aim tuning
-    private static final double AIM_KP = 0.35;
-    private static final double AIM_DEADBAND = 0.5;
-
     public static double turretZero = 0.5;
     public static double turretServoRange = 360.0;
     public static double ENCODER_OFFSET_DEG = 187.75;
@@ -43,7 +39,6 @@ public class Turret implements Subsystem {
         rightServo = new ServoEx(RobotConstants.rightTurret);
 
         AnalogInput ai = ActiveOpMode.hardwareMap().get(AnalogInput.class, "t_absolute");
-
         encoder = new AbsoluteAnalogEncoder(ai, 3.3)
                 .zero(Math.toRadians(ENCODER_OFFSET_DEG));
 
@@ -59,24 +54,16 @@ public class Turret implements Subsystem {
 
     @Override
     public void periodic() {
-
         // limelight
         if (autoAimEnabled && limelight.hasTarget()) {
 
             double yaw = limelight.getYaw();
+            double currentAngle = getEncoderAngle();
 
-            // Remove small jitter
-            if (Math.abs(yaw) > AIM_DEADBAND) {
-
-                // proportional correction
-                double correction = yaw * AIM_KP;
-
-                // incrementally adjust target angle
-                baseAngle += correction;
-            }
+            // aiming w limelight
+            baseAngle = currentAngle - yaw;
         }
 
-        // idk loose mode
         if (isLoose) {
             leftServo.getServo().getController().pwmDisable();
             rightServo.getServo().getController().pwmDisable();
@@ -85,7 +72,6 @@ public class Turret implements Subsystem {
 
         leftServo.getServo().getController().pwmEnable();
 
-        // calculating turret
         double totalAngle = baseAngle + offset;
 
         double rawTarget = turretZero + (totalAngle / turretServoRange);
@@ -98,6 +84,7 @@ public class Turret implements Subsystem {
     }
 
     // control methods
+
     public void setBaseAngle(double angle) {
         this.baseAngle = angle;
         this.autoAimEnabled = false;
