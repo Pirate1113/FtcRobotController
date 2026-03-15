@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.common.hardware.AbsoluteAnalogEncoder;
 public class TurretServoOffset extends OpMode {
 
     public static double turretZero = 0.5;
-    public static double turretServoRange = 355;
+    public static double turretServoRange = 360.0;
     public static double ENCODER_OFFSET_DEG = 187.75;
 
     ServoImplEx rt, lt;

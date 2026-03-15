@@ -32,6 +32,7 @@ public class Turret implements Subsystem {
     private double offset = 0;
     private double baseAngle = 0;
     private boolean isLoose = false;
+    private boolean autoAimEnabled = false;
 
     @Override
     public void initialize() {
