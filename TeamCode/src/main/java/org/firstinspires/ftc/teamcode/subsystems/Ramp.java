@@ -22,10 +22,10 @@ public class Ramp implements Subsystem {
         rampServo = new ServoEx(RobotConstants.ramp, 0.02);
     }
     public Command front = new InstantCommand(() -> {
-        rampServo.getServo().setPosition(1);
+        rampServo.getServo().setPosition(0);
     });
     public Command back = new InstantCommand(() -> {
-        rampServo.getServo().setPosition(0);
+        rampServo.getServo().setPosition(1);
     });
     public double getRamp() {
         return rampServo.getPosition();
