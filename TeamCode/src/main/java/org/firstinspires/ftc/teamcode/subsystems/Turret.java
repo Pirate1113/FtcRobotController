@@ -54,7 +54,6 @@ public class Turret implements Subsystem {
 
     @Override
     public void periodic() {
-
         // limelight
         if (autoAimEnabled && limelight.hasTarget()) {
 
@@ -62,7 +61,7 @@ public class Turret implements Subsystem {
             double currentAngle = getEncoderAngle();
 
             // aiming w limelight
-            baseAngle = currentAngle + yaw;
+            baseAngle = currentAngle - yaw;
         }
 
         if (isLoose) {
