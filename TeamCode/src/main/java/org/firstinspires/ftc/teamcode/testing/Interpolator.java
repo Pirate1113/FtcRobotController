@@ -97,10 +97,14 @@ public class Interpolator extends LinearOpMode {
 
             currentVel = -shooter1.getVelocity();
 
-            telemetry.addData("Shooter current RPM: ", currentVel*60/28);
-            telemetry.addData("target RPM: ", targetVel*60/28);
-            telemetry.addData("Hood servo current: ", servoCurrent);
-            telemetry.addData("distance: ", distance);
+            telemetry.addLine("--- Controls ---");
+            telemetry.addLine("D-Pad Up/Down : shooter speed +/-100 ticks/s");
+            telemetry.addLine("Right Stick Y : hood servo position");
+            telemetry.addLine("--- State ---");
+            telemetry.addData("Shooter RPM (actual)", currentVel * 60 / 28);
+            telemetry.addData("Shooter RPM (target)", targetVel * 60 / 28);
+            telemetry.addData("Hood servo position", servoCurrent);
+            telemetry.addData("Distance (in)", distance);
             telemetry.update();
         }
     }
