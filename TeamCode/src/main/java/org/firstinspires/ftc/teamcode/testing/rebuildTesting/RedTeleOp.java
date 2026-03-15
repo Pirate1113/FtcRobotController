@@ -40,21 +40,21 @@ public class RedTeleOp extends NextFTCOpMode {
     public void onStartButtonPressed() {
         // ── Shooter ──────────────────────────────────────────────────────────
         // Right bumper: toggle auto-aim (limelight-driven RPM + hood angle)
-        Gamepads.gamepad1().rightBumper().toggleOnBecomesTrue()
+        Gamepads.gamepad2().rightBumper().toggleOnBecomesTrue()
                 .whenBecomesTrue(AutoAim.INSTANCE.enable)
                 .whenBecomesFalse(AutoAim.INSTANCE.off);
 
         // Left bumper: full-power manual shot (bypasses auto-aim)
-        Gamepads.gamepad1().leftBumper().toggleOnBecomesTrue()
+        Gamepads.gamepad2().leftBumper().toggleOnBecomesTrue()
                 .whenBecomesTrue(AutoAim.INSTANCE.on)
                 .whenBecomesFalse(AutoAim.INSTANCE.off);
 
         // Dpad right: reverse shooter (unjam)
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(AutoAim.INSTANCE.reverse);
+        Gamepads.gamepad2().dpadRight().whenBecomesTrue(AutoAim.INSTANCE.reverse);
 
         // ── Recycler ─────────────────────────────────────────────────────────
         // Y: toggle wanted color (green ↔ purple)
-        Gamepads.gamepad1().y().whenBecomesTrue(new InstantCommand(() -> {
+        Gamepads.gamepad2().y().whenBecomesTrue(new InstantCommand(() -> {
             if (Recycler.INSTANCE.getSelectedColor() == Recycler.ColorChoice.GREEN) {
                 Recycler.INSTANCE.selectPurple();
             } else {
@@ -64,7 +64,7 @@ public class RedTeleOp extends NextFTCOpMode {
 
         // ── Intake ───────────────────────────────────────────────────────────
         // X: toggle both intakes + ramp forward (full feed)
-        Gamepads.gamepad1().x().toggleOnBecomesTrue()
+        Gamepads.gamepad2().x().toggleOnBecomesTrue()
                 .whenBecomesTrue(new ParallelGroup(
                         Intake.INSTANCE.moveBack,
                         Intake.INSTANCE.moveFront,
@@ -76,7 +76,7 @@ public class RedTeleOp extends NextFTCOpMode {
                 ));
 
         // B: toggle front intake + ramp reverse
-        Gamepads.gamepad1().b().toggleOnBecomesTrue()
+        Gamepads.gamepad2().b().toggleOnBecomesTrue()
                 .whenBecomesTrue(new ParallelGroup(
                         Intake.INSTANCE.moveFront,
                         Ramp.INSTANCE.back
@@ -84,7 +84,7 @@ public class RedTeleOp extends NextFTCOpMode {
                 .whenBecomesFalse(Intake.INSTANCE.stopFront);
 
         // A: ramp override
-        Gamepads.gamepad1().a().toggleOnBecomesTrue()
+        Gamepads.gamepad2().a().toggleOnBecomesTrue()
                 .whenBecomesTrue(Ramp.INSTANCE.front)
                 .whenBecomesFalse(Ramp.INSTANCE.back);
     }
