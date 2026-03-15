@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -64,13 +65,24 @@ public class LimelightAngle {
 
         double pitchDeg = result.getTy();
 
-        double pitchRad = Math.toRadians(pitchDeg+15*Math.PI/180);
+        double pitchRad = Math.toRadians(pitchDeg);
         double verticalDiff = tagHeight - LLHeight;
 
         return verticalDiff / Math.tan(pitchRad);
     }
 
+    public String getDistanceInfo() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return "result is not valid";
+        double pitchDeg = result.getTy();
 
+        double pitchRad = Math.toRadians(pitchDeg);
+        double verticalDiff = tagHeight - LLHeight;
+
+        double distance =  verticalDiff / Math.tan(pitchRad);
+        return "pitch deg:" + Double.toString(pitchDeg) + " verticalDiff: " + Double.toString(verticalDiff) + " tan: " + Double.toString(Math.tan(pitchRad));
+//blue alliance
+    }
     public void stop() {
         limelight.stop();
     }
