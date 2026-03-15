@@ -23,11 +23,7 @@ public class Interpolator extends LinearOpMode {
 
     private ServoEx hood;
 
-    private ServoEx palm;
 
-    public static double P = 0.02;
-    public static double I = 0.00;
-    public static double D = 0.1;
 
     public static double targetVel;
     double currentVel;
@@ -45,9 +41,6 @@ public class Interpolator extends LinearOpMode {
 
     LimelightAngle limelight;
 
-    private final ControlSystem vpid = ControlSystem.builder()
-            .velPid(P,I,D)
-            .build();
 
 
     @Override
@@ -57,7 +50,6 @@ public class Interpolator extends LinearOpMode {
         limelight.pipelineSwitch(0);
 
         shooter1 = hardwareMap.get(DcMotorEx.class, "shooter1");
-        shooter2 = hardwareMap.get(DcMotorEx.class, "shooter2");
         shooter1.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -68,55 +60,40 @@ public class Interpolator extends LinearOpMode {
         shooter2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         hood = new ServoEx("hoodServo");
-        palm = new ServoEx("feedServo");
 
         waitForStart();
 
         while (opModeIsActive()) {
             distance = limelight.getDistanceInches();
 
-//            double stick = -gamepad1.right_stick_y; // up = positive
-//            if (Math.abs(stick) < 0.05) stick = 0;
-//            servoCurrent += stick * increment;
-//            servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
-            servoCurrent = -36.79717*Math.pow(distance,-1.08794)+0.494168;
+            double stick = -gamepad1.right_stick_y; // up = positive
+            if (Math.abs(stick) < 0.05) stick = 0;
+            servoCurrent += stick * increment;
             servoCurrent = Range.clip(servoCurrent, 0.0, 1.0);
+
             hood.setPosition(servoCurrent);
 
 
-//            if (gamepad1.dpad_up && !dpadUpPrev) {
-//                targetVel += 100;
-//            }
-//            if (gamepad1.dpad_down && !dpadDownPrev) {
-//                targetVel -= 100;
-//            }
-
-            targetVel = (10.88255*distance+2691.0285)*28/60;
-            targetVel = Range.clip(targetVel, 0, 6000);
-
+            if (gamepad1.dpad_up && !dpadUpPrev) {
+                targetVel += 100;
+            }
+            if (gamepad1.dpad_down && !dpadDownPrev) {
+                targetVel -= 100;
+            }
 
             dpadUpPrev = gamepad1.dpad_up;
             dpadDownPrev = gamepad1.dpad_down;
 
-            if (gamepad1.a && !aPrev) {
-                palmOn = !palmOn;
-
-                if (palmOn) {
-                    palm.setPosition(0);
-                } else {
-                    palm.setPosition(0.3);
-                }
-            }
 
             aPrev = gamepad1.a;
 
-            vpid.setGoal(new KineticState(0, targetVel));
-
-            double power = vpid.calculate(new KineticState(
-                    shooter1.getCurrentPosition(),
-                    shooter1.getVelocity()
-                )
-            );
+//            vpid.setGoal(new KineticState(0, targetVel));
+//
+//            double power = vpid.calculate(new KineticState(
+//                    shooter1.getCurrentPosition(),
+//                    shooter1.getVelocity()
+//                )
+//            );
 
 //            shooter1.setPower(power);
 //            shooter2.setPower(power);
@@ -125,18 +102,10 @@ public class Interpolator extends LinearOpMode {
 
             currentVel = -shooter1.getVelocity();
 
-            telemetry.addData("shooter1 current RPM: ", currentVel*60/28);
+            telemetry.addData("Shooter current RPM: ", currentVel*60/28);
             telemetry.addData("target RPM: ", targetVel*60/28);
-            telemetry.addData("hood servo current: ", servoCurrent);
+            telemetry.addData("Hood servo current: ", servoCurrent);
             telemetry.addData("distance: ", distance);
-            telemetry.addData(
-                    "real? shooter1 RPM",
-                    Math.abs(shooter1.getVelocity()) * 60.0 / 28.0
-            );
-            telemetry.addData(
-                    "real? target RPM",
-                    targetVel * 60.0 / 28.0
-            );
             telemetry.update();
         }
     }

@@ -27,7 +27,7 @@ public class Recycler implements Subsystem {
     private static final int EMPTY_RED   = 42;
     private static final int EMPTY_GREEN = 70;
     private static final int EMPTY_BLUE  = 58;
-    private static final int EMPTY_ERROR = 4;   // ±4 on each channel
+    private static final int EMPTY_ERROR = 10;   // ±4 on each channel
 
     public enum ColorChoice {
         GREEN,

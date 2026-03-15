@@ -34,6 +34,7 @@ public class TurretServoOffset extends OpMode {
     private double currentTargetServo = 0.5;
     private boolean isLoose = false;
     private boolean lastB = false;
+    private double lastDeg = Double.NaN;  // NaN = not yet initialized
 
     @Override
     public void init() {
@@ -56,8 +57,9 @@ public class TurretServoOffset extends OpMode {
         if (gamepad1.b && !lastB) isLoose = !isLoose;
         lastB = gamepad1.b;
 
-        // Force a fresh read
-        double currentDeg = Math.toDegrees(enc.getCurrentPosition());
+        // Force a fresh read; convert [-180, 180) → [0, 360) so ENC_MIN/MAX are meaningful
+        double rawDeg = Math.toDegrees(enc.getCurrentPosition());
+        double currentDeg = rawDeg < 0 ? rawDeg + 360.0 : rawDeg;
 
         if (isLoose) {
             rt.setPwmDisable();
