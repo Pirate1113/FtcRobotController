@@ -19,7 +19,7 @@ public class Intake implements Subsystem {
     private double powerBack = 0;
 
     public void initialize() {
-        intakeFront = new MotorEx("f_intake").reversed().floatMode();
+        intakeFront = new MotorEx("f_intake").floatMode();
         intakeBack = new MotorEx("b_intake").floatMode();
     }
 
@@ -27,11 +27,11 @@ public class Intake implements Subsystem {
     // ===== INDEPENDENT MOTOR CONTROL =====
     public Command moveFront = new InstantCommand(() -> {
         powerFront = POWER;
-        intakeFront.getMotor().setPower(-powerFront);
+        intakeFront.getMotor().setPower(powerFront);
     });
     public Command moveBack = new InstantCommand(() -> {
         powerBack = POWER;
-        intakeBack.getMotor().setPower(-powerBack);
+        intakeBack.getMotor().setPower(powerBack);
     });
     public Command stopFront = new InstantCommand(() -> {
         powerFront = 0;

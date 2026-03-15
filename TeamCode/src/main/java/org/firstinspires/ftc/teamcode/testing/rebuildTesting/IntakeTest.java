@@ -26,7 +26,7 @@ public class IntakeTest extends NextFTCOpMode {
         //left intake control
         Gamepads.gamepad2().b().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveFront).whenBecomesFalse(Intake.INSTANCE.stopFront);
         Gamepads.gamepad2().x().toggleOnBecomesTrue().whenBecomesTrue(Intake.INSTANCE.moveBack).whenBecomesFalse(Intake.INSTANCE.stopBack);
-        Gamepads.gamepad2().dpadLeft().toggleOnBecomesFalse().whenBecomesTrue(Ramp.INSTANCE.front).whenBecomesFalse(Ramp.INSTANCE.back);
+        Gamepads.gamepad2().a().toggleOnBecomesFalse().whenBecomesTrue(Ramp.INSTANCE.front).whenBecomesFalse(Ramp.INSTANCE.back);
 
 
     }
