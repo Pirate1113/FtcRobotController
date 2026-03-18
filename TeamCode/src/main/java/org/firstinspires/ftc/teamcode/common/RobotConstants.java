@@ -19,7 +19,7 @@ public class RobotConstants {
 
     //intake
     public static final String leftIntake = "f_intake";
-    public static final String rightIntake = "r_intake";
+    public static final String rightIntake = "b_intake";
     public static final boolean rightIntakeReversed = false;
     public static double intakeBoost = 0;
 
@@ -33,8 +33,8 @@ public class RobotConstants {
     public static double turretServoRange = 355;
 
     //shooter
-    public static final String leftShooter = "left_shooter";
-    public static final String rightShooter=  "right_shooter";
+    public static final String leftShooter = "shooter1";
+    public static final String rightShooter=  "shooter2";
     public static final boolean leftShooterReversed = true;
     public static double shooterP = 0.001, shooterI = 0, shooterD = 0, shooterF = 0.0004;
 

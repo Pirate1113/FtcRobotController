@@ -24,7 +24,6 @@ import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.core.units.Distance;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class SwerveDrivetrain implements Subsystem {
@@ -74,7 +73,7 @@ public class SwerveDrivetrain implements Subsystem {
     @Override
     public void initialize() {
         odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, "odo");
-        odo.setOffsets(-148.675, 31.675, DistanceUnit.MM);
+        odo.setOffsets(-2.50688543, -6.70373543, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         odo.resetPosAndIMU();
@@ -113,6 +112,10 @@ public class SwerveDrivetrain implements Subsystem {
 
     @Override
     public void periodic() {
+        if (ActiveOpMode.gamepad1().options) {
+            odo.resetPosAndIMU();
+        }
+
         for(SwerveModule m : swerveModules){
             m.read();
         }
@@ -155,18 +158,12 @@ public class SwerveDrivetrain implements Subsystem {
             swerveModules[i].getTelemetry(ActiveOpMode.telemetry());
         }
 
-        if (ActiveOpMode.gamepad1().optionsWasPressed()){
-            odo.resetPosAndIMU();
-        }
+
 
     }
 
     public Pose getPose() {
-        return new Pose(
-                odo.getPosX(DistanceUnit.INCH),
-                odo.getPosY(DistanceUnit.INCH),
-                odo.getHeading(AngleUnit.RADIANS)
-        );
+        return new Pose(odo.getPosX(DistanceUnit.INCH), odo.getPosY(DistanceUnit.INCH), odo.getHeading(AngleUnit.RADIANS));
     }
 
     public void autoDrive(double power) {
