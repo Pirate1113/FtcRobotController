@@ -63,10 +63,8 @@ public class Turret implements Subsystem {
                 rightRaw.setPwmEnable();
             }
 
-            // Using gear ratio logic from the turret implementation
             double angleToTarget = baseAngle + offset;
-            double gearRatio = angleToTarget * (160.0 / 38.0) * (15.0 / 80.0);
-            double rawTarget = turretZero + (gearRatio / turretServoRange);
+            double rawTarget = turretZero + (angleToTarget / turretServoRange);
 
             double wrappedTarget = rawTarget % 1.0;
             if (wrappedTarget < 0) wrappedTarget += 1.0;

@@ -27,6 +27,9 @@ public class Gate implements Subsystem {
     public Command close = new InstantCommand(() -> {
         gateServo.getServo().setPosition(0);
     });
+    public Command flick = new InstantCommand(() -> {
+        gateServo.getServo().setPosition(2);
+    });
     public double getGate() {
         return gateServo.getPosition();
     }

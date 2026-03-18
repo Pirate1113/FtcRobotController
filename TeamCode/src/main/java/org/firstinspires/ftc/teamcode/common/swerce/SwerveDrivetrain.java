@@ -28,6 +28,7 @@ import dev.nextftc.ftc.ActiveOpMode;
 
 public class SwerveDrivetrain implements Subsystem {
     public static final SwerveDrivetrain INSTANCE = new SwerveDrivetrain();
+
     private SwerveDrivetrain() {}
 
     Telemetry dashboardTelemetry;
@@ -162,8 +163,11 @@ public class SwerveDrivetrain implements Subsystem {
 
     }
 
+<<<<<<< Updated upstream
     public Pose getPose() {
         return new Pose(odo.getPosX(DistanceUnit.INCH), odo.getPosY(DistanceUnit.INCH), odo.getHeading(AngleUnit.RADIANS));
+=======
+>>>>>>> Stashed changes
     }
 
     public void autoDrive(double power) {
